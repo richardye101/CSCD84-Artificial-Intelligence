@@ -1,2 +1,4 @@
 .vscode/settings.json
+/docs/.obsidian/*
 .obsidian/*
+.DS_Store
