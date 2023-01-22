@@ -265,7 +265,8 @@ switch (mode)
     case 0: //BFS
 		Queue* queue = createQueue();
 		int cameFrom[graph_size];
-		// Create a queued array to keep track of queued nodes
+
+		// Create an array to keep track of queued nodes
 		bool queued[n];
     	memset(queued, false, sizeof(queued));
 
@@ -275,12 +276,18 @@ switch (mode)
 		
 		// track the order in which nodes were visited
 		int order = 2;
+
+		// used to terminate the search when a piece of cheese is found
+		bool found == false;
+
 		// Loop until the queue is empty
-		while (!isEmpty(queue))
+		while (!isEmpty(queue) && found == false)
 		{
+			// keep track of the current location
 			int current = dequeue(queue);
 			int cur_x = current % size_X;
 			int cur_y = current / size_Y - 1;
+
 			// need to check if pixel is one of cheese_loc[10][2]
 			for(int i = 0; i < cheeses; i++){
 				int cheese_x = cheese_loc[i][0];
@@ -289,6 +296,7 @@ switch (mode)
 				{
 					path = constructPath(cameFrom, cheese_x + (cheese_y*size_X), start);
 					printf("Reached a cheese piece at %d, %d\n", cheese_x, cheese_y);
+					found = true;
 					break;
 				}
 			}
@@ -316,17 +324,30 @@ switch (mode)
 						break;
 				}
 				
-				// if any dimensions are out of bounds
-				if(x > 31 || y > 31)
-					break;
-				
-				int idx = x + (y*size_X);
-				if (!queued[idx] && gr[current][i]) // checks if neighbour visited and if there is a wall in the way
+				// check dimensions are in bounds
+				if(x < 32 && x >= 0 && y >= 0 && y < 32)
 				{
-					enqueue(queue, idx);
-					// insert value into cameFrom array
-					cameFrom[idx] = current;
-					queued[idx] = true;
+					int idx = x + (y*size_X);
+
+					// check for cats
+					bool is_cat = false;
+					for(int i = 0; i < cats; i ++)
+					{
+						if idx != cat_loc[i][0] + (cat_loc[i][1]*size_X)
+						{
+							is_cat = true;
+							break;
+						}
+							
+					}
+					// queue if neighbour is not visited, no wall (weight != 0), no cat
+					if (!queued[idx] && gr[current][i] && !is_cat) 
+					{
+						enqueue(queue, idx);
+						// insert value into cameFrom array
+						cameFrom[idx] = current;
+						queued[idx] = true;
+					}
 				}
 			}
 			visit_order[x][y] = order;
