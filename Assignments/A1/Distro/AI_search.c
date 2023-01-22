@@ -323,7 +323,6 @@ switch (mode)
 						y = cur_y;
 						break;
 				}
-				
 				// check dimensions are in bounds
 				if(x < 32 && x >= 0 && y >= 0 && y < 32)
 				{
@@ -333,7 +332,7 @@ switch (mode)
 					bool is_cat = false;
 					for(int i = 0; i < cats; i ++)
 					{
-						if idx != cat_loc[i][0] + (cat_loc[i][1]*size_X)
+						if (idx == cat_loc[i][0] + (cat_loc[i][1]*size_X))
 						{
 							is_cat = true;
 							break;
