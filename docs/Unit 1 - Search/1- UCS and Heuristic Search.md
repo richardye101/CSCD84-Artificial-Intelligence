@@ -31,10 +31,12 @@ Heuristic Search, also called $A^*$ (A-star) search is a powerful and extensivel
 
 Because it is a guess, it can not be used exclusively to guide search expansion order (if you think about it, in order to know exactly how far each node is from the goal, we'd have to have completed the search process on the entire tree!). Instead, $A^*$ search uses the heuristic function in combination with the actual cost of getting to a node from the initial state (this value is updated as nodes are expanded, just like with UCS).
 The heuristic cost used by A* search to determine expansion order is:
+
 $$
 f(n)=g(n)+h(n)
 $$
-Where $f(n)$ is the heuristic cost for some node $\boldsymbol{n}$, and it consists of $\boldsymbol{g}(\mathbf{n})$ - the actual cost of reaching node $\boldsymbol{n}$ from the initial node, and $\boldsymbol{h}(\boldsymbol{n})$ a **guess of the cost to get to [the/a] goal state from $n$**.
+
+Where $f(n)$ is the heuristic cost for some node $\mathbf{n}$, and it consists of $\mathbf{g}(\mathbf{n})$ - the actual cost of reaching node $\mathbf{n}$ from the initial node, and $\mathbf{h}(\mathbf{n})$ a **guess of the cost to get to [the/a] goal state from $n$**.
 The $A^*$ search algorithm is identical to UCS, but we use the heuristic cost $h(n)$ to order nodes in the priority queue. Otherwise there's no change! So if you have implemented UCS, implementing A* is straightforward, you just need to add a suitable heuristic function.
 
 In the example above, a good guess would be to use the Manhattan distance between a node and the goal. This happens to be a lucky guess for this problem because the Manhattan distance is the actual distance between two nodes - it is very often not the case that we can find such an appropriate guess, so we'll talk about what makes a good guess below. For now, let's see how things change once we introduce the heuristic cost for each node into the search process.

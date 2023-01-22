@@ -1,4 +1,8 @@
-
+- [[#Scheduling courses example|Scheduling courses example]]
+- [[#Backtracking Search|Backtracking Search]]
+	- [[#Backtracking Search#Algorithm|Algorithm]]
+			- [[#Worst case|Worst case]]
+	- [[#Backtracking Search#Improving Backtracking search|Improving Backtracking search]]
 
 - Need to listen to *I can't get no satisfcation*...
 Constraint satisfaction deals with scheduling, such as timetable problems, operations, etc.

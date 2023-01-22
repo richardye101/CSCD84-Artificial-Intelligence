@@ -27,24 +27,90 @@
 /**********************************************************************
 % COMPLETE THIS TEXT BOX:
 %
-% 1) Student Name:		
-% 2) Student Name:		
+% 1) Student Name: Richard (Rong Feng) Ye
+% 2) Student Name: Samuel Steven Prokopchuk
 %
-% 1) Student number:
-% 2) Student number:
+% 1) Student number: 1005035230
+% 2) Student number: 
 % 
-% 1) UtorID
+% 1) yerong1
 % 2) UtorID
 % 
 % We hereby certify that the work contained here is our own
 %
-% ____________________             _____________________
+% Richard Rong Feng Ye             _____________________
 % (sign with your name)            (sign with your name)
 ***********************************************************************/
 
 #include "AI_search.h"
 
-void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[size_X][size_Y], int cat_loc[10][2], int cats, int cheese_loc[10][2], int cheeses, int mouse_loc[1][2], int mode, int (*heuristic)(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], int cats, int cheeses, double gr[graph_size][4]))
+// Data structure to store a queue
+typedef struct {
+	int data[graph_size];
+	int front, rear;
+} Queue;
+
+// Function to create an empty queue
+Queue* createQueue()
+{
+	Queue* queue = (Queue*)malloc(sizeof(Queue));
+	queue->front = queue->rear = -1;
+
+	return queue;
+}
+
+// Function to check if the queue is full
+bool isFull(Queue* queue)
+{
+	return queue->rear == graph_size - 1;
+}
+
+// Function to check if the queue is empty
+bool isEmpty(Queue* queue)
+{
+	return queue->front == -1;
+}
+
+// Function to add an element to the queue
+void enqueue(Queue* queue, int element)
+{
+	if (isFull(queue))
+	{
+		printf("Queue overflow\n");
+		return;
+	}
+
+	queue->rear++;
+	queue->data[queue->rear] = element;
+
+	// If this is the first element added to the queue
+	if (queue->front == -1)
+		queue->front = queue->rear;
+}
+
+// Function to remove an element from the queue
+int dequeue(Queue* queue)
+{
+	if (isEmpty(queue))
+	{
+		printf("Queue underflow\n");
+		return -1;
+	}
+
+	int element = queue->data[queue->front];
+	queue->front++;
+
+	// If this is the last element in the queue
+	if (queue->front > queue->rear)
+		queue->front = queue->rear = -1;
+
+	return element;
+}
+
+void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[size_X][size_Y], int cat_loc[10][2],
+ int cats, int cheese_loc[10][2], int cheeses, int mouse_loc[1][2], int mode,
+  int (*heuristic)(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], int cats, int cheeses, double gr[graph_size][4])
+  )
 {
  /*
    This function is the interface between your solution for the assignment and the driver code. The driver code
@@ -72,9 +138,9 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
 				v
 			node at (i,j+1)
 
-	The graph is theredore stored as an adjacency list with size 1024 x 4, with one row per node in the
+	The graph is therefore stored as an adjacency list with size 1024 x 4, with one row per node in the
 	graph, and 4 columns corresponding to the weight of an edge linking the node with each of its 4
-	possible neighbours in the order towp, right, bottom, left (clockwise from top).
+	possible neighbours in the order top, right, bottom, left (clockwise from top).
 
 	Since all we care is whether nodes are connected. Weights will be either 0 or 1, if the weight is
 	1, then the neighbouring nodes are connected, if the weight is 0, they are not. For example, if
@@ -193,6 +259,93 @@ void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[s
  *
  ********************************************************************************************************/
 
+int start = mouse_loc[0][0] + (mouse_loc[0][1]*size_X);
+switch (mode)
+​{
+    case 0: //BFS
+      // statements
+	  //   use a queue, first in first out to store the nodes
+
+		// memset(visited, false, sizeof(visited));
+
+		// Create a queue to store the nodes to be visited
+		Queue* queue = createQueue();
+		int cameFrom[graph_size];
+
+		// Enqueue the start node
+		enqueue(queue, start);
+		visit_order[mouse_loc[0][0]][mouse_loc[0][1]] = 1;
+		
+		// track the order in which nodes were visited
+		int order = 2;
+		// Loop until the queue is empty
+		while (!isEmpty(queue))
+		{
+			int current = dequeue(queue);
+			
+			// need to check if pixel is one of cheese_loc[10][2]
+			for(int i = 0; i < cheeses; i++){
+				int cheese_x = cheese_loc[i][0];
+				int cheese_y = cheese_loc[i][1];
+				if (current == (cheese_x + (cheese_y*size_X)) )
+				{
+					path = constructPath(cameFrom, cheese_x + (cheese_y*size_X), start);
+					printf("Reached a cheese piece at %d, %d\n", cheese_x, cheese_y);
+					break;
+				}
+			}
+
+			// Enqueue all unvisited neighbors of the current node
+			for (int i = 0; i < 4; i++)
+			{	
+				int x,y;
+				switch (i){
+					case 0:
+						x = current % size_X;
+						y = current / size_Y - 1;
+						break;
+					case 1:
+						x = current % size_X + 1;
+						y = current / size_Y;
+						break;
+					case 2:
+						x = current % size_X;
+						y = current / size_Y + 1;
+						break;
+					case 3:
+						x = current % size_X - 1;
+						y = current / size_Y;
+						break;
+				}
+				
+				// if any dimensions are out of bounds
+				if(x > 31 || y > 31)
+					break;
+
+				if (visit_order[x][y] != -1 && gr[current][i]) // checks if neighbour visited and if there is a wall in the way
+				{
+					enqueue(queue, i);
+					// visited[i] = true;
+					// insert value into cameFrom array
+					cameFrom[x + (y*size_X)] = current;
+					visit_order[x][y] = order;
+				}
+			}
+			order++;
+		}
+      break;
+
+    case 1: //DFS
+      // statements
+	//   use a stack, first in last out 
+      break;
+    case 2: //A*
+      // statements
+	//   use a priority queue, in order of start to current length
+	//   pick path based on cost + heuristic, store path cost as just path cost?
+      break;
+}
+
  // Stub so that the code compiles/runs - The code below will be removed and replaced by your code!
 
  path[0][0]=mouse_loc[0][0];
@@ -247,3 +400,28 @@ int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int 
  return(1);		// <-- Evidently you will need to update this.
 }
 
+int [][] constructPath(int* cameFrom, int goal, int start)
+{
+    int current = goal;
+    int reverse_path[graph_size];
+	int path[graph_size][2];
+    int pathIndex = 0;
+
+    while (current != start)
+    {
+        reverse_path[pathIndex] = current;
+        current = cameFrom[current];
+		pathIndex++;
+    }
+    reverse_path[pathIndex] = start;
+
+	for(i = pathIndex; i > -1; i--){
+		path[i][0] = reverse_path[i] % size_X;
+		path[i][1] = reverse_path[i] / size_Y;
+	}
+	return path;
+    // printf("The path from start to goal is: ");
+    // for (int i = pathIndex - 1; i >= 0; i--)
+    //     printf("%d ", path[i]);
+    // printf("\n");
+}
