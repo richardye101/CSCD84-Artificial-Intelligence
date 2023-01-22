@@ -263,14 +263,11 @@ int start = mouse_loc[0][0] + (mouse_loc[0][1]*size_X);
 switch (mode)
 ​{
     case 0: //BFS
-      // statements
-	  //   use a queue, first in first out to store the nodes
-
-		// memset(visited, false, sizeof(visited));
-
-		// Create a queue to store the nodes to be visited
 		Queue* queue = createQueue();
 		int cameFrom[graph_size];
+		// Create a queued array to keep track of queued nodes
+		bool queued[n];
+    	memset(queued, false, sizeof(queued));
 
 		// Enqueue the start node
 		enqueue(queue, start);
@@ -282,7 +279,8 @@ switch (mode)
 		while (!isEmpty(queue))
 		{
 			int current = dequeue(queue);
-			
+			int cur_x = current % size_X;
+			int cur_y = current / size_Y - 1;
 			// need to check if pixel is one of cheese_loc[10][2]
 			for(int i = 0; i < cheeses; i++){
 				int cheese_x = cheese_loc[i][0];
@@ -301,36 +299,37 @@ switch (mode)
 				int x,y;
 				switch (i){
 					case 0:
-						x = current % size_X;
-						y = current / size_Y - 1;
+						x = cur_x;
+						y = cur_y - 1;
 						break;
 					case 1:
-						x = current % size_X + 1;
-						y = current / size_Y;
+						x = cur_x + 1;
+						y = cur_y;
 						break;
 					case 2:
-						x = current % size_X;
-						y = current / size_Y + 1;
+						x = cur_x;
+						y = cur_y + 1;
 						break;
 					case 3:
-						x = current % size_X - 1;
-						y = current / size_Y;
+						x = cur_x - 1;
+						y = cur_y;
 						break;
 				}
 				
 				// if any dimensions are out of bounds
 				if(x > 31 || y > 31)
 					break;
-
-				if (visit_order[x][y] != -1 && gr[current][i]) // checks if neighbour visited and if there is a wall in the way
+				
+				int idx = x + (y*size_X);
+				if (!queued[idx] && gr[current][i]) // checks if neighbour visited and if there is a wall in the way
 				{
-					enqueue(queue, i);
-					// visited[i] = true;
+					enqueue(queue, idx);
 					// insert value into cameFrom array
-					cameFrom[x + (y*size_X)] = current;
-					visit_order[x][y] = order;
+					cameFrom[idx] = current;
+					queued[idx] = true;
 				}
 			}
+			visit_order[x][y] = order;
 			order++;
 		}
       break;
