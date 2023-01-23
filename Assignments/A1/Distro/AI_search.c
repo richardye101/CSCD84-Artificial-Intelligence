@@ -44,6 +44,9 @@
 
 #include "AI_search.h"
 
+/***********************************************************************
+ * Queue Data Structure and operations for BFS
+***********************************************************************/
 // Data structure to store a queue
 typedef struct {
 	int data[graph_size];
@@ -72,7 +75,7 @@ bool isEmpty(Queue* queue)
 }
 
 // Function to add an element to the queue
-void enqueue(Queue* queue, int element)
+void insert(Queue* queue, int element)
 {
 	if (isFull(queue))
 	{
@@ -89,7 +92,7 @@ void enqueue(Queue* queue, int element)
 }
 
 // Function to remove an element from the queue
-int dequeue(Queue* queue)
+int extract(Queue* queue)
 {
 	if (isEmpty(queue))
 	{
@@ -106,6 +109,158 @@ int dequeue(Queue* queue)
 
 	return element;
 }
+
+/***********************************************************************
+ * Stack Data Structure for DFS
+***********************************************************************/
+// Data structure to store a stack
+typedef struct {
+    int data[graph_size];
+    int top;
+} Stack;
+
+// Function to create an empty stack
+Stack* createStack()
+{
+    Stack* stack = (Stack*)malloc(sizeof(Stack));
+    stack->top = -1;
+
+    return stack;
+}
+
+// Function to check if the stack is full
+bool isFull(Stack* stack)
+{
+    return stack->top == MAX_STACK_SIZE - 1;
+}
+
+// Function to check if the stack is empty
+bool isEmpty(Stack* stack)
+{
+    return stack->top == -1;
+}
+
+// Function to insert an element to the stack
+void insert(Stack* stack, int element)
+{
+    if (isFull(stack))
+    {
+        printf("Stack overflow\n");
+        return;
+    }
+
+    stack->top++;
+    stack->data[stack->top] = element;
+}
+
+// Function to extract an element from the stack
+int extract(Stack* stack)
+{
+    if (isEmpty(stack))
+    {
+        printf("Stack underflow\n");
+        return -1;
+    }
+
+    int element = stack->data[stack->top];
+    stack->top--;
+
+    return element;
+}
+
+/***********************************************************************
+ * Priority Queue Data Structure for A*
+***********************************************************************/
+typedef struct {
+    int data[graph_size];
+    int cost[graph_size];
+    int front, rear;
+} PriorityQueue;
+
+// Function to create an empty priority queue
+PriorityQueue* createPriorityQueue()
+{
+    PriorityQueue* queue = (PriorityQueue*)malloc(sizeof(PriorityQueue));
+    queue->front = queue->rear = -1;
+
+    return queue;
+}
+
+// Function to check if the priority queue is full
+bool isFull(PriorityQueue* queue)
+{
+    return queue->rear == MAX_QUEUE_SIZE - 1;
+}
+
+// Function to check if the priority queue is empty
+bool isEmpty(PriorityQueue* queue)
+{
+    return queue->front == -1;
+}
+
+// Function to swap two elements in the priority queue
+void swap(PriorityQueue* queue, int i, int j)
+{
+    int temp = queue->data[i];
+    queue->data[i] = queue->data[j];
+    queue->data[j] = temp;
+
+    int tempCost = queue->cost[i];
+    queue->cost[i] = queue->cost[j];
+    queue->cost[j] = tempCost;
+}
+
+// Function to insert an element into the priority queue
+void insert(PriorityQueue* queue, int element)
+{
+	// We've already checked if there is a wall before calling insert
+	// We know the cost to get to any node is 1
+
+	int cost = 1;
+    if (isFull(queue))
+    {
+        printf("Priority queue overflow\n");
+        return;
+    }
+
+    if (isEmpty(queue))
+    {
+        queue->front = queue->rear = 0;
+        queue->data[queue->rear] = element;
+		
+		// Cost to get to first node is 0
+        queue->cost[queue->rear] = 0;
+        return;
+    }
+
+    queue->rear++;
+    queue->data[queue->rear] = element;
+    queue->cost[queue->rear] = cost;
+
+    // Move the element to its correct position
+    int i = queue->rear;
+    while (i > 0 && queue->cost[i] < queue->cost[i - 1])
+    {
+        swap(queue, i, i - 1);
+        i--;
+    }
+}
+
+// Function to remove the element with the highest priority
+int extract(PriorityQueue* queue)
+{
+    if (isEmpty(queue))
+    {
+        printf("Priority queue underflow\n");
+        return -1;
+    }
+
+    int element = queue->data[queue->front];
+    queue->front++;
+
+    return element;
+}
+
 
 void search(double gr[graph_size][4], int path[graph_size][2], int visit_order[size_X][size_Y], int cat_loc[10][2],
  int cats, int cheese_loc[10][2], int cheeses, int mouse_loc[1][2], int mode,
@@ -263,114 +418,119 @@ int start = mouse_loc[0][0] + (mouse_loc[0][1]*size_X);
 switch (mode)
 ​{
     case 0: //BFS
-		Queue* queue = createQueue();
-		int cameFrom[graph_size];
-
-		// Create an array to keep track of queued nodes
-		bool queued[n];
-    	memset(queued, false, sizeof(queued));
-
-		// Enqueue the start node
-		enqueue(queue, start);
-		visit_order[mouse_loc[0][0]][mouse_loc[0][1]] = 1;
-		
-		// track the order in which nodes were visited
-		int order = 2;
-
-		// used to terminate the search when a piece of cheese is found
-		bool found == false;
-
-		// Loop until the queue is empty
-		while (!isEmpty(queue) && found == false)
-		{
-			// keep track of the current location
-			int current = dequeue(queue);
-			int cur_x = current % size_X;
-			int cur_y = current / size_Y - 1;
-
-			// need to check if pixel is one of cheese_loc[10][2]
-			for(int i = 0; i < cheeses; i++){
-				int cheese_x = cheese_loc[i][0];
-				int cheese_y = cheese_loc[i][1];
-				if (current == (cheese_x + (cheese_y*size_X)) )
-				{
-					path = constructPath(cameFrom, cheese_x + (cheese_y*size_X), start);
-					printf("Reached a cheese piece at %d, %d\n", cheese_x, cheese_y);
-					found = true;
-					break;
-				}
-			}
-
-			// Enqueue all unvisited neighbors of the current node
-			for (int i = 0; i < 4; i++)
-			{	
-				int x,y;
-				switch (i){
-					case 0:
-						x = cur_x;
-						y = cur_y - 1;
-						break;
-					case 1:
-						x = cur_x + 1;
-						y = cur_y;
-						break;
-					case 2:
-						x = cur_x;
-						y = cur_y + 1;
-						break;
-					case 3:
-						x = cur_x - 1;
-						y = cur_y;
-						break;
-				}
-				// check dimensions are in bounds
-				if(x < 32 && x >= 0 && y >= 0 && y < 32)
-				{
-					int idx = x + (y*size_X);
-
-					// check for cats
-					bool is_cat = false;
-					for(int i = 0; i < cats; i ++)
-					{
-						if (idx == cat_loc[i][0] + (cat_loc[i][1]*size_X))
-						{
-							is_cat = true;
-							break;
-						}
-							
-					}
-					// queue if neighbour is not visited, no wall (weight != 0), no cat
-					if (!queued[idx] && gr[current][i] && !is_cat) 
-					{
-						enqueue(queue, idx);
-						// insert value into cameFrom array
-						cameFrom[idx] = current;
-						queued[idx] = true;
-					}
-				}
-			}
-			visit_order[x][y] = order;
-			order++;
-		}
+		// Create a queue to store the nodes to be queued
+		Queue* data_structure = createQueue();
       break;
 
     case 1: //DFS
-      // statements
-	//   use a stack, first in last out 
+		// Create a stack to store the nodes to be queued
+		Stack* data_structure = createStack();
       break;
     case 2: //A*
-      // statements
-	//   use a priority queue, in order of start to current length
-	//   pick path based on cost + heuristic, store path cost as just path cost?
+		// pick path based on cost + heuristic, store path cost as just path cost?
+
+		// Create a stack to store the nodes to be queued
+		PriorityQueue* data_structure = createPriorityQueue();	
       break;
+	
+	// insert the start node
+	insert(data_structure, start);
+
+	// array to store where nodes came from, to create a path
+	int cameFrom[graph_size];
+
+	// Create an array to keep track of queued nodes
+	bool visited[n];
+	memset(visited, false, sizeof(visited));
+	visited[start] = true;
+	
+	// track the order in which nodes were visited
+	visit_order[mouse_loc[0][0]][mouse_loc[0][1]] = 1;
+	// order for subsequent nodes
+	int order = 2;
+
+	// used to terminate the search when a piece of cheese is found
+	bool found == false;
+	// Loop until the data_structure is empty
+	while (!isEmpty(data_structure) && !found)
+	{
+		// keep track of the current location
+		int current = extract(data_structure);
+		int cur_x = current % size_X;
+		int cur_y = current / size_Y;
+
+		// need to check if pixel is one of cheese_loc[10][2]
+		for(int i = 0; i < cheeses; i++){
+			int cheese_x = cheese_loc[i][0];
+			int cheese_y = cheese_loc[i][1];
+			if (current == (cheese_x + (cheese_y*size_X)) )
+			{
+				path = constructPath(cameFrom, cheese_x + (cheese_y*size_X), start);
+				printf("Reached a cheese piece at %d, %d\n", cheese_x, cheese_y);
+				found = true;
+				break;
+			}
+		}
+
+		// insert all unvisited neighbors of the current node
+		for (int i = 0; i < 4; i++)
+		{	
+			int x,y;
+			switch (i){
+				case 0:
+					x = cur_x;
+					y = cur_y - 1;
+					break;
+				case 1:
+					x = cur_x + 1;
+					y = cur_y;
+					break;
+				case 2:
+					x = cur_x;
+					y = cur_y + 1;
+					break;
+				case 3:
+					x = cur_x - 1;
+					y = cur_y;
+					break;
+			}
+			// check dimensions are in bounds
+			if(x < 32 && x >= 0 && y >= 0 && y < 32)
+			{
+				int idx = x + (y*size_X);
+
+				// check for cats
+				bool is_cat = false;
+				for(int i = 0; i < cats; i ++)
+				{
+					if (idx == (cat_loc[i][0] + (cat_loc[i][1]*size_X) ) )
+					{
+						is_cat = true;
+						break;
+					}
+						
+				}
+				// queue if neighbour is not visited, no wall (weight != 0), no cat
+				if (!visited[idx] && gr[current][i] && !is_cat) 
+				{
+					insert(data_structure, idx);
+
+					// insert value into cameFrom array
+					cameFrom[idx] = current;
+					visited[idx] = true;
+				}
+			}
+		}
+		visit_order[x][y] = order;
+		order++;
+	}
 }
 
  // Stub so that the code compiles/runs - The code below will be removed and replaced by your code!
-
- path[0][0]=mouse_loc[0][0];
- path[0][1]=mouse_loc[0][1];
- path[1][0]=mouse_loc[0][0];
- path[1][1]=mouse_loc[0][1];
+//  path[0][0]=mouse_loc[0][0];
+//  path[0][1]=mouse_loc[0][1];
+//  path[1][0]=mouse_loc[0][0];
+//  path[1][1]=mouse_loc[0][1];
 
  return;
 }
