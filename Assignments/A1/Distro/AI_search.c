@@ -211,12 +211,11 @@ void swap(PriorityQueue* queue, int i, int j)
 }
 
 // Function to insert an element into the priority queue
-void insert(PriorityQueue* queue, int element)
+void insert(PriorityQueue* queue, int element, int cost)
 {
 	// We've already checked if there is a wall before calling insert
-	// We know the cost to get to any node is 1
-
-	int cost = 1;
+	// We know the cost to get to any node is g(n) = 1
+	// int cost = 1;
     if (isFull(queue))
     {
         printf("Priority queue overflow\n");
@@ -420,21 +419,38 @@ switch (mode)
     case 0: //BFS
 		// Create a queue to store the nodes to be queued
 		Queue* data_structure = createQueue();
+		// insert the start node
+		insert(data_structure, start);
       break;
 
     case 1: //DFS
+		/*
+		this is run every few time steps because if you don't 
+		dfs will just go back and forth and not go anywhere
+		*/
+		
+
 		// Create a stack to store the nodes to be queued
 		Stack* data_structure = createStack();
+		// insert the start node
+		insert(data_structure, start);
       break;
     case 2: //A*
 		// pick path based on cost + heuristic, store path cost as just path cost?
 
 		// Create a stack to store the nodes to be queued
 		PriorityQueue* data_structure = createPriorityQueue();	
+		// insert the start node
+		insert(data_structure, start, 0);
       break;
 	
-	// insert the start node
-	insert(data_structure, start);
+	/*
+	Since the traversal and checking of cheese/cats/walls are all the same
+	between each of the search methods, we can reuse that code for all three.
+	The only thing that differs is the data structure used to store the data, 
+	which is initialized in the above switch case block. This reduces the lines
+	of code written and is easy to read and debug.
+	*/
 
 	// array to store where nodes came from, to create a path
 	int cameFrom[graph_size];
@@ -513,8 +529,11 @@ switch (mode)
 				// queue if neighbour is not visited, no wall (weight != 0), no cat
 				if (!visited[idx] && gr[current][i] && !is_cat) 
 				{
+					if(mode == 2){
+						h = heuristic( x, y, cat_loc, cheese_loc, mouse_loc, cats, cheeses);
+						insert(data_structure, idx, 1 + h);
+					}
 					insert(data_structure, idx);
-
 					// insert value into cameFrom array
 					cameFrom[idx] = current;
 					visited[idx] = true;
@@ -555,6 +574,10 @@ int H_cost(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int mouse_lo
 
 		These arguments are as described in the search() function above
  */
+
+	// cost should be higher if closer to a cat
+	// cost should be lower if close to cheese
+	// cost should be lower for 
 
  return(1);		// <-- Evidently you will need to update this.
 }
