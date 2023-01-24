@@ -44,22 +44,96 @@
 
 
 #include "AI_search.h"
+#include <assert.h>
 
-// BEGIN STRUCT HELPER FUNCTION DEFINITIONS
-Deque Deque_new(void) {
+// BEGIN STRUCT HELPER FUNCTION DEFS
+DequeItem *DequeItem_new(int x, int y) {
+  DequeItem *deque_item = malloc(sizeof(DequeItem));
+  assert(deque_item != NULL);
+  deque_item->cord.x = x;
+  deque_item->cord.y = y;
+  deque_item->prev = NULL;
+  deque_item->next = NULL;
+}
+
+Deque *Deque_new(void) {
   Deque *deque = malloc(sizeof(Deque));
-  if (deque == NULL) {
-    fprintf(stderr, "malloc failed!\n");
-    exit(EXIT_FAILURE);
-  }
+  assert(deque != NULL);
   deque->head = NULL;
   deque->tail = NULL;
   deque->size = 0;
   return deque;
 }
-// END STRUCT HELPER FUNCTION DEFINITIONS
 
-// BEGIN HELPER FUNCTION DEFINITIONS
+Heap *Heap_new(void) {
+  Heap *heap = malloc(sizeof(Heap));
+  assert(heap != NULL);
+  heap->size = 0;
+  return heap;
+}
+
+void Deque_push_front(Deque *deque, int x, int y) {
+  DequeItem deque_item = DequeItem_new(x, y);
+  deque_item->next = deque->head;
+  deque_item->prev = NULL;
+  if (deque->tail == NULL) {
+    deque->head = deque->tail = deque_item;
+  } else {
+    d->head->prev = deque_item;
+    d->head = deque_item;
+  }
+  ++deque->size;
+}
+
+void Deque_push_back(Deque *deque, int x, int y) {
+  DequeItem deque_item = DequeItem_new(x, y);
+  deque_item->prev = deque->tail;
+  deque_item->next = NULL;
+  if (deque->head == NULL) {
+    deque->head = deque->tail = deque_item;
+  } else {
+    deque->tail->next = deque_item;
+    deque->tail = deque_item;
+  }
+  ++deque->size;
+}
+
+Cord Deque_pop_front(Deque *deque) {
+  assert(deque != NULL);
+  Cord cord = deque->head.cord;
+  DequeItem deque_item = deque->head;
+  if (deque->head == deque->tail) {
+    deque->head = deque->tail = NULL;
+  } else {
+    deque->head = deque->head->next;
+  }
+  free(deque_item);
+  --deque->size;
+  return cord;
+}
+
+Cord Deque_pop_back(Deque* deque) {
+  assert(deque != NULL);
+  Cord cord = deque->tail.cord;
+  DequeItem deque_item = deque->tail;
+  if (deque->head == deque->tail) {
+    deque->head = deque->tail = NULL;
+  } else {
+    deque->tail = deque->tail->prev;
+  }
+  free(deque_item);
+  --deque->size;
+  return cord;
+}
+
+void Heap_insert(Heap* heap, int x, int y, int priority) {
+  for (int i=0; i<heap->size; ++i) {
+    // TODO(@Sam)
+  }
+}
+// END STRUCT HELPER FUNCTION DEFS
+
+// BEGIN HELPER FUNCTION DEFS
 void index_to_cord(int index, int *x, int *y) {
   *x = index % size_X;
   *y = index % size_Y;
@@ -68,7 +142,7 @@ void index_to_cord(int index, int *x, int *y) {
 int cord_to_index(int x, int y) { return x + y * size_X; }
 
 int is_cord_valid(int x, int y) { return cord_to_index(x, y) < graph_size; }
-// END HELPER FUNCTION DEFINITIONS
+// END HELPER FUNCTION DEFS
 
 void search(double gr[graph_size][4], int path[graph_size][2],
             int visit_order[size_X][size_Y], int cat_loc[10][2], int cats,

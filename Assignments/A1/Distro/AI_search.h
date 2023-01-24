@@ -20,18 +20,23 @@
 
 #define __AI_search_header
 
-// Generally needed includes
+// C STL includes
 #include <malloc.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "board_layout.h"
 
 // BEGIN STRUCT DEFS
 // Deque will be used for both queue and stack
-typedef struct DequeItem {
+typedef struct Cord {
   int x, y;
+} Cord;
+
+typedef struct DequeItem {
+  Cord cord;
   DequeItem *prev, *next;
 } DequeItem;
 
@@ -42,17 +47,23 @@ typedef struct DequeItem {
 } Deque;
 
 typedef struct HeapItem {
-  int x, y;
+  Cord cord;
   double priority;
 } HeapItem;
 
 typedef struct Heap {
   HeapItem data[graph_size];
+  int size;
 } Heap;
 // END STRUCT DEFS
 
 // BEGIN STRUCT HELPER FUNCTION PROTOS
-Deque Deque_new(void);
+DequeItem *DequeItem_new(int x, int y);
+Deque *Deque_new(void);
+void Deque_push_front(Deque *deque, int x, int y);
+void Deque_push_back(Deque *deque, int x, int y);
+Cord Deque_pop_front(Deque *deque);
+Cord Deque_pop_back(Deque *deque);
 // END STRUCT HELPER FUNCTION PROTOS
 
 // Function prototypes for D84 - Unit 1 - Search assignment solution
