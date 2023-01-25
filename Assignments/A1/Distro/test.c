@@ -27,7 +27,15 @@ int test_Deque(void) {
     assert(cord.y == i);
     assert(deque->size == size);
   }
+  assert(deque->size == 0);
+  free(deque);
+  deque = NULL;
   printf("PASSED test_Deque\n");
+  return 0;
+}
+
+int test_MinHeap(void) {
+  printf("PASSED test_MinHeap\n");
   return 0;
 }
 
