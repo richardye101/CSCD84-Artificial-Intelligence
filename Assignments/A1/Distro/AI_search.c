@@ -44,20 +44,20 @@
 
 
 #include "AI_search.h"
-#include <assert.h>
 
 // BEGIN STRUCT HELPER FUNCTION DEFS
 DequeItem *DequeItem_new(int x, int y) {
-  DequeItem *deque_item = malloc(sizeof(DequeItem));
+  DequeItem *deque_item = (DequeItem*)malloc(sizeof(DequeItem));
   assert(deque_item != NULL);
   deque_item->cord.x = x;
   deque_item->cord.y = y;
   deque_item->prev = NULL;
   deque_item->next = NULL;
+  return deque_item;
 }
 
 Deque *Deque_new(void) {
-  Deque *deque = malloc(sizeof(Deque));
+  Deque *deque = (Deque *)malloc(sizeof(Deque));
   assert(deque != NULL);
   deque->head = NULL;
   deque->tail = NULL;
@@ -65,28 +65,30 @@ Deque *Deque_new(void) {
   return deque;
 }
 
-Heap *Heap_new(void) {
-  Heap *heap = malloc(sizeof(Heap));
-  assert(heap != NULL);
-  heap->size = 0;
-  return heap;
+MinHeap *Heap_new(void) {
+  MinHeap *min_heap = (MinHeap *)malloc(sizeof(MinHeap));
+  assert(min_heap != NULL);
+  min_heap->size = 0;
+  return min_heap;
 }
 
 void Deque_push_front(Deque *deque, int x, int y) {
-  DequeItem deque_item = DequeItem_new(x, y);
+  assert(deque != NULL);
+  DequeItem *deque_item = DequeItem_new(x, y);
   deque_item->next = deque->head;
   deque_item->prev = NULL;
   if (deque->tail == NULL) {
     deque->head = deque->tail = deque_item;
   } else {
-    d->head->prev = deque_item;
-    d->head = deque_item;
+    deque->head->prev = deque_item;
+    deque->head = deque_item;
   }
   ++deque->size;
 }
 
 void Deque_push_back(Deque *deque, int x, int y) {
-  DequeItem deque_item = DequeItem_new(x, y);
+  assert(deque != NULL);
+  DequeItem *deque_item = DequeItem_new(x, y);
   deque_item->prev = deque->tail;
   deque_item->next = NULL;
   if (deque->head == NULL) {
@@ -100,8 +102,9 @@ void Deque_push_back(Deque *deque, int x, int y) {
 
 Cord Deque_pop_front(Deque *deque) {
   assert(deque != NULL);
-  Cord cord = deque->head.cord;
-  DequeItem deque_item = deque->head;
+  assert(deque->size != 0);
+  Cord cord = deque->head->cord;
+  DequeItem *deque_item = deque->head;
   if (deque->head == deque->tail) {
     deque->head = deque->tail = NULL;
   } else {
@@ -114,8 +117,9 @@ Cord Deque_pop_front(Deque *deque) {
 
 Cord Deque_pop_back(Deque* deque) {
   assert(deque != NULL);
-  Cord cord = deque->tail.cord;
-  DequeItem deque_item = deque->tail;
+  assert(deque->size != 0);
+  Cord cord = deque->tail->cord;
+  DequeItem* deque_item = deque->tail;
   if (deque->head == deque->tail) {
     deque->head = deque->tail = NULL;
   } else {
@@ -126,10 +130,45 @@ Cord Deque_pop_back(Deque* deque) {
   return cord;
 }
 
-void Heap_insert(Heap* heap, int x, int y, int priority) {
-  for (int i=0; i<heap->size; ++i) {
-    // TODO(@Sam)
+MinHeap* MinHeap_new(void) {
+  MinHeap *min_heap = (MinHeap *)malloc(sizeof(MinHeap));
+  assert(min_heap != NULL);
+  min_heap->size = 0;
+  return min_heap;
+}
+
+void MinHeap_insert(MinHeap* min_heap, int x, int y, int priority) {
+  assert(min_heap != NULL);
+  assert(min_heap->size != graph_size);
+  int i;
+  for (i = min_heap->size; i != 0 && min_heap->data[i / 2].priority > priority;
+       i /= 2) {
+    min_heap->data[i] = min_heap->data[i / 2];
   }
+  min_heap->data[i].cord.x = x;
+  min_heap->data[i].cord.y = y;
+  min_heap->data[i].priority = priority;
+  ++min_heap->size;
+}
+
+Cord MinHeap_pop(MinHeap *min_heap) {
+  assert(min_heap != NULL);
+  assert(min_heap->size != 0);
+  Cord cord = min_heap->data[0].cord;
+  min_heap->data[0] = min_heap->data[min_heap->size - 1];
+  --min_heap->size;
+  int i=0, l=1, r=2;
+  while (l < min_heap->size) {
+    int next_i = (r >= min_heap->size ||
+                  (min_heap->data[r].priority > min_heap->data[l].priority))
+                     ? l
+                     : r;
+    HeapItem temp = min_heap->data[i];
+    min_heap->data[i] = min_heap->data[next_i];
+    min_heap->data[next_i] = temp;
+    i = next_i;
+  }
+  return cord;
 }
 // END STRUCT HELPER FUNCTION DEFS
 

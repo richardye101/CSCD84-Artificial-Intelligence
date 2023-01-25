@@ -21,11 +21,10 @@
 #define __AI_search_header
 
 // C STL includes
-#include <malloc.h>
+#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
 
 #include "board_layout.h"
 
@@ -37,10 +36,10 @@ typedef struct Cord {
 
 typedef struct DequeItem {
   Cord cord;
-  DequeItem *prev, *next;
+  struct DequeItem *prev, *next;
 } DequeItem;
 
-} typedef struct Deque {
+typedef struct Deque {
   DequeItem *head;
   DequeItem *tail;
   int size;
@@ -51,19 +50,23 @@ typedef struct HeapItem {
   double priority;
 } HeapItem;
 
-typedef struct Heap {
+typedef struct MinHeap {
   HeapItem data[graph_size];
   int size;
-} Heap;
+} MinHeap;
 // END STRUCT DEFS
 
 // BEGIN STRUCT HELPER FUNCTION PROTOS
 DequeItem *DequeItem_new(int x, int y);
 Deque *Deque_new(void);
+MinHeap *Heap_new(void);
 void Deque_push_front(Deque *deque, int x, int y);
 void Deque_push_back(Deque *deque, int x, int y);
-Cord Deque_pop_front(Deque *deque);
-Cord Deque_pop_back(Deque *deque);
+Cord Deque_pop_front(Deque *deque); 
+Cord Deque_pop_back(Deque* deque);
+MinHeap* MinHeap_new(void);
+void MinHeap_insert(MinHeap* min_heap, int x, int y, int priority);
+Cord MinHeap_pop(MinHeap *min_heap);
 // END STRUCT HELPER FUNCTION PROTOS
 
 // Function prototypes for D84 - Unit 1 - Search assignment solution
