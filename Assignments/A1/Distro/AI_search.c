@@ -1,47 +1,46 @@
 /*
-	CSC D84 - Unit 1 - Search
+        CSC D84 - Unit 1 - Search
 
-	This file contains stubs for implementing the different search
-	algorithms covered in the course. Please read the assignment
-	handout carefully - it describes the game, the data you will
-	have to handle, and the search functions you must provide.
+        This file contains stubs for implementing the different search
+        algorithms covered in the course. Please read the assignment
+        handout carefully - it describes the game, the data you will
+        have to handle, and the search functions you must provide.
 
-	Once you have read the handout carefully, implement your search
-	code in the sections below marked with
+        Once you have read the handout carefully, implement your search
+        code in the sections below marked with
 
-	**************
-	*** TO DO:
-	**************
+        **************
+        *** TO DO:
+        **************
 
-	Make sure to add it to your report.txt file - it will be marked!
+        Make sure to add it to your report.txt file - it will be marked!
 
-	Have fun!
+        Have fun!
 
-	DO NOT FORGET TO 'valgrind' YOUR CODE - We will check for pointer
-	management being done properly, and for memory leaks.
+        DO NOT FORGET TO 'valgrind' YOUR CODE - We will check for pointer
+        management being done properly, and for memory leaks.
 
-	Starter code: F.J.E., Jul. 15
-	Updated: F.J.E., Jan. 18
+        Starter code: F.J.E., Jul. 15
+        Updated: F.J.E., Jan. 18
 */
 
 /**********************************************************************
 % COMPLETE THIS TEXT BOX:
 %
-% 1) Student Name:		
-% 2) Student Name:		
+% 1) Student Name:
+% 2) Student Name:
 %
 % 1) Student number:
 % 2) Student number:
-% 
+%
 % 1) UtorID
 % 2) UtorID
-% 
+%
 % We hereby certify that the work contained here is our own
 %
 % ____________________             _____________________
 % (sign with your name)            (sign with your name)
 ***********************************************************************/
-
 
 #include "AI_search.h"
 
@@ -335,18 +334,19 @@ void search(double gr[graph_size][4], int path[graph_size][2],
    *that in the latter case, you will have to inform your A* function somehow of
    *what heuristic it's supposed to use.
    *
-   *		Visiting Order: When adding the neighbours of a node to your list of
-   *candidates for expansion, do so in the order top, right, bottom, left.
+   *		Visiting Order: When adding the neighbours of a node to your
+   *list of candidates for expansion, do so in the order top, right, bottom,
+   *left.
    *
-   *		NOTE: Your search functions should be smart enough to not choose a
-   *path that goes through a cat! this is easily done without any heuristics.
+   *		NOTE: Your search functions should be smart enough to not choose
+   *a path that goes through a cat! this is easily done without any heuristics.
    *
    *		How you design your solution is up to you. But:
    *
-   *		- Document your implementation by adding concise and clear comments
-   *in this file
-   *		- Document your design (how you implemented the solution, and why)
-   *in the report
+   *		- Document your implementation by adding concise and clear
+   *comments in this file
+   *		- Document your design (how you implemented the solution, and
+   *why) in the report
    *
    ********************************************************************************************************/
 
@@ -361,58 +361,82 @@ void search(double gr[graph_size][4], int path[graph_size][2],
   return;
 }
 
-int H_cost(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], int cats, int cheeses, double gr[graph_size][4])
-{
- /*
-	This function computes and returns the heuristic cost for location x,y.
-	As discussed in lecture, this means estimating the cost of getting from x,y to the goal. 
-	The goal is cheese. Which cheese is up to you.
-	Whatever you code here, your heuristic must be admissible.
+int H_cost(int x, int y, int cat_loc[10][2], int cheese_loc[10][2],
+           int mouse_loc[1][2], int cats, int cheeses,
+           double gr[graph_size][4]) {
+  /*
+         This function computes and returns the heuristic cost for location x,y.
+         As discussed in lecture, this means estimating the cost of getting from
+     x,y to the goal. The goal is cheese. Which cheese is up to you. Whatever
+     you code here, your heuristic must be admissible.
 
-	Input arguments:
+         Input arguments:
 
-		x,y - Location for which this function will compute a heuristic search cost
-		cat_loc - Cat locations
-		cheese_loc - Cheese locations
-		mouse_loc - Mouse location
-		cats - # of cats
-		cheeses - # of cheeses
-		gr - The graph's adjacency list for the maze
+                 x,y - Location for which this function will compute a heuristic
+     search cost cat_loc - Cat locations cheese_loc - Cheese locations mouse_loc
+     - Mouse location cats - # of cats cheeses - # of cheeses gr - The graph's
+     adjacency list for the maze
 
-		These arguments are as described in the search() function above
- */
-// calculates the manhattan distance from the first piece of cheese to the mouse
-// assumes that there is at least 1 piece of cheese in the maze
-double min_dist_cheese_val = cheese_loc[0][0] - mouse_loc[0][0] + cheese_loc[0][1] - mouse_loc[0][1];
+                 These arguments are as described in the search() function above
+  */
 
-// finds the definitive closest piece of cheese to the mouse, and stores its information
-for(int i = 1; i < cheeses; i++){
-     double dist_cheese_val = cheese_loc[i][0] - mouse_loc[0][0] + cheese_loc[i][1] - mouse_loc[0][1];
-     if(dist_cheese_val < min_dist_cheese_val){
-          min_dist_cheese_val = dist_cheese_val;
-     }
-}
- 
- return(min_dist_cheese_val);		// <-- Evidently you will need to update this.
-}
+  /* 
+  calculates the euclidean distance from the first piece of cheese to the
+  suggested location assumes that there is at least 1 piece of cheese in the maze
 
-int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], int cats, int cheeses, double gr[graph_size][4])
-{
- /*
-	This function computes and returns the heuristic cost for location x,y.
-	As discussed in lecture, this means estimating the cost of getting from x,y to the goal. 
-	The goal is cheese. 
+  This is because the euclidean distance is the minimum distance between two points
+  This will always be a lower bound on a the manhattan distance, which is what
+  the true path would be, as the mouse can only move horizontally or vertically
 
-	However - this time you want your heuristic function to help the mouse avoid being eaten.
-	Therefore: You have to somehow incorporate knowledge of the cats' locations into your
-	heuristic cost estimate. How well you do this will determine how well your mouse behaves
-	and how good it is at escaping kitties.
-
-	This heuristic *does not have to* be admissible.
-
-	Input arguments have the same meaning as in the H_cost() function above.
- */
-
- return(1);		// <-- Evidently you will need to update this.
+  Therefore it is an admissible heuristic, as it is <= true cost
+  */ 
+  double min_dist_cheese_val = pow(pow(cheese_loc[0][0] - x,2) + pow(cheese_loc[0][1] - y,2), 0.5);
+      
+  // finds the definitive closest piece of cheese to the mouse, and stores its
+  // information
+  for (int i = 1; i < cheeses; i++) {
+    double dist_cheese_val =
+        pow(pow(cheese_loc[i][0] - x,2) + pow(cheese_loc[i][1] - y,2), 0.5);;
+    if (dist_cheese_val < min_dist_cheese_val) {
+      min_dist_cheese_val = dist_cheese_val;
+    }
+  }
+  return ((int)min_dist_cheese_val);
 }
 
+int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2],
+                   int mouse_loc[1][2], int cats, int cheeses,
+                   double gr[graph_size][4]) {
+  /*
+         This function computes and returns the heuristic cost for location x,y.
+         As discussed in lecture, this means estimating the cost of getting from
+     x,y to the goal. The goal is cheese.
+
+         However - this time you want your heuristic function to help the mouse
+     avoid being eaten. Therefore: You have to somehow incorporate knowledge of
+     the cats' locations into your heuristic cost estimate. How well you do this
+     will determine how well your mouse behaves and how good it is at escaping
+     kitties.
+
+         This heuristic *does not have to* be admissible.
+
+         Input arguments have the same meaning as in the H_cost() function
+     above.
+  */
+
+int cost = H_cost( x, y, cat_loc, cheese_loc, mouse_loc, cats, cheeses, gr);
+
+// For the cost, we define it to follow 100/(1+x), so cost increases as distance shrinks, and distance can be 0)
+double dist_cat_val = 100 / (1 + pow(pow(cat_loc[0][0] - x,2) + pow(cat_loc[0][1] - y,2), 0.5) );
+      
+  // finds the definitive closest piece of cat to the mouse, and stores its
+  // information
+  for (int i = 1; i < cats; i++) {
+    double dist_cat_val = 100 /
+        (1 + pow(pow(cat_loc[i][0] - x,2) + pow(cat_loc[i][1] - y,2), 0.5) );
+    if (dist_cat_val < dist_cat_val) {
+      dist_cat_val = dist_cat_val;
+    }
+  }
+  return (dist_cat_val);
+}
