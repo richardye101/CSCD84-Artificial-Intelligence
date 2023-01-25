@@ -156,20 +156,20 @@ Cord MinHeap_pop(MinHeap *min_heap) {
   assert(min_heap->size != 0);
   Cord cord = min_heap->data[0].cord;
   min_heap->data[0] = min_heap->data[min_heap->size - 1];
-  int i=0, l=1, r=2;
-  while (l < min_heap->size) {
-    int next_i = (r >= min_heap->size ||
-                  (min_heap->data[r].priority > min_heap->data[l].priority))
-                     ? l
-                     : r;
+  --min_heap->size;
+  for (int i = 0, l = 1, r = 2, next_i;
+       l < min_heap->size &&
+       min_heap->data[next_i =
+                          (r >= min_heap->size || (min_heap->data[r].priority >
+                                                   min_heap->data[l].priority))
+                              ? l
+                              : r]
+               .priority < min_heap->data[i].priority;
+       l = 2 * i + 1, r = 2 * i + 2, i = next_i) {
     HeapItem temp = min_heap->data[i];
     min_heap->data[i] = min_heap->data[next_i];
     min_heap->data[next_i] = temp;
-    i = next_i;
-    l = 2 * i + 1;
-    r = 2 * i + 2;
   }
-  --min_heap->size;
   return cord;
 }
 // END STRUCT HELPER FUNCTION DEFS
