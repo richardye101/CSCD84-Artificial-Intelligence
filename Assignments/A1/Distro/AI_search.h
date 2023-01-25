@@ -35,7 +35,7 @@ typedef struct DequeItem {
   DequeItem *prev, *next;
 } DequeItem;
 
-} typedef struct Deque {
+typedef struct Deque {
   DequeItem *head;
   DequeItem *tail;
   int size;
