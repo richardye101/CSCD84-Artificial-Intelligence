@@ -381,8 +381,19 @@ int H_cost(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int mouse_lo
 
 		These arguments are as described in the search() function above
  */
+// calculates the manhattan distance from the first piece of cheese to the mouse
+// assumes that there is at least 1 piece of cheese in the maze
+double min_dist_cheese_val = cheese_loc[0][0] - mouse_loc[0][0] + cheese_loc[0][1] - mouse_loc[0][1];
 
- return(1);		// <-- Evidently you will need to update this.
+// finds the definitive closest piece of cheese to the mouse, and stores its information
+for(int i = 1; i < cheeses; i++){
+     double dist_cheese_val = cheese_loc[i][0] - mouse_loc[0][0] + cheese_loc[i][1] - mouse_loc[0][1];
+     if(dist_cheese_val < min_dist_cheese_val){
+          min_dist_cheese_val = dist_cheese_val;
+     }
+}
+ 
+ return(min_dist_cheese_val);		// <-- Evidently you will need to update this.
 }
 
 int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], int cats, int cheeses, double gr[graph_size][4])
