@@ -35,11 +35,50 @@ int test_Deque(void) {
 }
 
 int test_MinHeap(void) {
+  MinHeap* min_heap = MinHeap_new();
+  assert(min_heap != NULL);
+  int size =0;
+  MinHeap_insert(min_heap, 7, 8, 24);
+  ++size;
+  assert(min_heap->size == size);
+  MinHeap_insert(min_heap, 0, 1, -1);
+  ++size;
+  assert(min_heap->size == size);
+  MinHeap_insert(min_heap, 4, 5, 6);
+  ++size;
+  assert(min_heap->size == size);
+  MinHeap_insert(min_heap, 2, 3, 1);
+  ++size;
+  assert(min_heap->size == size);
+  MinHeap_insert(min_heap, 6, 7, 10);
+  ++size;
+  assert(min_heap->size == size);
+  MinHeap_insert(min_heap, 3, 4, 2);
+  ++size;
+  assert(min_heap->size == size);
+  MinHeap_insert(min_heap, 1, 2, 0);
+  ++size;
+  assert(min_heap->size == size);
+  MinHeap_insert(min_heap, 5, 6, 8);
+  ++size;
+  assert(min_heap->size == size);
+  for (int i=0; i<8; ++i) {
+    assert(min_heap != NULL);
+    Cord cord = MinHeap_pop(min_heap);
+    assert(cord.x == i && cord.y == i + 1);
+    -- size;
+    assert(min_heap->size == size);
+  }
+  assert(min_heap->size == 0);
+  free(min_heap);
+  min_heap = NULL;
   printf("PASSED test_MinHeap\n");
   return 0;
 }
 
 int main() {
-  test_Deque();
+  if (test_Deque() == 0 && test_MinHeap() == 0) {
+    printf("--PASSED ALL TEST CASES--\n");
+  }
   return 0;
 }

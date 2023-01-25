@@ -47,7 +47,7 @@ typedef struct Deque {
 
 typedef struct HeapItem {
   Cord cord;
-  double priority;
+  int priority;
 } HeapItem;
 
 typedef struct MinHeap {

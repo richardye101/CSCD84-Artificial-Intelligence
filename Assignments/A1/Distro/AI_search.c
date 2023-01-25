@@ -141,9 +141,9 @@ void MinHeap_insert(MinHeap* min_heap, int x, int y, int priority) {
   assert(min_heap != NULL);
   assert(min_heap->size != graph_size);
   int i;
-  for (i = min_heap->size; i != 0 && min_heap->data[i / 2].priority > priority;
-       i /= 2) {
-    min_heap->data[i] = min_heap->data[i / 2];
+  for (i = min_heap->size; i != 0 && min_heap->data[(i - 1) / 2].priority > priority;
+       i = (i - 1) / 2) {
+    min_heap->data[i] = min_heap->data[(i - 1) / 2];
   }
   min_heap->data[i].cord.x = x;
   min_heap->data[i].cord.y = y;
@@ -156,7 +156,6 @@ Cord MinHeap_pop(MinHeap *min_heap) {
   assert(min_heap->size != 0);
   Cord cord = min_heap->data[0].cord;
   min_heap->data[0] = min_heap->data[min_heap->size - 1];
-  --min_heap->size;
   int i=0, l=1, r=2;
   while (l < min_heap->size) {
     int next_i = (r >= min_heap->size ||
@@ -167,7 +166,10 @@ Cord MinHeap_pop(MinHeap *min_heap) {
     min_heap->data[i] = min_heap->data[next_i];
     min_heap->data[next_i] = temp;
     i = next_i;
+    l = 2 * i + 1;
+    r = 2 * i + 2;
   }
+  --min_heap->size;
   return cord;
 }
 // END STRUCT HELPER FUNCTION DEFS
