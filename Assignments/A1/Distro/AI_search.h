@@ -43,6 +43,11 @@
 // END DIRECTIONS
 
 // BEGIN STRUCT DEFS
+typedef int (*HEURISTIC_FUNCTION)(int x, int y, int cat_loc[10][2],
+                                  int cheese_loc[10][2], int mouse_loc[1][2],
+                                  int cats, int cheeses,
+                                  double gr[graph_size][4]);
+
 // Deque will be used for both queue and stack
 typedef struct Cord {
   int x, y;
@@ -73,6 +78,7 @@ typedef struct DataStructure {
   Deque *deque;
   MinHeap *min_heap;
   int mode;
+  HEURISTIC_FUNCTION heuristic;
 } DataStructure;
 // END STRUCT DEFS
 
@@ -87,7 +93,7 @@ Cord Deque_pop_back(Deque* deque);
 MinHeap* MinHeap_new(void);
 void MinHeap_insert(MinHeap *min_heap, Cord cord, int priority);
 Cord MinHeap_pop(MinHeap *min_heap);
-DataStructure* DataStructure_new(int mode);
+DataStructure *DataStructure_new(int mode, HEURISTIC_FUNCTION heuristic);
 void DataStructure_insert(DataStructure *data_structure, Cord cord,
                           int priority);
 Cord DataStructure_pop(DataStructure *data_structure);
@@ -99,13 +105,14 @@ void construct_path(int path[graph_size][2], int came_from[graph_size], Cord sta
 // Function prototypes for D84 - Unit 1 - Search assignment solution
 
 // BEGIN MISC HELPER FUNCTION PROTOS
-Cord next_cord(Cord cord, int direction);
+Cord get_next_cord(Cord cord, int direction);
 Cord index_to_cord(int index);
 int cord_to_index(Cord cord);
 int is_index_valid(int index);
 int is_cord_valid(Cord cord);
 int equal_cords(Cord a, Cord b);
-void construct_path(int path[graph_size][2], int came_from[graph_size], Cord start, Cord goal);
+void construct_path(int path[graph_size][2], int came_from[graph_size],
+                    Cord start, Cord goal);
 // END MISC HELPER FUNCTION PROTOS
 
 

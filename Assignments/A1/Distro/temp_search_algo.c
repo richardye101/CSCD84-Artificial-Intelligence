@@ -40,14 +40,14 @@ while (!isEmpty(data_structure) && !found) {
   
   // insert all unvisited neighbors of the current node
   for (int direction=0; direction<4; ++direction) {
-    const Cord cord = next_cord(xy_to_cord(cur_x, cur_y), direction);
+    const Cord cord = next_cord((Cord){cur_x, cur_y}, direction);
     const int index = 
     if (!is_cord_valid(cord)) {
       continue;
     }
     bool is_cat = false;
     for (int cat = 0; cat < cats; ++cat) {
-      if (is_cord_equal(cord, xy_to_cord(cat_loc[i][0], cat_loc[i][1]))) {
+      if (is_cord_equal(cord, (Cord){cat_loc[i][0], cat_loc[i][1]})) {
         is_cat = true;
         break;
       }

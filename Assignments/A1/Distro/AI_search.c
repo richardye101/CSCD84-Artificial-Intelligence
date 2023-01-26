@@ -170,13 +170,14 @@ Cord MinHeap_pop(MinHeap *min_heap) {
   }
   return cord;
 }
-DataStructure* DataStructure_new(int mode) {
+DataStructure* DataStructure_new(int mode, HEURISTIC_FUNCTION heuristic) {
   DataStructure *data_structure =
       (DataStructure *)malloc(sizeof(DataStructure));
   assert(data_structure != NULL);
   data_structure->deque = Deque_new();
   data_structure->min_heap = MinHeap_new();
   data_structure->mode = mode;
+  data_structure->heuristic = heuristic;
   return data_structure;
 }
 void DataStructure_insert(DataStructure *data_structure, Cord cord,
@@ -247,7 +248,7 @@ int DataStructure_size(DataStructure* data_structure) {
 // END STRUCT HELPER FUNCTION DEFS
 
 // BEGIN HELPER FUNCTION DEFS
-Cord next_cord(Cord cord, int direction) {
+Cord get_next_cord(Cord cord, int direction) {
   switch (direction) {
     case DIRECTION_UP:
       --cord.y;
@@ -274,7 +275,9 @@ Cord index_to_cord(int index) {
 }
 int cord_to_index(Cord cord) { return cord.x + cord.y * size_X; }
 int is_index_valid(int index) { return 0 <= index && index < graph_size; }
-int is_cord_valid(Cord cord) { return is_index_valid(cord_to_index(cord)); }
+int is_cord_valid(Cord cord) {
+  return 0 <= cord.x && cord.x < size_X && 0 <= cord.y && cord.y < size_Y;
+}
 int equal_cords(Cord a, Cord b) { return a.x == b.x && a.y == b.y; }
 void construct_path(int path[graph_size][2], int came_from[graph_size],
                     Cord start, Cord goal) {
@@ -466,14 +469,14 @@ void search(double gr[graph_size][4], int path[graph_size][2],
   Cord mouse_cord = (Cord){mouse_loc[0][0], mouse_loc[0][1]};
   int came_from[graph_size];
   bool visited[graph_size];
-  DataStructure *data_structure = DataStructure_new(mode);
+  DataStructure *data_structure = DataStructure_new(mode, heuristic);
   // Use 0 priority for starting node
   DataStructure_insert(data_structure, mouse_cord, 0);
   bool found_cheese = false;
-  int visit_counter=0;
+  int visit_counter = 0;
   while (DataStructure_size(data_structure) > 0) {
     Cord cord = DataStructure_pop(data_structure);
-    visit_order[cord_to_index(cord)] = visit_counter;
+    // visit_order[cord_to_index(cord)] = visit_counter;
     ++visit_counter;
     // Check if found cheese
     for (int cheese = 0; cheese<cheeses; ++cheese) {
@@ -487,9 +490,19 @@ void search(double gr[graph_size][4], int path[graph_size][2],
     }
     if (found_cheese) break;
     for (int direction = 0; direction < 4; ++direction) {
-      const Cord cord = next_cord((Cord){cur_x, cur_y}, direction);
+      const Cord next_cord = get_next_cord((Cord){mouse_loc[0][0], mouse_loc[0][1]}, direction);
       if (!is_cord_valid(cord)) {
         continue;
+      }
+      bool is_cat = false;
+      for (int cat=0; cat<cats; ++cat) {
+        if (equal_cords(cord, (Cord){cat_loc[cat][0], cat_loc[cat][1]})) {
+          is_cat = true;
+          break;
+        }
+      }
+      if (!visited[cord_to_index(cord)] && gr[cord_to_index(next_cord)][direction] && !is_cat) {
+        DataStructure_insert(data_structure, cord, 69);
       }
     }
   }

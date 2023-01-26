@@ -1,6 +1,7 @@
 **/.vscode/
 **/.obsidian/
-**/.DS_Store/
+**/.DS_Store
 *.exe
 *.out
+*.gch
 Programming Exercises/
