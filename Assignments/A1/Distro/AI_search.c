@@ -43,20 +43,21 @@
 /**********************************************************************
 % COMPLETE THIS TEXT BOX:
 %
-% 1) Student Name:
-% 2) Student Name:
+% 1) Student Name:		
+% 2) Student Name:		
 %
 % 1) Student number:
 % 2) Student number:
-%
+% 
 % 1) UtorID
 % 2) UtorID
-%
+% 
 % We hereby certify that the work contained here is our own
 %
 % ____________________             _____________________
 % (sign with your name)            (sign with your name)
 ***********************************************************************/
+
 
 #include "AI_search.h"
 
@@ -350,19 +351,18 @@ void search(double gr[graph_size][4], int path[graph_size][2],
    *that in the latter case, you will have to inform your A* function somehow of
    *what heuristic it's supposed to use.
    *
-   *		Visiting Order: When adding the neighbours of a node to your
-   *list of candidates for expansion, do so in the order top, right, bottom,
-   *left.
+   *		Visiting Order: When adding the neighbours of a node to your list of
+   *candidates for expansion, do so in the order top, right, bottom, left.
    *
-   *		NOTE: Your search functions should be smart enough to not choose
-   *a path that goes through a cat! this is easily done without any heuristics.
+   *		NOTE: Your search functions should be smart enough to not choose a
+   *path that goes through a cat! this is easily done without any heuristics.
    *
    *		How you design your solution is up to you. But:
    *
-   *		- Document your implementation by adding concise and clear
-   *comments in this file
-   *		- Document your design (how you implemented the solution, and
-   *why) in the report
+   *		- Document your implementation by adding concise and clear comments
+   *in this file
+   *		- Document your design (how you implemented the solution, and why)
+   *in the report
    *
    ********************************************************************************************************/
 
@@ -377,24 +377,26 @@ void search(double gr[graph_size][4], int path[graph_size][2],
   return;
 }
 
-int H_cost(int x, int y, int cat_loc[10][2], int cheese_loc[10][2],
-           int mouse_loc[1][2], int cats, int cheeses,
-           double gr[graph_size][4]) {
-  /*
-         This function computes and returns the heuristic cost for location x,y.
-         As discussed in lecture, this means estimating the cost of getting from
-     x,y to the goal. The goal is cheese. Which cheese is up to you. Whatever
-     you code here, your heuristic must be admissible.
+int H_cost(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], int cats, int cheeses, double gr[graph_size][4])
+{
+ /*
+	This function computes and returns the heuristic cost for location x,y.
+	As discussed in lecture, this means estimating the cost of getting from x,y to the goal. 
+	The goal is cheese. Which cheese is up to you.
+	Whatever you code here, your heuristic must be admissible.
 
-         Input arguments:
+	Input arguments:
 
-                 x,y - Location for which this function will compute a heuristic
-     search cost cat_loc - Cat locations cheese_loc - Cheese locations mouse_loc
-     - Mouse location cats - # of cats cheeses - # of cheeses gr - The graph's
-     adjacency list for the maze
+		x,y - Location for which this function will compute a heuristic search cost
+		cat_loc - Cat locations
+		cheese_loc - Cheese locations
+		mouse_loc - Mouse location
+		cats - # of cats
+		cheeses - # of cheeses
+		gr - The graph's adjacency list for the maze
 
-                 These arguments are as described in the search() function above
-  */
+		These arguments are as described in the search() function above
+ */
 
   /* 
   calculates the euclidean distance from the first piece of cheese to the
@@ -420,26 +422,22 @@ int H_cost(int x, int y, int cat_loc[10][2], int cheese_loc[10][2],
   return ((int)min_dist_cheese_val);
 }
 
-int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2],
-                   int mouse_loc[1][2], int cats, int cheeses,
-                   double gr[graph_size][4]) {
-  /*
-         This function computes and returns the heuristic cost for location x,y.
-         As discussed in lecture, this means estimating the cost of getting from
-     x,y to the goal. The goal is cheese.
+int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], int cats, int cheeses, double gr[graph_size][4])
+{
+ /*
+	This function computes and returns the heuristic cost for location x,y.
+	As discussed in lecture, this means estimating the cost of getting from x,y to the goal. 
+	The goal is cheese. 
 
-         However - this time you want your heuristic function to help the mouse
-     avoid being eaten. Therefore: You have to somehow incorporate knowledge of
-     the cats' locations into your heuristic cost estimate. How well you do this
-     will determine how well your mouse behaves and how good it is at escaping
-     kitties.
+	However - this time you want your heuristic function to help the mouse avoid being eaten.
+	Therefore: You have to somehow incorporate knowledge of the cats' locations into your
+	heuristic cost estimate. How well you do this will determine how well your mouse behaves
+	and how good it is at escaping kitties.
 
-         This heuristic *does not have to* be admissible.
-         This heuristic *does not have to* be admissible.
+	This heuristic *does not have to* be admissible.
 
-         Input arguments have the same meaning as in the H_cost() function
-     above.
-  */
+	Input arguments have the same meaning as in the H_cost() function above.
+ */
 
   int h_cost = H_cost(x, y, cat_loc, cheese_loc, mouse_loc, cats, cheeses, gr);
 int cost = H_cost( x, y, cat_loc, cheese_loc, mouse_loc, cats, cheeses, gr);
