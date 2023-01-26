@@ -1,6 +1,6 @@
-**/.vscode
-**/.obsidian
-**/.DS_Store
+**/.vscode/
+**/.obsidian/
+**/.DS_Store/
 *.exe
 *.out
 Programming Exercises/

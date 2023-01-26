@@ -46,11 +46,10 @@
 #include "AI_search.h"
 
 // BEGIN STRUCT HELPER FUNCTION DEFS
-DequeItem *DequeItem_new(int x, int y) {
+DequeItem *DequeItem_new(Cord cord) {
   DequeItem *deque_item = (DequeItem*)malloc(sizeof(DequeItem));
   assert(deque_item != NULL);
-  deque_item->cord.x = x;
-  deque_item->cord.y = y;
+  deque_item->cord = cord;
   deque_item->prev = NULL;
   deque_item->next = NULL;
   return deque_item;
@@ -72,9 +71,9 @@ MinHeap *Heap_new(void) {
   return min_heap;
 }
 
-void Deque_push_front(Deque *deque, int x, int y) {
+void Deque_push_front(Deque *deque, Cord cord) {
   assert(deque != NULL);
-  DequeItem *deque_item = DequeItem_new(x, y);
+  DequeItem *deque_item = DequeItem_new(cord);
   deque_item->next = deque->head;
   deque_item->prev = NULL;
   if (deque->tail == NULL) {
@@ -86,9 +85,9 @@ void Deque_push_front(Deque *deque, int x, int y) {
   ++deque->size;
 }
 
-void Deque_push_back(Deque *deque, int x, int y) {
+void Deque_push_back(Deque *deque, Cord cord) {
   assert(deque != NULL);
-  DequeItem *deque_item = DequeItem_new(x, y);
+  DequeItem *deque_item = DequeItem_new(cord);
   deque_item->prev = deque->tail;
   deque_item->next = NULL;
   if (deque->head == NULL) {
@@ -137,7 +136,7 @@ MinHeap* MinHeap_new(void) {
   return min_heap;
 }
 
-void MinHeap_insert(MinHeap* min_heap, int x, int y, int priority) {
+void MinHeap_insert(MinHeap* min_heap, Cord cord, int priority) {
   assert(min_heap != NULL);
   assert(min_heap->size != graph_size);
   int i;
@@ -145,8 +144,7 @@ void MinHeap_insert(MinHeap* min_heap, int x, int y, int priority) {
        i = (i - 1) / 2) {
     min_heap->data[i] = min_heap->data[(i - 1) / 2];
   }
-  min_heap->data[i].cord.x = x;
-  min_heap->data[i].cord.y = y;
+  min_heap->data[i].cord = cord;
   min_heap->data[i].priority = priority;
   ++min_heap->size;
 }
@@ -181,7 +179,7 @@ DataStructure* DataStructure_new(int mode) {
   data_structure->mode = mode;
   return data_structure;
 }
-void DataStructure_insert(DataStructure *data_structure, int x, int y,
+void DataStructure_insert(DataStructure *data_structure, Cord cord,
                           int priority) {
   // Note priority only matters if mode == MODE_A_STAR
   assert(data_structure != NULL);
@@ -190,15 +188,15 @@ void DataStructure_insert(DataStructure *data_structure, int x, int y,
   switch (data_structure->mode) {
     case MODE_BFS:
       // Stack
-      Deque_push_back(data_structure->deque, x, y);
+      Deque_push_back(data_structure->deque, cord);
       break;
     case MODE_DFS:
       // Queue
-      Deque_push_back(data_structure->deque, x, y);
+      Deque_push_back(data_structure->deque, cord);
       break;
     case MODE_A_STAR:
       // MinHeap
-      MinHeap_insert(data_structure->min_heap, x, y, priority);
+      MinHeap_insert(data_structure->min_heap, cord, priority);
       break;
     default:
       break;
@@ -268,12 +266,6 @@ Cord next_cord(Cord cord, int direction) {
   }
   return cord;
 }
-Cord xy_to_cord(int x, int y) {
-  Cord cord;
-  cord.x = x;
-  cord.y = y;
-  return cord;
-}
 Cord index_to_cord(int index) {
   Cord cord;
   cord.x = index % size_X;
@@ -285,14 +277,17 @@ int is_index_valid(int index) { return 0 <= index && index < graph_size; }
 int is_cord_valid(Cord cord) { return is_index_valid(cord_to_index(cord)); }
 int equal_cords(Cord a, Cord b) { return a.x == b.x && a.y == b.y; }
 void construct_path(int path[graph_size][2], int came_from[graph_size],
-                    int start, int goal) {
-  int index = goal, path_size;
-  for (path_size=1; index != start; ++path_size) {
+                    Cord start, Cord goal) {
+  const int start_index = cord_to_index(start);
+  const int goal_index = cord_to_index(goal);
+  int index = goal_index;
+  int path_size;
+  for (path_size = 1; index != start_index; ++path_size) {
     index = came_from[index];
   }
-  index = goal;
+  index = goal_index;
   for (int i=path_size-1; i >= 0; --i) {
-    Cord cord = index_to_cord(index);
+    const Cord cord = index_to_cord(index);
     path[i][0] = cord.x;
     path[i][1] = cord.y;
     index = came_from[index];
@@ -468,23 +463,33 @@ void search(double gr[graph_size][4], int path[graph_size][2],
   // Stub so that the code compiles/runs - The code below will be removed and
   // replaced by your code!
 
+  Cord mouse_cord = (Cord){mouse_loc[0][0], mouse_loc[0][1]};
   int came_from[graph_size];
   bool visited[graph_size];
-  path[0][0] = mouse_loc[0][0], path[0][1] = mouse_loc[0][1];
   DataStructure *data_structure = DataStructure_new(mode);
   // Use 0 priority for starting node
-  DataStructure_insert(mouse_loc[0][0], mouse_loc[0][1], 0);
+  DataStructure_insert(data_structure, mouse_cord, 0);
   bool found_cheese = false;
+  int visit_counter=0;
   while (DataStructure_size(data_structure) > 0) {
-    Cord cord = DataStructure_pop();
+    Cord cord = DataStructure_pop(data_structure);
+    visit_order[cord_to_index(cord)] = visit_counter;
+    ++visit_counter;
+    // Check if found cheese
     for (int cheese = 0; cheese<cheeses; ++cheese) {
       if (cord.x == cheese_loc[cheese][0] && cord.y == cheese_loc[cheese][1]) {
-        // Found cheese
-        construct_path(
-            path, came_from, xy_to_cord(mouse_loc[0][0], mouse_loc[1][1]),
-            xy_to_cord(cheese_loc[cheese][0], cheese_loc[cheese][1]));
-        found = true;
+        construct_path(path, came_from,
+                       (Cord){mouse_loc[0][0], mouse_loc[1][1]},
+                       (Cord){cheese_loc[cheese][0], cheese_loc[cheese][1]});
+        found_cheese = true;
         break;
+      }
+    }
+    if (found_cheese) break;
+    for (int direction = 0; direction < 4; ++direction) {
+      const Cord cord = next_cord((Cord){cur_x, cur_y}, direction);
+      if (!is_cord_valid(cord)) {
+        continue;
       }
     }
   }

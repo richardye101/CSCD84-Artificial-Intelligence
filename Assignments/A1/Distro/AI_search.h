@@ -25,6 +25,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "board_layout.h"
 
@@ -72,32 +73,32 @@ typedef struct DataStructure {
   Deque *deque;
   MinHeap *min_heap;
   int mode;
-}
+} DataStructure;
 // END STRUCT DEFS
 
 // BEGIN STRUCT HELPER FUNCTION PROTOS
-DequeItem *DequeItem_new(int x, int y);
+DequeItem *DequeItem_new(Cord cord);
 Deque *Deque_new(void);
 MinHeap *Heap_new(void);
-void Deque_push_front(Deque *deque, int x, int y);
-void Deque_push_back(Deque *deque, int x, int y);
+void Deque_push_front(Deque *deque, Cord cord);
+void Deque_push_back(Deque *deque, Cord cord);
 Cord Deque_pop_front(Deque *deque); 
 Cord Deque_pop_back(Deque* deque);
 MinHeap* MinHeap_new(void);
-void MinHeap_insert(MinHeap* min_heap, int x, int y, int priority);
+void MinHeap_insert(MinHeap *min_heap, Cord cord, int priority);
 Cord MinHeap_pop(MinHeap *min_heap);
 DataStructure* DataStructure_new(int mode);
-void DataStructure_insert(DataStructure *data_structure, int x, int y,
+void DataStructure_insert(DataStructure *data_structure, Cord cord,
                           int priority);
 Cord DataStructure_pop(DataStructure *data_structure);
 int DataStructure_size(DataStructure* data_structure);
-construct_path(int path[graph_size][2]
+void construct_path(int path[graph_size][2], int came_from[graph_size], Cord start,
+               Cord goal);
 // END STRUCT HELPER FUNCTION PROTOS
 
 // Function prototypes for D84 - Unit 1 - Search assignment solution
 
 // BEGIN MISC HELPER FUNCTION PROTOS
-Cord xy_to_cord(int x, int y);
 Cord next_cord(Cord cord, int direction);
 Cord index_to_cord(int index);
 int cord_to_index(Cord cord);

@@ -6,10 +6,10 @@ int test_Deque(void) {
   int size=0;
   for (int i=0; i<10; ++i) {
     assert(deque != NULL);
-    Deque_push_front(deque, i, i + 1);
+    Deque_push_front(deque, (Cord){i, i + 1});
     ++size;
     assert(deque->size == size);
-    Deque_push_back(deque, i + 1, i);
+    Deque_push_back(deque, (Cord){i + 1, i});
     ++size;
     assert(deque->size == size);
   }
@@ -38,28 +38,28 @@ int test_MinHeap(void) {
   MinHeap* min_heap = MinHeap_new();
   assert(min_heap != NULL);
   int size =0;
-  MinHeap_insert(min_heap, 7, 8, 24);
+  MinHeap_insert(min_heap, (Cord){7, 8}, 24);
   ++size;
   assert(min_heap->size == size);
-  MinHeap_insert(min_heap, 0, 1, -1);
+  MinHeap_insert(min_heap, (Cord){0, 1}, -1);
   ++size;
   assert(min_heap->size == size);
-  MinHeap_insert(min_heap, 4, 5, 6);
+  MinHeap_insert(min_heap, (Cord){4, 5}, 6);
   ++size;
   assert(min_heap->size == size);
-  MinHeap_insert(min_heap, 2, 3, 1);
+  MinHeap_insert(min_heap, (Cord){2, 3}, 1);
   ++size;
   assert(min_heap->size == size);
-  MinHeap_insert(min_heap, 6, 7, 10);
+  MinHeap_insert(min_heap, (Cord){6, 7}, 10);
   ++size;
   assert(min_heap->size == size);
-  MinHeap_insert(min_heap, 3, 4, 2);
+  MinHeap_insert(min_heap, (Cord){3, 4}, 2);
   ++size;
   assert(min_heap->size == size);
-  MinHeap_insert(min_heap, 1, 2, 0);
+  MinHeap_insert(min_heap, (Cord){1, 2}, 0);
   ++size;
   assert(min_heap->size == size);
-  MinHeap_insert(min_heap, 5, 6, 8);
+  MinHeap_insert(min_heap, (Cord){5, 6}, 8);
   ++size;
   assert(min_heap->size == size);
   for (int i=0; i<8; ++i) {
