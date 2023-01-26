@@ -469,6 +469,8 @@ void search(double gr[graph_size][4], int path[graph_size][2],
   Cord mouse_cord = (Cord){mouse_loc[0][0], mouse_loc[0][1]};
   int came_from[graph_size];
   bool visited[graph_size];
+  memset(visited, false, sizeof(visited));
+  visited[cord_to_index(mouse_cord)] = true;
   DataStructure *data_structure = DataStructure_new(mode, heuristic);
   // Use 0 priority for starting node
   DataStructure_insert(data_structure, mouse_cord, 0);
@@ -476,7 +478,8 @@ void search(double gr[graph_size][4], int path[graph_size][2],
   int visit_counter = 0;
   while (DataStructure_size(data_structure) > 0) {
     Cord cord = DataStructure_pop(data_structure);
-    // visit_order[cord_to_index(cord)] = visit_counter;
+    if (visited[cord_to_index(cord)]) continue;
+    visit_order[cord.x][cord.y] = visit_counter;
     ++visit_counter;
     // Check if found cheese
     for (int cheese = 0; cheese<cheeses; ++cheese) {
@@ -485,13 +488,13 @@ void search(double gr[graph_size][4], int path[graph_size][2],
                        (Cord){mouse_loc[0][0], mouse_loc[1][1]},
                        (Cord){cheese_loc[cheese][0], cheese_loc[cheese][1]});
         found_cheese = true;
-        break;
+        // Found cheese - time step is done.
+        return;
       }
     }
-    if (found_cheese) break;
     for (int direction = 0; direction < 4; ++direction) {
       const Cord next_cord = get_next_cord((Cord){mouse_loc[0][0], mouse_loc[0][1]}, direction);
-      if (!is_cord_valid(cord)) {
+      if (!is_cord_valid(next_cord)) {
         continue;
       }
       bool is_cat = false;
@@ -501,8 +504,15 @@ void search(double gr[graph_size][4], int path[graph_size][2],
           break;
         }
       }
-      if (!visited[cord_to_index(cord)] && gr[cord_to_index(next_cord)][direction] && !is_cat) {
-        DataStructure_insert(data_structure, cord, 69);
+      // Ensure no wall and not a cat
+      if (gr[cord_to_index(next_cord)][direction] && !is_cat) {
+        visited[cord_to_index(next_cord)] = true;
+        int h = (heuristic == NULL)
+                    ? 0
+                    : heuristic(next_cord.x, next_cord.y, cat_loc, cheese_loc,
+                                mouse_loc, cats, cheeses, gr);
+        DataStructure_insert(data_structure, next_cord, h);
+        came_from[cord_to_index(next_cord)] = cord_to_index(next_cord);
       }
     }
   }
