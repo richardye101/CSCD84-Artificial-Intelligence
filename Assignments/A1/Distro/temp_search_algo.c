@@ -1,4 +1,5 @@
 // insert the start node
+#include "AI_search.h"
 insert(data_structure, start);
 /*
 Since the traversal and checking of cheese/cats/walls are all the same
@@ -9,7 +10,7 @@ of code written and is easy to read and debug.
 */
 
 // array to store where nodes came from, to create a path
-int cameFrom[graph_size];
+int came_from[graph_size];
 // Create an array to keep track of queued nodes
 bool visited[graph_size];
 memset(visited, false, sizeof(visited));
@@ -25,14 +26,12 @@ bool found == false;
 while (!isEmpty(data_structure) && !found) {
   // keep track of the current location
   int current = extract(data_structure);
-  int cur_x = current % size_X;
-  int cur_y = current / size_Y;
   // need to check if pixel is one of cheese_loc[10][2]
   for (int i = 0; i < cheeses; i++) {
     int cheese_x = cheese_loc[i][0];
     int cheese_y = cheese_loc[i][1];
     if (current == (cheese_x + (cheese_y * size_X))) {
-      path = constructPath(cameFrom, cheese_x + (cheese_y * size_X), start);
+      path = construct_path(path, cameFrom, cheese_x + (cheese_y * size_X), start);
       printf("Reached a cheese piece at %d, %d\n", cheese_x, cheese_y);
       found = true;
       break;
@@ -40,37 +39,21 @@ while (!isEmpty(data_structure) && !found) {
   }
   
   // insert all unvisited neighbors of the current node
-  for (int i = 0; i < 4; i++) {
-    int x, y;
-    switch (i) {
-    case 0:
-      x = cur_x;
-      y = cur_y - 1;
-      break;
-    case 1:
-      x = cur_x + 1;
-      y = cur_y;
-      break;
-    case 2:
-      x = cur_x;
-      y = cur_y + 1;
-      break;
-    case 3:
-      x = cur_x - 1;
-      y = cur_y;
-      break;
+  for (int direction=0; direction<4; ++direction) {
+    const Cord cord = next_cord(xy_to_cord(cur_x, cur_y), direction);
+    const int index = 
+    if (!is_cord_valid(cord)) {
+      continue;
     }
-    // check dimensions are in bounds
-    if (x < 32 && x >= 0 && y >= 0 && y < 32) {
-      int idx = x + (y * size_X);
-      // check for cats
-      bool is_cat = false;
-      for (int i = 0; i < cats; i++) {
-        if (idx == (cat_loc[i][0] + (cat_loc[i][1] * size_X))) {
-          is_cat = true;
-          break;
-        }
+    bool is_cat = false;
+    for (int cat = 0; cat < cats; ++cat) {
+      if (is_cord_equal(cord, xy_to_cord(cat_loc[i][0], cat_loc[i][1]))) {
+        is_cat = true;
+        break;
       }
+    }
+    if (!is_visited[cord_to_index()
+  }
       // queue if neighbour is not visited, no wall (weight != 0), no cat
       if (!visited[idx] && gr[current][i] && !is_cat) {
         if (mode == 2) {
