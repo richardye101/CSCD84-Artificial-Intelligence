@@ -1,5 +1,6 @@
-.vscode/settings.json
-/docs/.obsidian/*
-.obsidian/*
-.DS_Store
+**/.vscode/
+**/.obsidian/
+**/.DS_Store
+*.exe
+*.out
 Programming Exercises/
