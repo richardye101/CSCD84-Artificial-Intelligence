@@ -594,23 +594,21 @@ int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int 
 
   int h_cost = H_cost(x, y, cat_loc, cheese_loc, mouse_loc, cats, cheeses, gr);
   int max_cost = 50;
+  int max_cost = 50;
   // For the cost, we define it to follow 100/(1+x), so cost increases as
   // distance shrinks, and distance can be 0)
   double closest_dist_cat_val =
-      100 /
+      max_cost /
       (1 + pow(pow(cat_loc[0][0] - x, 2) + pow(cat_loc[0][1] - y, 2), 0.5));
 
-// For the cost, we define it to follow 100/(1+x), so cost increases as distance shrinks, and distance can be 0)
-double dist_cat_val = max_cost / (1 + pow(pow(cat_loc[0][0] - x,2) + pow(cat_loc[0][1] - y,2), 0.5) );
-      
   // finds the definitive closest piece of cat to the mouse, and stores its
   // information
   for (int i = 1; i < cats; i++) {
-    dist_cat_val = max_cost /
+    double dist_cat_val = max_cost /
         (1 + pow(pow(cat_loc[i][0] - x,2) + pow(cat_loc[i][1] - y,2), 0.5) );
-    if (dist_cat_val < dist_cat_val) {
+    if (dist_cat_val < closest_dist_cat_val) {
       dist_cat_val = dist_cat_val;
     }
   }
-  return (dist_cat_val);
+  return ((int)closest_dist_cat_val);
 }
