@@ -279,7 +279,7 @@ Cord get_next_cord(Cord cord, int direction) {
 Cord index_to_cord(int index) {
   Cord cord;
   cord.x = index % size_X;
-  cord.y = index % size_Y;
+  cord.y = index / size_Y;
   return cord;
 }
 int cord_to_index(Cord cord) { return cord.x + cord.y * size_X; }
@@ -301,10 +301,12 @@ void construct_path(int path[graph_size][2], int came_from[graph_size],
   index = goal_index;
   for (int i=path_size-1; i >= 0; --i) {
     const Cord cord = index_to_cord(index);
+    printf("(%d, %d), ", cord.x, cord.y);
     path[i][0] = cord.x;
     path[i][1] = cord.y;
     index = came_from[index];
   }
+    printf("\n");
 }
 // END HELPER FUNCTION DEFS
 
@@ -488,11 +490,9 @@ void search(double gr[graph_size][4], int path[graph_size][2],
   bool found_cheese = false;
   int visit_counter = 0;
   while (DataStructure_size(data_structure) > 0) {
-    printf("DEBUG %d\n", DataStructure_size(data_structure));
     Cord cord = DataStructure_pop(data_structure);
     visit_order[cord.x][cord.y] = visit_counter;
     ++visit_counter;
-    // Check if found cheese
     for (int cheese = 0; cheese<cheeses; ++cheese) {
       if (cord.x == cheese_loc[cheese][0] && cord.y == cheese_loc[cheese][1]) {
         // Found cheese - time step is done.
@@ -507,8 +507,8 @@ void search(double gr[graph_size][4], int path[graph_size][2],
       break;
     }
     for (int direction = 0; direction < 4; ++direction) {
-      printf("DEBUG\n");
       const Cord next_cord = get_next_cord(cord, direction);
+      printf("(%d, %d)->(%d, %d)\n", cord.x, cord.y, next_cord.x, next_cord.y);
       if (!is_cord_valid(next_cord) || visited[cord_to_index(next_cord)]) {
         continue;
       }
