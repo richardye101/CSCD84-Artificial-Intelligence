@@ -288,6 +288,14 @@ int is_cord_valid(Cord cord) {
   return 0 <= cord.x && cord.x < size_X && 0 <= cord.y && cord.y < size_Y;
 }
 int equal_cords(Cord a, Cord b) { return a.x == b.x && a.y == b.y; }
+int is_cord_in_cords(Cord cord, int cords[][2], int num_cords) {
+  for (int i = 0; i < num_cords; ++i) {
+    if (cord.x == cords[i][0] && cord.y == cords[i][1]) {
+      return true;
+    }
+  }
+  return false;
+}
 void construct_path(int path[graph_size][2], int came_from[graph_size],
                     const Cord start, const Cord goal) {
   const int start_index = cord_to_index(start);
@@ -497,37 +505,27 @@ void search(double gr[graph_size][4], int path[graph_size][2],
     Cord cord = DataStructure_pop(data_structure);
     visit_order[cord.x][cord.y] = visit_counter;
     ++visit_counter;
-    for (int cheese = 0; cheese < cheeses; ++cheese) {
-      if (cord.x == cheese_loc[cheese][0] && cord.y == cheese_loc[cheese][1]) {
-        // Found cheese - time step is done.
-        construct_path(path, came_from, mouse_cord,
-                       (Cord){cheese_loc[cheese][0], cheese_loc[cheese][1]});
-        DataStructure_dtor(data_structure);
-        return;
-      }
+    if (is_cord_in_cords(cord, cheese_loc, cheeses)) {
+      // Found cheese - time step is done.
+      construct_path(path, came_from, mouse_cord, cord);
+      DataStructure_dtor(data_structure);
+      return;
     }
     for (int direction = 0; direction < 4; ++direction) {
       const Cord next_cord = get_next_cord(cord, direction);
-      if (!is_cord_valid(next_cord) || visited[cord_to_index(next_cord)]) {
+      // Ensure valid, not visited, not wall, and not a cat.
+      if (!is_cord_valid(next_cord) || visited[cord_to_index(next_cord)] ||
+          !gr[cord_to_index(cord)][direction] ||
+          is_cord_in_cords(next_cord, cat_loc, cats)) {
         continue;
       }
-      bool is_cat = false;
-      for (int cat = 0; cat < cats; ++cat) {
-        if (equal_cords(next_cord, (Cord){cat_loc[cat][0], cat_loc[cat][1]})) {
-          is_cat = true;
-          break;
-        }
-      }
-      // Ensure no wall and not a cat
-      if (gr[cord_to_index(cord)][direction] && !is_cat) {
-        visited[cord_to_index(next_cord)] = true;
-        int h = (heuristic == NULL)
-                    ? 0
-                    : heuristic(next_cord.x, next_cord.y, cat_loc, cheese_loc,
-                                mouse_loc, cats, cheeses, gr);
-        DataStructure_insert(data_structure, next_cord, h);
-        came_from[cord_to_index(next_cord)] = cord_to_index(cord);
-      }
+      visited[cord_to_index(next_cord)] = true;
+      int h = (heuristic == NULL)
+                  ? 0
+                  : heuristic(next_cord.x, next_cord.y, cat_loc, cheese_loc,
+                              mouse_loc, cats, cheeses, gr);
+      DataStructure_insert(data_structure, next_cord, h);
+      came_from[cord_to_index(next_cord)] = cord_to_index(cord);
     }
   }
   DataStructure_dtor(data_structure);
