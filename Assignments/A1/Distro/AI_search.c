@@ -62,11 +62,10 @@
 #include "AI_search.h"
 
 // BEGIN STRUCT HELPER FUNCTION DEFS
-DequeItem *DequeItem_new(int x, int y) {
+DequeItem *DequeItem_new(Cord cord) {
   DequeItem *deque_item = (DequeItem*)malloc(sizeof(DequeItem));
   assert(deque_item != NULL);
-  deque_item->cord.x = x;
-  deque_item->cord.y = y;
+  deque_item->cord = cord;
   deque_item->prev = NULL;
   deque_item->next = NULL;
   return deque_item;
@@ -88,9 +87,9 @@ MinHeap *Heap_new(void) {
   return min_heap;
 }
 
-void Deque_push_front(Deque *deque, int x, int y) {
+void Deque_push_front(Deque *deque, Cord cord) {
   assert(deque != NULL);
-  DequeItem *deque_item = DequeItem_new(x, y);
+  DequeItem *deque_item = DequeItem_new(cord);
   deque_item->next = deque->head;
   deque_item->prev = NULL;
   if (deque->tail == NULL) {
@@ -102,9 +101,9 @@ void Deque_push_front(Deque *deque, int x, int y) {
   ++deque->size;
 }
 
-void Deque_push_back(Deque *deque, int x, int y) {
+void Deque_push_back(Deque *deque, Cord cord) {
   assert(deque != NULL);
-  DequeItem *deque_item = DequeItem_new(x, y);
+  DequeItem *deque_item = DequeItem_new(cord);
   deque_item->prev = deque->tail;
   deque_item->next = NULL;
   if (deque->head == NULL) {
@@ -153,7 +152,7 @@ MinHeap* MinHeap_new(void) {
   return min_heap;
 }
 
-void MinHeap_insert(MinHeap* min_heap, int x, int y, int priority) {
+void MinHeap_insert(MinHeap* min_heap, Cord cord, int priority) {
   assert(min_heap != NULL);
   assert(min_heap->size != graph_size);
   int i;
@@ -161,8 +160,7 @@ void MinHeap_insert(MinHeap* min_heap, int x, int y, int priority) {
        i = (i - 1) / 2) {
     min_heap->data[i] = min_heap->data[(i - 1) / 2];
   }
-  min_heap->data[i].cord.x = x;
-  min_heap->data[i].cord.y = y;
+  min_heap->data[i].cord = cord;
   min_heap->data[i].priority = priority;
   ++min_heap->size;
 }
@@ -188,17 +186,147 @@ Cord MinHeap_pop(MinHeap *min_heap) {
   }
   return cord;
 }
+DataStructure* DataStructure_new(int mode, HEURISTIC_FUNCTION heuristic) {
+  DataStructure *data_structure =
+      (DataStructure *)malloc(sizeof(DataStructure));
+  assert(data_structure != NULL);
+  data_structure->deque = Deque_new();
+  data_structure->min_heap = MinHeap_new();
+  data_structure->mode = mode;
+  data_structure->heuristic = heuristic;
+  return data_structure;
+}
+void DataStructure_insert(DataStructure *data_structure, Cord cord,
+                          int priority) {
+  // Note priority only matters if mode == MODE_A_STAR
+  assert(data_structure != NULL);
+  assert(data_structure->mode == MODE_BFS || data_structure->mode == MODE_DFS ||
+         data_structure->mode == MODE_A_STAR);
+  switch (data_structure->mode) {
+    case MODE_BFS:
+      // Stack
+      Deque_push_back(data_structure->deque, cord);
+      break;
+    case MODE_DFS:
+      // Queue
+      Deque_push_back(data_structure->deque, cord);
+      break;
+    case MODE_A_STAR:
+      // MinHeap
+      MinHeap_insert(data_structure->min_heap, cord, priority);
+      break;
+    default:
+      break;
+  }
+}
+Cord DataStructure_pop(DataStructure *data_structure) {
+  assert(data_structure != NULL);
+  assert(data_structure->mode == MODE_BFS || data_structure->mode == MODE_DFS ||
+         data_structure->mode == MODE_A_STAR);
+  Cord cord;
+  switch(data_structure->mode) {
+    case MODE_BFS:
+      // Stack
+      cord = Deque_pop_back(data_structure->deque);
+      break;
+    case MODE_DFS:
+      // Queue
+      cord = Deque_pop_front(data_structure->deque);
+      break;
+    case MODE_A_STAR:
+      // MinHeap
+      cord = MinHeap_pop(data_structure->min_heap);
+      break;
+    default:
+      break;
+  }
+  return cord;
+}
+int DataStructure_size(DataStructure* data_structure) {
+  assert(data_structure != NULL);
+  assert(data_structure->mode == MODE_BFS || data_structure->mode == MODE_DFS ||
+         data_structure->mode == MODE_A_STAR);
+  switch (data_structure->mode) {
+    case MODE_BFS:
+      // Stack
+      return data_structure->deque->size;
+    case MODE_DFS:
+      // Queue
+      return data_structure->deque->size;
+    case MODE_A_STAR:
+      // MinHeap
+      return data_structure->min_heap->size;
+    default:
+      break;
+  }
+  return -1; // This will never run - but put here to make compiler happy.
+}
+void DataStructure_dtor(DataStructure* data_structure) {
+  assert(data_structure != NULL);
+  while (DataStructure_size(data_structure) > 0) {
+    DataStructure_pop(data_structure);
+  }
+  free(data_structure->deque);
+  free(data_structure->min_heap);
+  free(data_structure);
+}
 // END STRUCT HELPER FUNCTION DEFS
 
 // BEGIN HELPER FUNCTION DEFS
-void index_to_cord(int index, int *x, int *y) {
-  *x = index % size_X;
-  *y = index % size_Y;
+Cord get_next_cord(Cord cord, int direction) {
+  switch (direction) {
+    case DIRECTION_UP:
+      --cord.y;
+      break;
+    case DIRECTION_RIGHT:
+      ++cord.x;
+      break;
+    case DIRECTION_DOWN:
+      ++cord.y;
+      break;
+    case DIRECTION_LEFT:
+      --cord.x;
+      break;
+    default:
+      break;
+  }
+  return cord;
 }
-
-int cord_to_index(int x, int y) { return x + y * size_X; }
-
-int is_cord_valid(int x, int y) { return cord_to_index(x, y) < graph_size; }
+Cord index_to_cord(int index) {
+  Cord cord;
+  cord.x = index % size_X;
+  cord.y = index / size_Y;
+  return cord;
+}
+int cord_to_index(Cord cord) { return cord.x + cord.y * size_X; }
+int is_index_valid(int index) { return 0 <= index && index < graph_size; }
+int is_cord_valid(Cord cord) {
+  return 0 <= cord.x && cord.x < size_X && 0 <= cord.y && cord.y < size_Y;
+}
+int equal_cords(Cord a, Cord b) { return a.x == b.x && a.y == b.y; }
+void construct_path(int path[graph_size][2], int came_from[graph_size],
+                    const Cord start, const Cord goal) {
+  const int start_index = cord_to_index(start);
+  const int goal_index = cord_to_index(goal);
+  int index = goal_index;
+  int path_size;
+  for (path_size = 1; index != start_index; ++path_size) {
+    index = came_from[index];
+  }
+  index = goal_index;
+  for (int i=path_size-1; i >= 0; --i) {
+    const Cord cord = index_to_cord(index);
+    path[i][0] = cord.x;
+    path[i][1] = cord.y;
+    index = came_from[index];
+  }
+  // UNCOMMNENT TO PRINT THE FULL PATH:
+  // for (int i=0; i<path_size; ++i) {
+  //   printf("(%d, %d), ", path[i][0], path[i][1]);
+  // }
+  // printf("\n");
+  // printf("---------------------------------------------------\n");
+}
 // END HELPER FUNCTION DEFS
 
 void search(double gr[graph_size][4], int path[graph_size][2],
@@ -237,7 +365,7 @@ void search(double gr[graph_size][4], int path[graph_size][2],
                                  v
                          node at (i,j+1)
 
-         The graph is theredore stored as an adjacency list with size 1024 x 4,
+         The graph is therefore stored as an adjacency list with size 1024 x 4,
     with one row per node in the graph, and 4 columns corresponding to the
     weight of an edge linking the node with each of its 4 possible neighbours in
     the order top, right, bottom, left (clockwise from top).
@@ -369,31 +497,77 @@ void search(double gr[graph_size][4], int path[graph_size][2],
   // Stub so that the code compiles/runs - The code below will be removed and
   // replaced by your code!
 
-  path[0][0] = mouse_loc[0][0];
-  path[0][1] = mouse_loc[0][1];
-  path[1][0] = mouse_loc[0][0];
-  path[1][1] = mouse_loc[0][1];
+  Cord mouse_cord = (Cord){mouse_loc[0][0], mouse_loc[0][1]};
+  int came_from[graph_size];
+  memset(came_from, -1, sizeof(came_from));
+  bool visited[graph_size];
+  memset(visited, false, sizeof(visited));
+  visited[cord_to_index(mouse_cord)] = true;
+  DataStructure *data_structure = DataStructure_new(mode, heuristic);
+  // Use 0 priority for starting node
+  DataStructure_insert(data_structure, mouse_cord, 0);
+  bool found_cheese = false;
+  int visit_counter = 0;
+  while (DataStructure_size(data_structure) > 0) {
+    Cord cord = DataStructure_pop(data_structure);
+    visit_order[cord.x][cord.y] = visit_counter;
+    ++visit_counter;
+    for (int cheese = 0; cheese<cheeses; ++cheese) {
+      if (cord.x == cheese_loc[cheese][0] && cord.y == cheese_loc[cheese][1]) {
+        // Found cheese - time step is done.
+        found_cheese = true;
+        construct_path(path, came_from, mouse_cord,
+                       (Cord){cheese_loc[cheese][0], cheese_loc[cheese][1]});
+        break;
+      }
+    }
+    if (found_cheese) {
+      break;
+    }
+    for (int direction = 0; direction < 4; ++direction) {
+      const Cord next_cord = get_next_cord(cord, direction);
+      if (!is_cord_valid(next_cord) || visited[cord_to_index(next_cord)]) {
+        continue;
+      }
+      bool is_cat = false;
+      for (int cat=0; cat<cats; ++cat) {
+        if (equal_cords(cord, (Cord){cat_loc[cat][0], cat_loc[cat][1]})) {
+          is_cat = true;
+          break;
+        }
+      }
+      // Ensure no wall and not a cat
+      if (gr[cord_to_index(cord)][direction] && !is_cat) {
+        visited[cord_to_index(next_cord)] = true;
+        int h = (heuristic == NULL)
+                    ? 0
+                    : heuristic(next_cord.x, next_cord.y, cat_loc, cheese_loc,
+                                mouse_loc, cats, cheeses, gr);
+        DataStructure_insert(data_structure, next_cord, h);
+        came_from[cord_to_index(next_cord)] = cord_to_index(cord);
+      }
+    }
+  }
+  DataStructure_dtor(data_structure);
 
   return;
 }
 
-int H_cost(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], int cats, int cheeses, double gr[graph_size][4])
-{
- /*
-	This function computes and returns the heuristic cost for location x,y.
-	As discussed in lecture, this means estimating the cost of getting from x,y to the goal. 
-	The goal is cheese. Which cheese is up to you.
-	Whatever you code here, your heuristic must be admissible.
+int H_cost(int x, int y, int cat_loc[10][2], int cheese_loc[10][2],
+           int mouse_loc[1][2], int cats, int cheeses,
+           double gr[graph_size][4]) {
+  /*
+         This function computes and returns the heuristic cost for location x,y.
+         As discussed in lecture, this means estimating the cost of getting from
+     x,y to the goal. The goal is cheese. Which cheese is up to you. Whatever
+     you code here, your heuristic must be admissible.
 
-	Input arguments:
+         Input arguments:
 
-		x,y - Location for which this function will compute a heuristic search cost
-		cat_loc - Cat locations
-		cheese_loc - Cheese locations
-		mouse_loc - Mouse location
-		cats - # of cats
-		cheeses - # of cheeses
-		gr - The graph's adjacency list for the maze
+                 x,y - Location for which this function will compute a heuristic
+     search cost cat_loc - Cat locations cheese_loc - Cheese locations mouse_loc
+     - Mouse location cats - # of cats cheeses - # of cheeses gr - The graph's
+     adjacency list for the maze
 
 		These arguments are as described in the search() function above
  */
