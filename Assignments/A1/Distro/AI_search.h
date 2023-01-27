@@ -112,7 +112,7 @@ int is_index_valid(int index);
 int is_cord_valid(Cord cord);
 int equal_cords(Cord a, Cord b);
 void construct_path(int path[graph_size][2], int came_from[graph_size],
-                    Cord start, Cord goal);
+                    const Cord start, const Cord goal);
 // END MISC HELPER FUNCTION PROTOS
 
 

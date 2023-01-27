@@ -289,24 +289,27 @@ int is_cord_valid(Cord cord) {
 }
 int equal_cords(Cord a, Cord b) { return a.x == b.x && a.y == b.y; }
 void construct_path(int path[graph_size][2], int came_from[graph_size],
-                    Cord start, Cord goal) {
+                    const Cord start, const Cord goal) {
   const int start_index = cord_to_index(start);
   const int goal_index = cord_to_index(goal);
   int index = goal_index;
   int path_size;
   for (path_size = 1; index != start_index; ++path_size) {
-    printf("INDEX: %d", index);
     index = came_from[index];
   }
   index = goal_index;
   for (int i=path_size-1; i >= 0; --i) {
     const Cord cord = index_to_cord(index);
-    printf("(%d, %d), ", cord.x, cord.y);
     path[i][0] = cord.x;
     path[i][1] = cord.y;
     index = came_from[index];
   }
-    printf("\n");
+  // UNCOMMNENT TO PRINT THE FULL PATH:
+  // for (int i=0; i<path_size; ++i) {
+  //   printf("(%d, %d), ", path[i][0], path[i][1]);
+  // }
+  // printf("\n");
+  // printf("---------------------------------------------------\n");
 }
 // END HELPER FUNCTION DEFS
 
@@ -497,7 +500,6 @@ void search(double gr[graph_size][4], int path[graph_size][2],
       if (cord.x == cheese_loc[cheese][0] && cord.y == cheese_loc[cheese][1]) {
         // Found cheese - time step is done.
         found_cheese = true;
-        printf("FOUND CHEESE\n");
         construct_path(path, came_from, mouse_cord,
                        (Cord){cheese_loc[cheese][0], cheese_loc[cheese][1]});
         break;
@@ -508,7 +510,6 @@ void search(double gr[graph_size][4], int path[graph_size][2],
     }
     for (int direction = 0; direction < 4; ++direction) {
       const Cord next_cord = get_next_cord(cord, direction);
-      printf("(%d, %d)->(%d, %d)\n", cord.x, cord.y, next_cord.x, next_cord.y);
       if (!is_cord_valid(next_cord) || visited[cord_to_index(next_cord)]) {
         continue;
       }
@@ -532,7 +533,6 @@ void search(double gr[graph_size][4], int path[graph_size][2],
     }
   }
   DataStructure_dtor(data_structure);
-  printf("NICE\n");
 
   return;
 }
