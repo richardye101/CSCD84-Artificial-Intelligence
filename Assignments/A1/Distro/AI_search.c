@@ -245,6 +245,15 @@ int DataStructure_size(DataStructure* data_structure) {
   }
   return -1; // This will never run - but put here to make compiler happy.
 }
+void DataStructure_dtor(DataStructure* data_structure) {
+  assert(data_structure != NULL);
+  while (DataStructure_size(data_structure) > 0) {
+    DataStructure_pop(data_structure);
+  }
+  free(data_structure->deque);
+  free(data_structure->min_heap);
+  free(data_structure);
+}
 // END STRUCT HELPER FUNCTION DEFS
 
 // BEGIN HELPER FUNCTION DEFS
@@ -286,6 +295,7 @@ void construct_path(int path[graph_size][2], int came_from[graph_size],
   int index = goal_index;
   int path_size;
   for (path_size = 1; index != start_index; ++path_size) {
+    printf("INDEX: %d", index);
     index = came_from[index];
   }
   index = goal_index;
@@ -468,6 +478,7 @@ void search(double gr[graph_size][4], int path[graph_size][2],
 
   Cord mouse_cord = (Cord){mouse_loc[0][0], mouse_loc[0][1]};
   int came_from[graph_size];
+  memset(came_from, -1, sizeof(came_from));
   bool visited[graph_size];
   memset(visited, false, sizeof(visited));
   visited[cord_to_index(mouse_cord)] = true;
@@ -477,24 +488,28 @@ void search(double gr[graph_size][4], int path[graph_size][2],
   bool found_cheese = false;
   int visit_counter = 0;
   while (DataStructure_size(data_structure) > 0) {
+    printf("DEBUG %d\n", DataStructure_size(data_structure));
     Cord cord = DataStructure_pop(data_structure);
-    if (visited[cord_to_index(cord)]) continue;
     visit_order[cord.x][cord.y] = visit_counter;
     ++visit_counter;
     // Check if found cheese
     for (int cheese = 0; cheese<cheeses; ++cheese) {
       if (cord.x == cheese_loc[cheese][0] && cord.y == cheese_loc[cheese][1]) {
-        construct_path(path, came_from,
-                       (Cord){mouse_loc[0][0], mouse_loc[1][1]},
-                       (Cord){cheese_loc[cheese][0], cheese_loc[cheese][1]});
-        found_cheese = true;
         // Found cheese - time step is done.
-        return;
+        found_cheese = true;
+        printf("FOUND CHEESE\n");
+        construct_path(path, came_from, mouse_cord,
+                       (Cord){cheese_loc[cheese][0], cheese_loc[cheese][1]});
+        break;
       }
     }
+    if (found_cheese) {
+      break;
+    }
     for (int direction = 0; direction < 4; ++direction) {
-      const Cord next_cord = get_next_cord((Cord){mouse_loc[0][0], mouse_loc[0][1]}, direction);
-      if (!is_cord_valid(next_cord)) {
+      printf("DEBUG\n");
+      const Cord next_cord = get_next_cord(cord, direction);
+      if (!is_cord_valid(next_cord) || visited[cord_to_index(next_cord)]) {
         continue;
       }
       bool is_cat = false;
@@ -505,17 +520,19 @@ void search(double gr[graph_size][4], int path[graph_size][2],
         }
       }
       // Ensure no wall and not a cat
-      if (gr[cord_to_index(next_cord)][direction] && !is_cat) {
+      if (gr[cord_to_index(cord)][direction] && !is_cat) {
         visited[cord_to_index(next_cord)] = true;
         int h = (heuristic == NULL)
                     ? 0
                     : heuristic(next_cord.x, next_cord.y, cat_loc, cheese_loc,
                                 mouse_loc, cats, cheeses, gr);
         DataStructure_insert(data_structure, next_cord, h);
-        came_from[cord_to_index(next_cord)] = cord_to_index(next_cord);
+        came_from[cord_to_index(next_cord)] = cord_to_index(cord);
       }
     }
   }
+  DataStructure_dtor(data_structure);
+  printf("NICE\n");
 
   return;
 }

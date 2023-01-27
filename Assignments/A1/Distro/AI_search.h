@@ -99,8 +99,7 @@ void DataStructure_insert(DataStructure *data_structure, Cord cord,
                           int priority);
 Cord DataStructure_pop(DataStructure *data_structure);
 int DataStructure_size(DataStructure* data_structure);
-void construct_path(int path[graph_size][2], int came_from[graph_size], Cord start,
-               Cord goal);
+void DataStructure_dtor(DataStructure* data_structure);
 // END STRUCT HELPER FUNCTION PROTOS
 
 // Function prototypes for D84 - Unit 1 - Search assignment solution
