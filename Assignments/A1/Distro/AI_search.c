@@ -568,6 +568,7 @@ int H_cost(int x, int y, int cat_loc[10][2], int cheese_loc[10][2],
  */
 
   /* 
+  /* 
   calculates the euclidean distance from the first piece of cheese to the
   suggested location assumes that there is at least 1 piece of cheese in the maze
 
@@ -629,7 +630,12 @@ double dist_cat_val = 100 / (1 + pow(pow(cat_loc[0][0] - x,2) + pow(cat_loc[0][1
         (1 + pow(pow(cat_loc[i][0] - x,2) + pow(cat_loc[i][1] - y,2), 0.5) );
     if (dist_cat_val < dist_cat_val) {
       dist_cat_val = dist_cat_val;
+    double dist_cat_val = 100 /
+        (1 + pow(pow(cat_loc[i][0] - x,2) + pow(cat_loc[i][1] - y,2), 0.5) );
+    if (dist_cat_val < dist_cat_val) {
+      dist_cat_val = dist_cat_val;
     }
   }
   return ((int)closest_dist_cat_val + h_cost);
 }
+
