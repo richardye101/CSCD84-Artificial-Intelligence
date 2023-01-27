@@ -377,31 +377,21 @@ int H_cost(int x, int y, int cat_loc[10][2], int cheese_loc[10][2],
      - Mouse location cats - # of cats cheeses - # of cheeses gr - The graph's
      adjacency list for the maze
 
-                 These arguments are as described in the search() function above
-  */
+		These arguments are as described in the search() function above
+ */
+// calculates the manhattan distance from the first piece of cheese to the mouse
+// assumes that there is at least 1 piece of cheese in the maze
+double min_dist_cheese_val = cheese_loc[0][0] - mouse_loc[0][0] + cheese_loc[0][1] - mouse_loc[0][1];
 
-  /* 
-  calculates the euclidean distance from the first piece of cheese to the
-  suggested location assumes that there is at least 1 piece of cheese in the maze
-
-  This is because the euclidean distance is the minimum distance between two points
-  This will always be a lower bound on a the manhattan distance, which is what
-  the true path would be, as the mouse can only move horizontally or vertically
-
-  Therefore it is an admissible heuristic, as it is <= true cost
-  */ 
-  double min_dist_cheese_val = pow(pow(cheese_loc[0][0] - x,2) + pow(cheese_loc[0][1] - y,2), 0.5);
-      
-  // finds the definitive closest piece of cheese to the mouse, and stores its
-  // information
-  for (int i = 1; i < cheeses; i++) {
-    double dist_cheese_val =
-        pow(pow(cheese_loc[i][0] - x,2) + pow(cheese_loc[i][1] - y,2), 0.5);;
-    if (dist_cheese_val < min_dist_cheese_val) {
-      min_dist_cheese_val = dist_cheese_val;
-    }
-  }
-  return ((int)min_dist_cheese_val);
+// finds the definitive closest piece of cheese to the mouse, and stores its information
+for(int i = 1; i < cheeses; i++){
+     double dist_cheese_val = cheese_loc[i][0] - mouse_loc[0][0] + cheese_loc[i][1] - mouse_loc[0][1];
+     if(dist_cheese_val < min_dist_cheese_val){
+          min_dist_cheese_val = dist_cheese_val;
+     }
+}
+ 
+ return(min_dist_cheese_val);		// <-- Evidently you will need to update this.
 }
 
 int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2],
