@@ -548,10 +548,31 @@ int H_cost(int x, int y, int cat_loc[10][2], int cheese_loc[10][2],
      - Mouse location cats - # of cats cheeses - # of cheeses gr - The graph's
      adjacency list for the maze
 
-                 These arguments are as described in the search() function above
-  */
+		These arguments are as described in the search() function above
+ */
 
-  return (1);  // <-- Evidently you will need to update this.
+  /* 
+  calculates the euclidean distance from the first piece of cheese to the
+  suggested location assumes that there is at least 1 piece of cheese in the maze
+
+  This is because the euclidean distance is the minimum distance between two points
+  This will always be a lower bound on a the manhattan distance, which is what
+  the true path would be, as the mouse can only move horizontally or vertically
+
+  Therefore it is an admissible heuristic, as it is <= true cost
+  */ 
+  double min_dist_cheese_val = pow(pow(cheese_loc[0][0] - x,2) + pow(cheese_loc[0][1] - y,2), 0.5);
+      
+  // finds the definitive closest piece of cheese to the mouse, and stores its
+  // information
+  for (int i = 1; i < cheeses; i++) {
+    double dist_cheese_val =
+        pow(pow(cheese_loc[i][0] - x,2) + pow(cheese_loc[i][1] - y,2), 0.5);;
+    if (dist_cheese_val < min_dist_cheese_val) {
+      min_dist_cheese_val = dist_cheese_val;
+    }
+  }
+  return ((int)min_dist_cheese_val);
 }
 
 int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], int cats, int cheeses, double gr[graph_size][4])
@@ -571,6 +592,30 @@ int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int 
 	Input arguments have the same meaning as in the H_cost() function above.
  */
 
- return(1);		// <-- Evidently you will need to update this.
-}
+  int h_cost = H_cost(x, y, cat_loc, cheese_loc, mouse_loc, cats, cheeses, gr);
 
+  // For the cost, we define it to follow 100/(1+x), so cost increases as
+  // distance shrinks, and distance can be 0)
+  double closest_dist_cat_val =
+      100 /
+      (1 + pow(pow(cat_loc[0][0] - x, 2) + pow(cat_loc[0][1] - y, 2), 0.5));
+
+// For the cost, we define it to follow 100/(1+x), so cost increases as distance shrinks, and distance can be 0)
+double dist_cat_val = 100 / (1 + pow(pow(cat_loc[0][0] - x,2) + pow(cat_loc[0][1] - y,2), 0.5) );
+      
+  // finds the definitive closest piece of cat to the mouse, and stores its
+  // information
+  for (int i = 1; i < cats; i++) {
+    double dist_cat_val = 100 /
+        (1 + pow(pow(cat_loc[i][0] - x,2) + pow(cat_loc[i][1] - y,2), 0.5) );
+    if (dist_cat_val < dist_cat_val) {
+      dist_cat_val = dist_cat_val;
+    }
+    double dist_cat_val = 100 /
+        (1 + pow(pow(cat_loc[i][0] - x,2) + pow(cat_loc[i][1] - y,2), 0.5) );
+    if (dist_cat_val < dist_cat_val) {
+      dist_cat_val = dist_cat_val;
+    }
+  }
+  return (dist_cat_val);
+}
