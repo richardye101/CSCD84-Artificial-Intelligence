@@ -593,7 +593,7 @@ int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int 
  */
 
   int h_cost = H_cost(x, y, cat_loc, cheese_loc, mouse_loc, cats, cheeses, gr);
-  int max_cost = 50;
+  
   int max_cost = 50;
   // For the cost, we define it to follow 100/(1+x), so cost increases as
   // distance shrinks, and distance can be 0)
