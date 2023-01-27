@@ -205,11 +205,11 @@ void DataStructure_insert(DataStructure *data_structure, Cord cord,
   switch (data_structure->mode) {
     case MODE_BFS:
       // Stack
-      Deque_push_back(data_structure->deque, cord);
+      Deque_push_front(data_structure->deque, cord);
       break;
     case MODE_DFS:
       // Queue
-      Deque_push_back(data_structure->deque, cord);
+      Deque_push_front(data_structure->deque, cord);
       break;
     case MODE_A_STAR:
       // MinHeap
