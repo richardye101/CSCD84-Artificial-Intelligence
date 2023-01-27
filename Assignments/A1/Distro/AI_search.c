@@ -606,12 +606,12 @@ double dist_cat_val = 100 / (1 + pow(pow(cat_loc[0][0] - x,2) + pow(cat_loc[0][1
   // finds the definitive closest piece of cat to the mouse, and stores its
   // information
   for (int i = 1; i < cats; i++) {
-    double dist_cat_val = 100 /
+    dist_cat_val = 100 /
         (1 + pow(pow(cat_loc[i][0] - x,2) + pow(cat_loc[i][1] - y,2), 0.5) );
     if (dist_cat_val < dist_cat_val) {
       dist_cat_val = dist_cat_val;
     }
-    double dist_cat_val = 100 /
+    dist_cat_val = 100 /
         (1 + pow(pow(cat_loc[i][0] - x,2) + pow(cat_loc[i][1] - y,2), 0.5) );
     if (dist_cat_val < dist_cat_val) {
       dist_cat_val = dist_cat_val;
