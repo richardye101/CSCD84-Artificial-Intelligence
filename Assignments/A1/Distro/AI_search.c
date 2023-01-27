@@ -497,11 +497,9 @@ void search(double gr[graph_size][4], int path[graph_size][2],
     Cord cord = DataStructure_pop(data_structure);
     visit_order[cord.x][cord.y] = visit_counter;
     ++visit_counter;
-    bool found_cheese = false;
     for (int cheese = 0; cheese < cheeses; ++cheese) {
       if (cord.x == cheese_loc[cheese][0] && cord.y == cheese_loc[cheese][1]) {
         // Found cheese - time step is done.
-        found_cheese = true;
         construct_path(path, came_from, mouse_cord,
                        (Cord){cheese_loc[cheese][0], cheese_loc[cheese][1]});
         DataStructure_dtor(data_structure);
