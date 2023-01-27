@@ -309,11 +309,13 @@ void construct_path(int path[graph_size][2], int came_from[graph_size],
   const int start_index = cord_to_index(start);
   const int goal_index = cord_to_index(goal);
   int index = goal_index;
+  // find the length of the path
   int path_size;
   for (path_size = 1; index != start_index; ++path_size) {
     index = came_from[index];
   }
   index = goal_index;
+  // construct the path from goal node to start node
   for (int i=path_size-1; i >= 0; --i) {
     const Cord cord = index_to_cord(index);
     path[i][0] = cord.x;
@@ -506,7 +508,7 @@ void search(double gr[graph_size][4], int path[graph_size][2],
   DataStructure *data_structure = DataStructure_new(mode, heuristic);
   // Use 0 priority for starting node
   DataStructure_insert(data_structure, mouse_cord, 0);
-  int visit_counter = 0;
+  int visit_counter = 1;
   while (DataStructure_size(data_structure) > 0) {
     Cord cord = DataStructure_pop(data_structure);
     visit_order[cord.x][cord.y] = visit_counter;
@@ -529,7 +531,7 @@ void search(double gr[graph_size][4], int path[graph_size][2],
       }
       bool is_cat = false;
       for (int cat = 0; cat < cats; ++cat) {
-        if (equal_cords(cord, (Cord){cat_loc[cat][0], cat_loc[cat][1]})) {
+        if (equal_cords(next_cord, (Cord){cat_loc[cat][0], cat_loc[cat][1]})) {
           is_cat = true;
           break;
         }
