@@ -27,18 +27,18 @@
 /**********************************************************************
 % COMPLETE THIS TEXT BOX:
 %
-% 1) Student Name:		
-% 2) Student Name:		
+% 1) Student Name:		Richard Ye
+% 2) Student Name:		Sam Prokopchuk
 %
-% 1) Student number:
-% 2) Student number:
+% 1) Student number: 1005035230
+% 2) Student number: 1006570943
 % 
-% 1) UtorID
-% 2) UtorID
+% 1) UtorID: yerong1
+% 2) UtorID: prokopc3
 % 
 % We hereby certify that the work contained here is our own
 %
-% ____________________             _____________________
+% _Richard_Ye__________            _Sam_Prokopchuk______
 % (sign with your name)            (sign with your name)
 ***********************************************************************/
 
