@@ -561,18 +561,16 @@ int H_cost(int x, int y, int cat_loc[10][2], int cheese_loc[10][2],
 
   Therefore it is an admissible heuristic, as it is <= true cost
   */ 
-  double min_dist_cheese_val = pow(pow(cheese_loc[0][0] - x,2) + pow(cheese_loc[0][1] - y,2), 0.5);
+  int min_dist_cheese_val = size_X + size_Y;
       
   // finds the definitive closest piece of cheese to the mouse, and stores its
   // information
   for (int i = 1; i < cheeses; i++) {
-    double dist_cheese_val =
-        pow(pow(cheese_loc[i][0] - x,2) + pow(cheese_loc[i][1] - y,2), 0.5);;
-    if (dist_cheese_val < min_dist_cheese_val) {
-      min_dist_cheese_val = dist_cheese_val;
-    }
+    min_dist_cheese_val =
+        fmin(min_dist_cheese_val,
+             abs(cheese_loc[i][0] - x) + abs(cheese_loc[i][1] - y));
   }
-  return ((int)min_dist_cheese_val);
+  return min_dist_cheese_val;
 }
 
 int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], int cats, int cheeses, double gr[graph_size][4])
@@ -594,21 +592,15 @@ int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int 
 
   int h_cost = H_cost(x, y, cat_loc, cheese_loc, mouse_loc, cats, cheeses, gr);
   
-  int max_cost = 50;
   // For the cost, we define it to follow 100/(1+x), so cost increases as
   // distance shrinks, and distance can be 0)
-  double closest_dist_cat_val =
-      max_cost /
-      (1 + pow(pow(cat_loc[0][0] - x, 2) + pow(cat_loc[0][1] - y, 2), 0.5));
+  double closest_dist_cat_val = size_X * size_Y;
 
   // finds the definitive closest piece of cat to the mouse, and stores its
   // information
-  for (int i = 1; i < cats; i++) {
-    double dist_cat_val = max_cost /
-        (1 + pow(pow(cat_loc[i][0] - x,2) + pow(cat_loc[i][1] - y,2), 0.5) );
-    if (dist_cat_val < closest_dist_cat_val) {
-      dist_cat_val = dist_cat_val;
-    }
+  for (int i = 0; i < cats; i++) {
+     closest_dist_cat_val = fmin(closest_dist_cat_val,
+               abs(cat_loc[i][0] - x) + abs(cat_loc[i][1] - y));
   }
-  return ((int)closest_dist_cat_val);
+  return h_cost + (int)(100 / (1 + closest_dist_cat_val));
 }
