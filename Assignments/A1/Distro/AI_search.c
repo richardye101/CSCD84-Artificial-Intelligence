@@ -602,5 +602,5 @@ int H_cost_nokitty(int x, int y, int cat_loc[10][2], int cheese_loc[10][2], int 
      closest_dist_cat_val = fmin(closest_dist_cat_val,
                abs(cat_loc[i][0] - x) + abs(cat_loc[i][1] - y));
   }
-  return h_cost + (int)(100 / (1 + closest_dist_cat_val));
+  return h_cost + (int)(80 / (1 + closest_dist_cat_val));
 }
