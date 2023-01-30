@@ -32,43 +32,38 @@ but explain carefully when needed.
 
 1 .- (1 marks) Of BFS and DFS, which search algorithm yields the best results? (i.e. which is more likely
      to get the mouse to the cheese safely before being eaten?)
-BFS yields the better results over DFS.
+
+BFS yields the better results over DFS. It will always find the shortest path to the closest piece of cheese.
 
 
 2 .- (1 marks) Does this mean that in general BFS is a better search algorithm? (yes/no and give reasons to
      support your answer based on your observations)
-In this context, BFS is a better search algorithm (as seen in q1).
-In general, BFS will find the shortest path - wheras DFS may not.
-A potential downside of BFS is higher complexity if the graph is very dense, and the goal isn't to definitively find the shortest path.
+
+In this context, BFS is a better search algorithm (as seen in q1). This is mainly due to the fact that the edge weights are equal. In general, BFS will find the shortest path - whereas DFS may not.  Whether that is something that matters depends on context and in this context that is something we care about. BFS also performs better than DFS in this scenario because the mouse can only travel in 4 directions at a time, which means searching outward from a given node is not enormously costly. However, if the graph is very dense then BFS would result in much higher complexity and may prove to be more inefficient than DFS.
 
 
 3 .- (2 marks) Describe the heuristic function you used for A* search. Why is this heuristic admissible?
-The heuristic function for A* search is simply the manhattan distance between the current (x, y) location and the closest cheese.
-This is admissiable because on a 2d graph, the shortest possible path between two points is exactly the manhattan distance.
-The manhattan distance may be less than the true cost if there are walls.
+The heuristic function for A* search is simply the manhattan distance between the current (x, y) search location and the closest cheese.
+This heuristic is admissible because on a 2D graph, the shortest possible path between two points is exactly the Manhattan distance so the Manhattan distance will always serve as the lower bound on the true cost. The Manhattan distance may be less than the true cost if there are walls.
 
 
 4 .- (1 marks) Explain how your heuristic function accounts for the presence of multiple cheese.
-We use the manhattan distance to the closest cheese.
-So farther cheeses won't make the heuristic un-admissible.
-As a result, the heuristic is calculated only using the closest cheese.
+We only consider the manhattan distance to the closest cheese at each time step. This is a greedy choice as the mouse is more likely to win if they collect all the cheeses, and the fastest way to do that is to go for the closest cheese. Farther cheeses may even make the heuristic un-admissible.
 
 
 5 .- (1 marks) Is A* equivalent to BFS for this problem? or is it better/worse? explain your answer based on 
      your observations.
-Without considering the cat locations, BFS (the shortest path) will objectively be the optimal solution.
-A* could be sub-optimal in sub cases - for example if it decides to go a route that at first seems closesr but in reality takes more time.
+As A* does not consider the cat locations, BFS (the shortest path) will objectively be the optimal solution. A* could be sub-optimal in sub cases - for example if it decides to go a route that at first seems closer but in reality takes more time due to walls and detours where there was a faster route if they went in the opposite direction of the cheese initially.
 
 
 6 .- (2 marks) Describe your heuristic function for A*-nokitty. How does it work? what factors are considered
      into the cost function? is it admissible (yes/no and why)?
-A*-nokitty is calculated by taking A* and adding ⌊80 / (1 + c)⌋.
-Where c is the manhattan distance to the cat closest to the current (x, y) position.
-Aside from the current (x, y) position, the closest cat and cheese are considered.
+A*-nokitty is calculated by taking the heuristic from A* and adding ⌊80 / (1 + c)⌋, where c is the Manhattan distance to the cat closest to the current (x, y) position. This function returns a larger heuristic when the Manhattan distance to the closest cat is small, and a smaller heuristic when the closest cat is further. We add 1 to it to ensure that if the current (x, y) position is where a cat is, the heuristic stays finite. Finally, through trial and error we found a numerator of 80 to be the most effective.
+
+As A*-nokitty adds the heuristic from A*, it therefore considers both the closest cat and closest cheese.
 The function is not admissible because if, say the cat is directly next to the current (x, y),
-then A* = [manhattan to cheese] + 40.
-If the cheese was directly next to the current (x, y) position as well then this would equal:
-A* = 1 + 40, which is clearly greater than the true value 1.
+then A* = [manhattan distance to cheese] + 40.
+If the cheese was also directly next to the current (x, y) position then the cost to the current (x, y) would equal A* = 1 + 40, which is clearly greater than the true cost to the cheese, 1.
 
 
 7 .- (2 marks) What is the largest limitation of the search algorithms implemented in this assignment?
