@@ -4,15 +4,15 @@ ________________________________________________
 
 Student Name 1 (last, first): Ye, Rong Feng (Richard)
 
-Student Name 2 (last, first):
+Student Name 2 (last, first): Prokopchuk, Samuel (Sam)
 
 Student number 1: 1005035230
 
-Student number 2:
+Student number 2: 1006570943
 
 UTORid 1: yerong1
 
-UTORid 2:
+UTORid 2: prokopc3
 
 READ THIS AND SIGN YOUR NAME AT THE END:
 
@@ -20,7 +20,7 @@ READ THIS AND SIGN YOUR NAME AT THE END:
 honesty and plaguarism. All work submitted as part
 of this assignment is my own.
 
-	Signed: _Rong Feng (Richard) Ye__	_(student 2 name here)__
+	Signed: _Rong Feng (Richard) Ye__	_Sam Prokopchuk__
 
 
 (-2.5 marks for failing to provide the identifying
@@ -33,26 +33,45 @@ but explain carefully when needed.
 1 .- (1 marks) Of BFS and DFS, which search algorithm yields the best results? (i.e. which is more likely
      to get the mouse to the cheese safely before being eaten?)
 
+BFS yields the better results over DFS. It will always find the shortest path to the closest piece of cheese.
+
 
 2 .- (1 marks) Does this mean that in general BFS is a better search algorithm? (yes/no and give reasons to
      support your answer based on your observations)
 
+In this context, BFS is a better search algorithm (as seen in q1). This is mainly due to the fact that the edge weights are equal. In general, BFS will find the shortest path - whereas DFS may not.  Whether that is something that matters depends on context and in this context that is something we care about. BFS also performs better than DFS in this scenario because the mouse can only travel in 4 directions at a time, which means searching outward from a given node is not enormously costly. However, if the graph is very dense then BFS would result in much higher complexity and may prove to be more inefficient than DFS.
+
 
 3 .- (2 marks) Describe the heuristic function you used for A* search. Why is this heuristic admissible?
+The heuristic function for A* search is simply the manhattan distance between the current (x, y) search location and the closest cheese.
+This heuristic is admissible because on a 2D graph, the shortest possible path between two points is exactly the Manhattan distance so the Manhattan distance will always serve as the lower bound on the true cost. The Manhattan distance may be less than the true cost if there are walls.
 
 
 4 .- (1 marks) Explain how your heuristic function accounts for the presence of multiple cheese.
+We only consider the manhattan distance to the closest cheese at each time step. This is a greedy choice as the mouse is more likely to win if they collect all the cheeses, and the fastest way to do that is to go for the closest cheese. Farther cheeses may even make the heuristic un-admissible.
 
 
 5 .- (1 marks) Is A* equivalent to BFS for this problem? or is it better/worse? explain your answer based on 
      your observations.
+As A* does not consider the cat locations, BFS (the shortest path) will objectively be the optimal solution. A* could be sub-optimal in sub cases - for example if it decides to go a route that at first seems closer but in reality takes more time due to walls and detours where there was a faster route if they went in the opposite direction of the cheese initially.
+
 
 6 .- (2 marks) Describe your heuristic function for A*-nokitty. How does it work? what factors are considered
      into the cost function? is it admissible (yes/no and why)?
+A*-nokitty is calculated by taking the heuristic from A* and adding ⌊80 / (1 + c)⌋, where c is the Manhattan distance to the cat closest to the current (x, y) position. This function returns a larger heuristic when the Manhattan distance to the closest cat is small, and a smaller heuristic when the closest cat is further. We add 1 to it to ensure that if the current (x, y) position is where a cat is, the heuristic stays finite. Finally, through trial and error we found a numerator of 80 to be the most effective.
+
+As A*-nokitty adds the heuristic from A*, it therefore considers both the closest cat and closest cheese.
+The function is not admissible because if, say the cat is directly next to the current (x, y),
+then A* = [manhattan distance to cheese] + 40.
+If the cheese was also directly next to the current (x, y) position then the cost to the current (x, y) would equal A* = 1 + 40, which is clearly greater than the true cost to the cheese, 1.
+
 
 7 .- (2 marks) What is the largest limitation of the search algorithms implemented in this assignment?
      (i.e. is there anything we are missing that could lead to a smarter mouse?) - this is
      a more or less open question, but we talked about it in lecture!
+The mouse could certainly improved if it used (for example) BFS in its heuristic function to determine if cats would be in its path.
+Another consideration is if the mouse were to use monte-carlo simulations to determine the probability of encountering a cat, going one direction, it could potentially be dramatically improved.
+
 
 _____________________________________________________
 
@@ -61,15 +80,16 @@ doesn't work, or what problems exist.
 	
 		Complete/Working	Partial		Not done
 
-DFS
+DFS       x
+(* DFS is implemented properly, but fails to find the cheese in reasonable time, in some cases).
 
-BFS
+BFS       x
 
-A*
+A*        x
 
-H
+H         x
 
-H_no_cats
+H_no_cats x
 
 _____________________________________________________
 
@@ -101,5 +121,4 @@ Marking:
 		 mouse most likely to win!
 
 Total for A1:       / out of 37.5
-
 
