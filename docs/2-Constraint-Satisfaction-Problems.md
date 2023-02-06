@@ -127,8 +127,8 @@ Using topological sort in $O(Nd^{2})$
 - Backtracking search (but will not backtrack because it will always have a valid assignment)
 
 ### Example of topological sort
-![[CSCD84/docs/Obsidian-Attachments/Pasted image 20230130092114.png]]
-![[CSCD84/docs/Obsidian-Attachments/Pasted image 20230130092200.png]]
+![[Obsidian-Attachments/Pasted image 20230130092114.png]]
+![[Obsidian-Attachments/Pasted image 20230130092200.png]]
 #### Backward pass
 
 - At H, remove $r$ from G
@@ -140,7 +140,7 @@ Using topological sort in $O(Nd^{2})$
 - At C, remove $y$ from D
 
 ### Near TS CSP
-![[CSCD84/docs/Obsidian-Attachments/IMG_8638 copy.png]]
+![[Obsidian-Attachments/IMG_8638 copy.png]]
 
 - Need to convert it into a tree structured CSP
 	- Can do this by removing cycles, starting with the nodes that belong to the most cycles
