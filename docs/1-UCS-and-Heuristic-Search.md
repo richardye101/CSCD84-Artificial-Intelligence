@@ -44,7 +44,7 @@ In the example above, a good guess would be to use the Manhattan distance betwee
 
 We try to create a heuristic cost that guesses the cost of the path from node N to G (goal state). In the city grid example, it can simply be the Manhattan Distance.
 
-![[Pasted image 20230116093020.png]]
+![[CSCD84/docs/Obsidian-Attachments/Pasted image 20230116093020.png]]
 This **isn't** trivial because streets may have conditions, such as speed limits, one way streets, etc. 
 
 ### Conditions of Heuristic Search

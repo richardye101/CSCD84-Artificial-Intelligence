@@ -56,7 +56,7 @@ $\alpha, \beta$ keeps track of the best current choice for current node and the 
 #### Example
 When you go to another child (min) node, you will pass in the $\alpha, \beta$ values from the parent (max) and if that child(min) sets their $\beta$ at some value that is smaller than $\alpha$, then it can immediately stop (as the min node will not give any value $\beta$ greater than that minimum)
 
-![[3-Game-Playing.png]]
+![[CSCD84/docs/Obsidian-Attachments/3-Game-Playing.png]]
 
 ## Monte Carlo Tree Search
 *Not really talked about, just a brief description of it and how it isn't great*
