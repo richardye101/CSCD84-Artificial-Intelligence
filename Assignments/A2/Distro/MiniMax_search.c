@@ -111,6 +111,40 @@ void Deque_dtor(Deque* deque) {
 }
 // END STRUCT HELPER FUNCTION DEFS
 
+// BEGIN HELPER FUNCTION DEFS
+Cord get_next_cord(Cord cord, int direction) {
+  switch (direction) {
+    case DIRECTION_UP:
+      --cord.y;
+      break;
+    case DIRECTION_RIGHT:
+      ++cord.x;
+      break;
+    case DIRECTION_DOWN:
+      ++cord.y;
+      break;
+    case DIRECTION_LEFT:
+      --cord.x;
+      break;
+    default:
+      break;
+  }
+  return cord;
+}
+int cord_to_index(Cord cord) { return cord.x + cord.y * size_X; }
+int is_cord_valid(Cord cord) {
+  return 0 <= cord.x && cord.x < size_X && 0 <= cord.y && cord.y < size_Y;
+}
+int is_cord_in_cords(Cord cord, int cords[][2], int num_cords) {
+  for (int i = 0; i < num_cords; ++i) {
+    if (cord.x == cords[i][0] && cord.y == cords[i][1]) {
+      return true;
+    }
+  }
+  return false;
+}
+// END HELPER FUNCTION DEFS
+
 double MiniMax(double gr[graph_size][4], int path[1][2],
                double minmax_cost[size_X][size_Y], int cat_loc[10][2], int cats,
                int cheese_loc[10][2], int cheeses, int mouse_loc[1][2],
@@ -277,6 +311,45 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
 
   path[0][0] = mouse_loc[0][0];
   path[0][1] = mouse_loc[0][1];
+  Cord cord = {mouse_loc[0][0], mouse_loc[0][1]};
+  if (depth >= maxDepth) {
+    return utility(cat_loc, cheese_loc, mouse_loc, cats, cheeses, depth, gr);
+  } else if (agentId == 0) {
+    // Mouse - maximizing agent
+    double max_eval = DBL_MIN;
+    for (int direction = 0; direction < 4; ++direction) {
+      Cord next_cord = get_next_cord(cord, direction);
+      if (!is_cord_valid(next_cord) || !gr[cord_to_index(cord)][direction] ||
+          is_cord_in_cords(next_cord, cat_loc, cats)) {
+        continue;
+      }
+      max_eval = fmax(max_eval, MiniMax(gr, path, minmax_cost, cat_loc, cats, cheese_loc,
+                            cheeses, mouse_loc, mode, utility, agentId, depth,
+                            maxDepth, alpha, beta));
+      alpha = fmax(alpha, max_eval);
+      if (beta <= alpha) {
+        break;
+      }
+    }
+    return max_eval;
+  } else {
+    // Cat - minimizing agent
+    double min_eval = DBL_MAX;
+    for (int direction = 0; direction < 4; ++direction) {
+      Cord next_cord = get_next_cord(cord, direction);
+      if (!is_cord_valid(next_cord) || !gr[cord_to_index(cord)][direction]) {
+        continue;
+      }
+      min_eval = fmin(min_eval, MiniMax(gr, path, minmax_cost, cat_loc, cats, cheese_loc,
+                            cheeses, mouse_loc, mode, utility, agentId, depth,
+                            maxDepth, alpha, beta));
+      beta = fmin(beta, min_eval);
+      if (beta <= alpha) {
+        break;
+      }
+    }
+    return min_eval;
+  }
 
   return (0.0);
 }
