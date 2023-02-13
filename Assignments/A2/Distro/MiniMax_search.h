@@ -20,20 +20,64 @@
 #define __MiniMax_search_header
 
 // Generally needed includes
-#include<stdio.h>
-#include<stdlib.h>
-#include<math.h>
-#include<malloc.h>
-#include<string.h>
+#include <assert.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "board_layout.h"
 
+// BEGIN DIRECTIONS
+#define DIRECTION_UP 0
+#define DIRECTION_RIGHT 1
+#define DIRECTION_DOWN 2
+#define DIRECTION_LEFT 3
+// END DIRECTIONS
+
+// BEGIN STRUCT DEFS
+
+// Deque will be used for both queue and stack
+typedef struct Cord {
+  int x, y;
+} Cord;
+
+typedef struct DequeItem {
+  Cord cord;
+  struct DequeItem *prev, *next;
+} DequeItem;
+
+typedef struct Deque {
+  DequeItem *head;
+  DequeItem *tail;
+  int size;
+} Deque;
+// BEGIN STRUCT DEFS
+//
+// BEGIN STRUCT HELPER FUNCTION PROTOS
+DequeItem *DequeItem_new(Cord cord);
+Deque *Deque_new(void);
+void Deque_push_front(Deque *deque, Cord cord);
+void Deque_push_back(Deque *deque, Cord cord);
+Cord Deque_pop_front(Deque *deque); 
+Cord Deque_pop_back(Deque* deque);
+// END STRUCT HELPER FUNCTION PROTOS
+
 // Function prototypes for D84 - Unit 2 - MiniMax assignment solution
-double MiniMax(double gr[graph_size][4], int path[1][2], double minmax_cost[size_X][size_Y], int cat_loc[10][2], int cats, int cheese_loc[10][2], int cheeses, int mouse_loc[1][2], int mode, double (*utility)(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], int cats, int cheeses, int depth, double gr[graph_size][4]), int agentId, int depth, int maxDepth, double alpha, double beta);
+double MiniMax(double gr[graph_size][4], int path[1][2],
+               double minmax_cost[size_X][size_Y], int cat_loc[10][2], int cats,
+               int cheese_loc[10][2], int cheeses, int mouse_loc[1][2],
+               int mode,
+               double (*utility)(int cat_loc[10][2], int cheese_loc[10][2],
+                                 int mouse_loc[1][2], int cats, int cheeses,
+                                 int depth, double gr[graph_size][4]),
+               int agentId, int depth, int maxDepth, double alpha, double beta);
 
-double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2], int cats, int cheeses, int depth, double gr[graph_size][4]);
+double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
+               int cats, int cheeses, int depth, double gr[graph_size][4]);
 
-int checkForTerminal(int mouse_loc[1][2],int cat_loc[10][2],int cheese_loc[10][2],int cats,int cheeses);
+int checkForTerminal(int mouse_loc[1][2], int cat_loc[10][2],
+                     int cheese_loc[10][2], int cats, int cheeses);
 // If you need to add any function prototypes yourself, you can do so *below* this line.
 
 
