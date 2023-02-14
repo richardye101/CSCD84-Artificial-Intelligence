@@ -63,3 +63,20 @@ When you go to another child (min) node, you will pass in the $\alpha, \beta$ va
 
 Runs simulations at each move and uses the result to create some utility function
 
+## ExpectiMiniMax - Games with Chance
+
+Where there is a random chance event after each move (picking a card, rolling a die) and that influences the next state/final states.
+
+In the tree search, it is represented with a diamond shaped node called a chance node which leads to child nodes with certain probabilities.
+
+What we do is calculate the **expected utility** at each move for each player, using the simple weighted average technique. 
+
+We can **still do** $\alpha, \beta$ pruning! Heres how:
+
+### Alpha Beta Pruning
+
+You cannot compute the average utility if you don't compute the average utility of every child node of the chance nodes, because you cannot take the average with missing values.
+
+> In practice the utility function is always bounded. 
+
+The overhead of computing with $\alpha, \beta$ is just proportional to $N$, which is still less compute than $b^{k}$ or $b^{m}$. 
