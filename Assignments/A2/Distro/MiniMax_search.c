@@ -1,33 +1,33 @@
 /*
-	CSC D84 - Unit 2 - MiniMax search and adversarial games
+        CSC D84 - Unit 2 - MiniMax search and adversarial games
 
-	This file contains stubs for implementing a MiniMax search
+        This file contains stubs for implementing a MiniMax search
         procedure with alpha-beta pruning. Please read the assignment
-	handout carefully - it describes the game, the data you will
-	have to handle, and the search functions you must provide.
+        handout carefully - it describes the game, the data you will
+        have to handle, and the search functions you must provide.
 
-	Once you have read the handout carefully, implement your search
-	code in the sections below marked with
+        Once you have read the handout carefully, implement your search
+        code in the sections below marked with
 
-	**************
-	*** TO DO:
-	**************
+        **************
+        *** TO DO:
+        **************
 
-	Make sure to add it to your report.txt file - it will be marked!
+        Make sure to add it to your report.txt file - it will be marked!
 
-	Have fun!
+        Have fun!
 
-	DO NOT FORGET TO 'valgrind' YOUR CODE - We will check for pointer
-	management being done properly, and for memory leaks.
+        DO NOT FORGET TO 'valgrind' YOUR CODE - We will check for pointer
+        management being done properly, and for memory leaks.
 
-	Starter code: F.J.E. Sep. 15
+        Starter code: F.J.E. Sep. 15
 */
 
 #include "MiniMax_search.h"
 
 // BEGIN STRUCT HELPER FUNCTION DEFS
 DequeItem *DequeItem_new(Cord cord) {
-  DequeItem *deque_item = (DequeItem*)malloc(sizeof(DequeItem));
+  DequeItem *deque_item = (DequeItem *)malloc(sizeof(DequeItem));
   assert(deque_item != NULL);
   deque_item->cord = cord;
   deque_item->prev = NULL;
@@ -87,11 +87,11 @@ Cord Deque_pop_front(Deque *deque) {
   return cord;
 }
 
-Cord Deque_pop_back(Deque* deque) {
+Cord Deque_pop_back(Deque *deque) {
   assert(deque != NULL);
   assert(deque->size != 0);
   Cord cord = deque->tail->cord;
-  DequeItem* deque_item = deque->tail;
+  DequeItem *deque_item = deque->tail;
   if (deque->head == deque->tail) {
     deque->head = deque->tail = NULL;
   } else {
@@ -102,14 +102,147 @@ Cord Deque_pop_back(Deque* deque) {
   return cord;
 }
 
-void Deque_dtor(Deque* deque) {
+void Deque_dtor(Deque *deque) {
   assert(deque != NULL);
   while (deque->size > 0) {
     Deque_pop_back(deque);
   }
   free(deque);
 }
-// END STRUCT HELPER FUNCTION DEFS
+// BEGIN HELPER FUNCTION DEFS
+Cord get_next_cord(Cord cord, int direction) {
+  switch (direction) {
+  case DIRECTION_UP:
+    --cord.y;
+    break;
+  case DIRECTION_RIGHT:
+    ++cord.x;
+    break;
+  case DIRECTION_DOWN:
+    ++cord.y;
+    break;
+  case DIRECTION_LEFT:
+    --cord.x;
+    break;
+  default:
+    break;
+  }
+  return cord;
+}
+Cord index_to_cord(int index) {
+  Cord cord;
+  cord.x = index % size_X;
+  cord.y = index / size_Y;
+  return cord;
+}
+int cord_to_index(Cord cord) { return cord.x + cord.y * size_X; }
+int is_index_valid(int index) { return 0 <= index && index < graph_size; }
+int is_cord_valid(Cord cord) {
+  return 0 <= cord.x && cord.x < size_X && 0 <= cord.y && cord.y < size_Y;
+}
+int equal_cords(Cord a, Cord b) { return a.x == b.x && a.y == b.y; }
+int is_cord_in_cords(Cord cord, int cords[][2], int num_cords) {
+  for (int i = 0; i < num_cords; ++i) {
+    if (cord.x == cords[i][0] && cord.y == cords[i][1]) {
+      return true;
+    }
+  }
+  return false;
+}
+void construct_path(int path[graph_size][2], int came_from[graph_size],
+                    const Cord start, const Cord goal) {
+  const int start_index = cord_to_index(start);
+  const int goal_index = cord_to_index(goal);
+  int index = goal_index;
+  // find the length of the path
+  int path_size;
+  for (path_size = 1; index != start_index; ++path_size) {
+    index = came_from[index];
+  }
+  index = goal_index;
+  // construct the path from goal node to start node
+  for (int i = path_size - 1; i >= 0; --i) {
+    const Cord cord = index_to_cord(index);
+    path[i][0] = cord.x;
+    path[i][1] = cord.y;
+    index = came_from[index];
+  }
+  // UNCOMMNENT TO PRINT THE FULL PATH:
+  // for (int i=0; i<path_size; ++i) {
+  //   printf("(%d, %d), ", path[i][0], path[i][1]);
+  // }
+  // printf("\n");
+  // printf("---------------------------------------------------\n");
+}
+// END HELPER FUNCTION DEFS
+
+void BFS(double gr[graph_size][4], int path[graph_size][2],
+            int cat_loc[10][2], int cats, int cheese_loc[10][2], 
+            int cheeses, int mouse_loc[1][2],
+            int is_mouse, int cat_num) {
+  /*
+  is_mouse:
+  0 cat is chasing mouse
+  1 mouse is chasing cheese
+
+  cat_num:
+  -1: is mouse currently
+  0 - cats: the index of the cat current being searched
+  */
+
+  Cord cat_cord, mouse_cord = (Cord){mouse_loc[0][0], mouse_loc[0][1]};
+  int came_from[graph_size];
+  memset(came_from, -1, sizeof(came_from));
+  bool visited[graph_size];
+  memset(visited, false, sizeof(visited));
+  int visit_counter = 1;
+
+  Deque *deque = Deque_new();
+  // Use 0 priority for starting node
+  if (is_mouse) {
+    visited[cord_to_index(mouse_cord)] = true;
+    Deque_push_front(deque, mouse_cord);
+  } else {
+    cat_cord.x = cat_loc[cat_num][0];
+    cat_cord.y = cat_loc[cat_num][1];
+    visited[cord_to_index(cat_cord)] = true;
+    Deque_push_front(deque, cat_cord);
+  }
+
+  while (deque->size > 0) {
+    Cord cord = Deque_pop_back(deque);
+    ++visit_counter;
+    if (is_mouse) {
+      if (is_cord_in_cords(cord, cheese_loc, cheeses)) {
+        // Found cheese - time step is done.
+        construct_path(path, came_from, mouse_cord, cord);
+        Deque_dtor(deque);
+        return;
+      }
+    } else {
+      if (equal_cords(cord, mouse_cord)) {
+        construct_path(path, came_from, cat_cord, cord);
+        Deque_dtor(deque);
+        return;
+      }
+    }
+
+    for (int direction = 0; direction < 4; ++direction) {
+      const Cord next_cord = get_next_cord(cord, direction);
+      // Ensure valid, not visited, not wall, and not a cat.
+      if (!is_cord_valid(next_cord) || visited[cord_to_index(next_cord)] ||
+          !gr[cord_to_index(cord)][direction] ||
+          is_cord_in_cords(next_cord, cat_loc, cats)) {
+        continue;
+      }
+      visited[cord_to_index(next_cord)] = true;
+      Deque_push_front(deque, next_cord);
+      came_from[cord_to_index(next_cord)] = cord_to_index(cord);
+    }
+  }
+  Deque_dtor(deque);
+  return;
+}
 
 double MiniMax(double gr[graph_size][4], int path[1][2],
                double minmax_cost[size_X][size_Y], int cat_loc[10][2], int cats,
@@ -250,25 +383,25 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
    *limited-depth BFS-like expansion. Once nodes below return values, your
    *function will propagate minimax utilities as per the minimax algorithm.
    *
-   *		Note that if alpha-beta pruning is specified, you must keep track of
-   *alphas and betas along the path.
+   *		Note that if alpha-beta pruning is specified, you must keep track
+   *of alphas and betas along the path.
    *
-   *		You can use helper functions if it seems reasonable. Add them to the
-   *MiniMax_search.h file and explain in your code why they are needed and how
-   *they are used.
+   *		You can use helper functions if it seems reasonable. Add them to
+   *the MiniMax_search.h file and explain in your code why they are needed and
+   *how they are used.
    *
    *		Recursion should appear somewhere.
    *
-   *		MiniMax cost: If the agentId=0 (Mouse), then once you have a MiniMax
-   *value for a location in the maze, you must update minmax_cost[][] for that
-   *location.
+   *		MiniMax cost: If the agentId=0 (Mouse), then once you have a
+   *MiniMax value for a location in the maze, you must update minmax_cost[][]
+   *for that location.
    *
    *		How you design your solution is up to you. But:
    *
-   *		- Document your implementation by adding concise and clear comments
-   *in this file
-   *		- Document your design (how you implemented the solution, and why)
-   *in the report
+   *		- Document your implementation by adding concise and clear
+   *comments in this file
+   *		- Document your design (how you implemented the solution, and
+   *why) in the report
    *
    ********************************************************************************************************/
 
@@ -283,51 +416,72 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
 
 double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
                int cats, int cheeses, int depth, double gr[graph_size][4]) {
- /*
-	This function computes and returns the utility value for a given game configuration.
-	As discussed in lecture, this should return a positive value for configurations that are 'good'
-	for the mouse, and a negative value for locations that are 'bad' for the mouse.
+  /*
+         This function computes and returns the utility value for a given game
+     configuration. As discussed in lecture, this should return a positive value
+     for configurations that are 'good' for the mouse, and a negative value for
+     locations that are 'bad' for the mouse.
 
-	How to define 'good' and 'bad' is up to you. Note that you can write a utility function
-	that favours your mouse or favours the cats, but that would be a bad idea... (why?)
+         How to define 'good' and 'bad' is up to you. Note that you can write a
+     utility function that favours your mouse or favours the cats, but that
+     would be a bad idea... (why?)
 
-	Input arguments:
+         Input arguments:
 
-		cat_loc - Cat locations
-		cheese_loc - Cheese locations
-		mouse_loc - Mouse location
-		cats - # of cats
-		cheeses - # of cheeses
-		depth - current search depth
-		gr - The graph's adjacency list for the maze
+                 cat_loc - Cat locations
+                 cheese_loc - Cheese locations
+                 mouse_loc - Mouse location
+                 cats - # of cats
+                 cheeses - # of cheeses
+                 depth - current search depth
+                 gr - The graph's adjacency list for the maze
 
-		These arguments are as described in A1. Do have a look at your solution!
- */
+                 These arguments are as described in A1. Do have a look at your
+     solution!
+  */
+  int mouse_path[graph_size][2] = {-1};
+  BFS(gr, mouse_path, cat_loc, cats, cheese_loc, cheeses, mouse_loc, 1, -1);
+  int m_path_size=0;
+  while(mouse_path[m_path_size] != -1){
+    ++m_path_size;
+  }
 
- return(1);   // <--- Obviously, this will be replaced by your computer utilities
+  int sum_c_paths = 0;
+  for(int c = 0; c < cats; ++c){
+    int cat_path[graph_size][2] = {-1};
+    BFS(gr, mouse_path, cat_loc, cats, cheese_loc, cheeses, mouse_loc, 0, c);
+    int c_path_size=0;
+    while(cat_path[c_path_size] != -1){
+      ++c_path_size;
+    }
+    sum_c_paths = sum_c_paths + c_path_size;
+  }
+
+  return (-pow((m_path_size-10)/3,3) + sum_c_paths/cats);
 }
 
-int checkForTerminal(int mouse_loc[1][2],int cat_loc[10][2],int cheese_loc[10][2],int cats,int cheeses)
-{
- /* 
-   This function determines whether a given configuration constitutes a terminal node.
-   Terminal nodes are those for which:
-     - A cat eats the mouse
-     or
-     - The mouse eats a cheese
-   
-   If the node is a terminal, the function returns 1, else it returns 0
- */
+int checkForTerminal(int mouse_loc[1][2], int cat_loc[10][2],
+                     int cheese_loc[10][2], int cats, int cheeses) {
+  /*
+    This function determines whether a given configuration constitutes a
+    terminal node. Terminal nodes are those for which:
+      - A cat eats the mouse
+      or
+      - The mouse eats a cheese
 
- // Check for cats having lunch
- for (int i=0; i<cats; i++)
-  if (mouse_loc[0][0]==cat_loc[i][0]&&mouse_loc[0][1]==cat_loc[i][1]) return(1);
+    If the node is a terminal, the function returns 1, else it returns 0
+  */
 
- // Check for mouse having lunch
- for (int i=0; i<cheeses; i++)
-  if (mouse_loc[0][0]==cheese_loc[i][0]&&mouse_loc[0][1]==cheese_loc[i][1]) return(1);
+  // Check for cats having lunch
+  for (int i = 0; i < cats; i++)
+    if (mouse_loc[0][0] == cat_loc[i][0] && mouse_loc[0][1] == cat_loc[i][1])
+      return (1);
 
- return(0);
+  // Check for mouse having lunch
+  for (int i = 0; i < cheeses; i++)
+    if (mouse_loc[0][0] == cheese_loc[i][0] &&
+        mouse_loc[0][1] == cheese_loc[i][1])
+      return (1);
 
+  return (0);
 }
-
