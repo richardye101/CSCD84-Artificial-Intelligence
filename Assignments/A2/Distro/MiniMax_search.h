@@ -68,7 +68,6 @@ Cord Deque_pop_back(Deque* deque);
 Cord get_next_cord(Cord cord, int direction);
 int cord_to_index(Cord cord);
 int is_cord_valid(Cord cord);
-int is_cord_in_cords(Cord cord, int cords[][2], int num_cords);
 // END HELPER FUNCTION PROTOS
 
 // Function prototypes for D84 - Unit 2 - MiniMax assignment solution

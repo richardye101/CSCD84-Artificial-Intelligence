@@ -135,14 +135,6 @@ int cord_to_index(Cord cord) { return cord.x + cord.y * size_X; }
 int is_cord_valid(Cord cord) {
   return 0 <= cord.x && cord.x < size_X && 0 <= cord.y && cord.y < size_Y;
 }
-int is_cord_in_cords(Cord cord, int cords[][2], int num_cords) {
-  for (int i = 0; i < num_cords; ++i) {
-    if (cord.x == cords[i][0] && cord.y == cords[i][1]) {
-      return true;
-    }
-  }
-  return false;
-}
 // END HELPER FUNCTION DEFS
 
 double MiniMax(double gr[graph_size][4], int path[1][2],
