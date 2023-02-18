@@ -309,8 +309,9 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
   // Stub so that the code compiles/runs - This will be removed and replaced by
   // your code!
 
-  path[0][0] = mouse_loc[0][0];
-  path[0][1] = mouse_loc[0][1];
+  // TODO(@Sam): Figure out how assigning "path" works
+  // path[0][0] = mouse_loc[0][0];
+  // path[0][1] = mouse_loc[0][1];
   Cord cord = {mouse_loc[0][0], mouse_loc[0][1]};
   if (depth >= maxDepth) {
     return utility(cat_loc, cheese_loc, mouse_loc, cats, cheeses, depth, gr);
@@ -319,13 +320,20 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
     double max_eval = DBL_MIN;
     for (int direction = 0; direction < 4; ++direction) {
       Cord next_cord = get_next_cord(cord, direction);
-      if (!is_cord_valid(next_cord) || !gr[cord_to_index(cord)][direction] ||
-          is_cord_in_cords(next_cord, cat_loc, cats)) {
+      if (!is_cord_valid(next_cord) || !gr[cord_to_index(cord)][direction]) {
         continue;
       }
-      max_eval = fmax(max_eval, MiniMax(gr, path, minmax_cost, cat_loc, cats, cheese_loc,
-                            cheeses, mouse_loc, mode, utility, agentId, depth,
-                            maxDepth, alpha, beta));
+      if (checkForTerminal(mouse_loc, cat_loc, cheese_loc, cats, cheeses)) {
+        continue;
+      }
+      max_eval =
+          fmax(max_eval,
+               checkForTerminal(mouse_loc, cat_loc, cheese_loc, cats, cheeses)
+                   ? utility(cat_loc, cheese_loc, mouse_loc, cats, cheeses,
+                             depth, gr)
+                   : MiniMax(gr, path, minmax_cost, cat_loc, cats, cheese_loc,
+                             cheeses, mouse_loc, mode, utility, agentId,
+                             depth + 1, maxDepth, alpha, beta));
       alpha = fmax(alpha, max_eval);
       if (beta <= alpha) {
         break;
@@ -340,9 +348,14 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
       if (!is_cord_valid(next_cord) || !gr[cord_to_index(cord)][direction]) {
         continue;
       }
-      min_eval = fmin(min_eval, MiniMax(gr, path, minmax_cost, cat_loc, cats, cheese_loc,
-                            cheeses, mouse_loc, mode, utility, agentId, depth,
-                            maxDepth, alpha, beta));
+      min_eval =
+          fmin(min_eval,
+               checkForTerminal(mouse_loc, cat_loc, cheese_loc, cats, cheeses)
+                   ? utility(cat_loc, cheese_loc, mouse_loc, cats, cheeses,
+                             depth, gr)
+                   : MiniMax(gr, path, minmax_cost, cat_loc, cats, cheese_loc,
+                             cheeses, mouse_loc, mode, utility, agentId,
+                             depth + 1, maxDepth, alpha, beta));
       beta = fmin(beta, min_eval);
       if (beta <= alpha) {
         break;
