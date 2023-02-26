@@ -65,9 +65,9 @@ Cord Deque_pop_back(Deque* deque);
 // END STRUCT HELPER FUNCTION PROTOS
 
 // BEGIN HELPER FUNCTION PROTOS
-Cord get_next_cord(Cord cord, int direction);
-int cord_to_index(Cord cord);
-int is_cord_valid(Cord cord);
+int loc_to_index(int loc[2]);
+void set_next_loc(int next_loc[2], int loc[2], int direction);
+int is_loc_valid(int loc[2]);
 // END HELPER FUNCTION PROTOS
 
 // Function prototypes for D84 - Unit 2 - MiniMax assignment solution
