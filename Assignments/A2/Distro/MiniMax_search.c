@@ -113,8 +113,8 @@ void Deque_dtor(Deque* deque) {
 
 // BEGIN HELPER FUNCTION DEFS
 int loc_to_index(int loc[2]) { return loc[0] + loc[1] * size_X; }
-void set_next_loc(int next_loc[2], int loc[2], int direction) {
-  next_loc[0] = loc[0], next_loc[1] = loc[1];
+void set_next_loc(int next_loc[2], int loc[1][2], int direction) {
+  next_loc[0] = loc[0][0], next_loc[1] = loc[0][1];
   switch (direction) {
     case DIRECTION_UP:
       --next_loc[1];
@@ -336,7 +336,7 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
     int prev_cat_loc[1][2] = {{cat_loc[kCatIndex][0], cat_loc[kCatIndex][1]}};
     for (int direction = 0; direction < 4; ++direction) {
       set_next_loc(cat_loc[kCatIndex], prev_cat_loc, direction);
-      if (!is_loc_valid(next_cat_loc) || !gr[loc_to_index(prev_cat_loc)][direction]) {
+      if (!is_loc_valid(cat_loc[kCatIndex]) || !gr[loc_to_index(prev_cat_loc[0])][direction]) {
         continue;
       }
       min_eval =
@@ -347,7 +347,8 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
                    : MiniMax(gr, path, minmax_cost, cat_loc, cats, cheese_loc,
                              cheeses, mouse_loc, mode, utility, agentId,
                              depth + 1, maxDepth, alpha, beta));
-      cat_loc[kCatIndex] = {prev_cat_loc[0][0], prev_cat_loc[0][1]};
+      cat_loc[kCatIndex][0] = prev_cat_loc[0][0];
+      cat_loc[kCatIndex][1] = prev_cat_loc[0][1];
       beta = fmin(beta, min_eval);
       if (beta <= alpha) {
         break;
