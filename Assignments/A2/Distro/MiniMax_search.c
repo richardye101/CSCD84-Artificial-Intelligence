@@ -244,6 +244,32 @@ void BFS(double gr[graph_size][4], int path[graph_size][2],
   return;
 }
 
+// BEGIN HELPER FUNCTION DEFS
+int loc_to_index(int loc[2]) { return loc[0] + loc[1] * size_X; }
+void set_next_loc(int next_loc[2], int loc[1][2], int direction) {
+  next_loc[0] = loc[0][0], next_loc[1] = loc[0][1];
+  switch (direction) {
+    case DIRECTION_UP:
+      --next_loc[1];
+      break;
+    case DIRECTION_RIGHT:
+      ++next_loc[0];
+      break;
+    case DIRECTION_DOWN:
+      ++next_loc[1];
+      break;
+    case DIRECTION_LEFT:
+      --next_loc[0];
+      break;
+    default:
+      break;
+  }
+}
+int is_loc_valid(int loc[2]) {
+  return 0 <= loc[0] && loc[0] < size_X && 0 <= loc[1] && loc[1] < size_Y;
+}
+// END HELPER FUNCTION DEFS
+
 double MiniMax(double gr[graph_size][4], int path[1][2],
                double minmax_cost[size_X][size_Y], int cat_loc[10][2], int cats,
                int cheese_loc[10][2], int cheeses, int mouse_loc[1][2],
@@ -408,8 +434,61 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
   // Stub so that the code compiles/runs - This will be removed and replaced by
   // your code!
 
-  path[0][0] = mouse_loc[0][0];
-  path[0][1] = mouse_loc[0][1];
+  // TODO(@Sam): Figure out how assigning "path" works
+  // path[0][0] = mouse_loc[0][0];
+  // path[0][1] = mouse_loc[0][1];
+  if (depth >= maxDepth) {
+    return utility(cat_loc, cheese_loc, mouse_loc, cats, cheeses, depth, gr);
+  } else if (agentId == 0) {
+    // Mouse - maximizing agent
+    double max_eval = DBL_MIN;
+    int next_mouse_loc[1][2];
+    for (int direction = 0; direction < 4; ++direction) {
+      set_next_loc(next_mouse_loc[0], mouse_loc, direction);
+      if (!is_loc_valid(next_mouse_loc[0]) || !gr[loc_to_index(mouse_loc[0])][direction]) {
+        continue;
+      }
+      max_eval =
+          fmax(max_eval,
+               checkForTerminal(next_mouse_loc, cat_loc, cheese_loc, cats, cheeses)
+                   ? utility(cat_loc, cheese_loc, next_mouse_loc, cats, cheeses,
+                             depth, gr)
+                   : MiniMax(gr, path, minmax_cost, cat_loc, cats, cheese_loc,
+                             cheeses, next_mouse_loc, mode, utility, agentId,
+                             depth + 1, maxDepth, alpha, beta));
+      alpha = fmax(alpha, max_eval);
+      if (beta <= alpha) {
+        break;
+      }
+    }
+    return max_eval;
+  } else {
+    // Cat - minimizing agent
+    const int kCatIndex = agentId % cats;
+    double min_eval = DBL_MAX;
+    int prev_cat_loc[1][2] = {{cat_loc[kCatIndex][0], cat_loc[kCatIndex][1]}};
+    for (int direction = 0; direction < 4; ++direction) {
+      set_next_loc(cat_loc[kCatIndex], prev_cat_loc, direction);
+      if (!is_loc_valid(cat_loc[kCatIndex]) || !gr[loc_to_index(prev_cat_loc[0])][direction]) {
+        continue;
+      }
+      min_eval =
+          fmin(min_eval,
+               checkForTerminal(mouse_loc, cat_loc, cheese_loc, cats, cheeses)
+                   ? utility(cat_loc, cheese_loc, mouse_loc, cats, cheeses,
+                             depth, gr)
+                   : MiniMax(gr, path, minmax_cost, cat_loc, cats, cheese_loc,
+                             cheeses, mouse_loc, mode, utility, agentId,
+                             depth + 1, maxDepth, alpha, beta));
+      cat_loc[kCatIndex][0] = prev_cat_loc[0][0];
+      cat_loc[kCatIndex][1] = prev_cat_loc[0][1];
+      beta = fmin(beta, min_eval);
+      if (beta <= alpha) {
+        break;
+      }
+    }
+    return min_eval;
+  }
 
   return (0.0);
 }

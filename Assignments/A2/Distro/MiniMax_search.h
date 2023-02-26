@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <float.h>
 
 #include "board_layout.h"
 
@@ -63,6 +64,12 @@ void Deque_push_back(Deque *deque, Cord cord);
 Cord Deque_pop_front(Deque *deque); 
 Cord Deque_pop_back(Deque* deque);
 // END STRUCT HELPER FUNCTION PROTOS
+
+// BEGIN HELPER FUNCTION PROTOS
+int loc_to_index(int loc[2]);
+void set_next_loc(int next_loc[2], int loc[1][2], int direction);
+int is_loc_valid(int loc[2]);
+// END HELPER FUNCTION PROTOS
 
 // Function prototypes for D84 - Unit 2 - MiniMax assignment solution
 double MiniMax(double gr[graph_size][4], int path[1][2],
