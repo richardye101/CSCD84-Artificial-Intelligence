@@ -521,7 +521,7 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
   int mouse_path[graph_size][2] = {-1};
   BFS(gr, mouse_path, cat_loc, cats, cheese_loc, cheeses, mouse_loc, 1, -1);
   int m_path_size=0;
-  while(mouse_path[m_path_size] != -1){
+  while(*mouse_path[m_path_size] != -1){
     ++m_path_size;
   }
 
@@ -530,7 +530,7 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
     int cat_path[graph_size][2] = {-1};
     BFS(gr, mouse_path, cat_loc, cats, cheese_loc, cheeses, mouse_loc, 0, c);
     int c_path_size=0;
-    while(cat_path[c_path_size] != -1){
+    while(*cat_path[c_path_size] != -1){
       ++c_path_size;
     }
     sum_c_paths = sum_c_paths + c_path_size;
