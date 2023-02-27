@@ -81,6 +81,9 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
                                  int depth, double gr[graph_size][4]),
                int agentId, int depth, int maxDepth, double alpha, double beta);
 
+int path_length(double gr[graph_size][4], int mouse_loc[1][2],
+                int cheese_loc[][2], int cheeses);
+
 double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
                int cats, int cheeses, int depth, double gr[graph_size][4]);
 

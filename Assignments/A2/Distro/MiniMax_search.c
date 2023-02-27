@@ -149,99 +149,46 @@ int is_cord_in_cords(Cord cord, int cords[][2], int num_cords) {
   }
   return false;
 }
-void construct_path(int path[graph_size][2], int came_from[graph_size],
-                    const Cord start, const Cord goal) {
-  const int start_index = cord_to_index(start);
-  const int goal_index = cord_to_index(goal);
-  int index = goal_index;
-  // find the length of the path
-  int path_size;
-  for (path_size = 1; index != start_index; ++path_size) {
-    index = came_from[index];
-  }
-  index = goal_index;
-  // construct the path from goal node to start node
-  for (int i = path_size - 1; i >= 0; --i) {
-    const Cord cord = index_to_cord(index);
-    path[i][0] = cord.x;
-    path[i][1] = cord.y;
-    index = came_from[index];
-  }
-  // UNCOMMNENT TO PRINT THE FULL PATH:
-  // for (int i=0; i<path_size; ++i) {
-  //   printf("(%d, %d), ", path[i][0], path[i][1]);
-  // }
-  // printf("\n");
-  // printf("---------------------------------------------------\n");
-}
-// END HELPER FUNCTION DEFS
 
-void BFS(double gr[graph_size][4], int path[graph_size][2],
-            int cat_loc[10][2], int cats, int cheese_loc[10][2], 
-            int cheeses, int mouse_loc[1][2],
-            int is_mouse, int cat_num) {
-  /*
-  is_mouse:
-  0 cat is chasing mouse
-  1 mouse is chasing cheese
-
-  cat_num:
-  -1: is mouse currently
-  0 - cats: the index of the cat current being searched
-  */
-
-  Cord cat_cord, mouse_cord = {mouse_loc[0][0], mouse_loc[0][1]};
+int path_length(double gr[graph_size][4], int mouse_loc[1][2],
+                int cheese_loc[][2], int cheeses) {
+  Cord mouse_cord = {mouse_loc[0][0], mouse_loc[0][1]};
   int came_from[graph_size];
-  memset(came_from, -1, sizeof(came_from));
   bool visited[graph_size];
   memset(visited, false, sizeof(visited));
-  int visit_counter = 1;
 
   Deque *deque = Deque_new();
-  // Use 0 priority for starting node
-  if (is_mouse) {
-    visited[cord_to_index(mouse_cord)] = true;
-    Deque_push_front(deque, mouse_cord);
-  } else {
-    cat_cord.x = cat_loc[cat_num][0];
-    cat_cord.y = cat_loc[cat_num][1];
-    visited[cord_to_index(cat_cord)] = true;
-    Deque_push_front(deque, cat_cord);
-  }
+  visited[cord_to_index(mouse_cord)] = true;
+  Deque_push_front(deque, mouse_cord);
 
   while (deque->size > 0) {
     Cord cord = Deque_pop_back(deque);
-    ++visit_counter;
-    if (is_mouse) {
-      if (is_cord_in_cords(cord, cheese_loc, cheeses)) {
-        // Found cheese - time step is done.
-        construct_path(path, came_from, mouse_cord, cord);
-        Deque_dtor(deque);
-        return;
+    if (is_cord_in_cords(cord, cheese_loc, cheeses)) {
+      // Found cheese - time step is done.
+      const int kStartIndex = cord_to_index(mouse_cord);
+      int goal_index = cord_to_index(cord);
+      // find the length of the path
+      int path_size;
+      for (path_size = 0; goal_index != kStartIndex; ++path_size) {
+        goal_index = came_from[goal_index];
       }
-    } else {
-      if (equal_cords(cord, mouse_cord)) {
-        construct_path(path, came_from, cat_cord, cord);
-        Deque_dtor(deque);
-        return;
-      }
+      Deque_dtor(deque);
+      return path_size;
     }
-
     for (int direction = 0; direction < 4; ++direction) {
       const Cord kNextCord = get_next_cord(cord, direction);
       // Ensure valid, not visited, not wall, and not a cat.
       if (!is_cord_valid(kNextCord) || visited[cord_to_index(kNextCord)] ||
-          !gr[cord_to_index(cord)][direction] ||
-          is_cord_in_cords(kNextCord, cat_loc, cats)) {
+          !gr[cord_to_index(cord)][direction]) {
         continue;
       }
       visited[cord_to_index(kNextCord)] = true;
-      Deque_push_front(deque, kNextCord);
       came_from[cord_to_index(kNextCord)] = cord_to_index(cord);
+      Deque_push_front(deque, kNextCord);
     }
   }
   Deque_dtor(deque);
-  return;
+  return graph_size;
 }
 
 // BEGIN HELPER FUNCTION DEFS
@@ -448,17 +395,25 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
       if (!is_loc_valid(next_mouse_loc[0]) || !gr[loc_to_index(mouse_loc[0])][direction]) {
         continue;
       }
-      max_eval =
-          fmax(max_eval,
-               checkForTerminal(next_mouse_loc, cat_loc, cheese_loc, cats, cheeses)
-                   ? utility(cat_loc, cheese_loc, next_mouse_loc, cats, cheeses,
-                             depth, gr)
-                   : MiniMax(gr, path, minmax_cost, cat_loc, cats, cheese_loc,
-                             cheeses, next_mouse_loc, mode, utility, agentId,
-                             depth + 1, maxDepth, alpha, beta));
-      alpha = fmax(alpha, max_eval);
-      if (beta <= alpha) {
-        break;
+      const double kEval =
+          checkForTerminal(next_mouse_loc, cat_loc, cheese_loc, cats, cheeses)
+              ? utility(cat_loc, cheese_loc, next_mouse_loc, cats, cheeses,
+                        depth, gr)
+              : MiniMax(gr, path, minmax_cost, cat_loc, cats, cheese_loc,
+                        cheeses, next_mouse_loc, mode, utility, (agentId + 1) % (1 + cats),
+                        depth + 1, maxDepth, alpha, beta);
+      if (kEval > max_eval) {
+        max_eval = kEval;
+        if (depth == 0){
+        path[0][0] = next_mouse_loc[0][0];
+        path[0][1] = next_mouse_loc[0][1];
+        }
+      }
+      if (mode == 1) {
+        alpha = fmax(alpha, max_eval);
+        if (beta <= alpha) {
+          break;
+        }
       }
     }
     return max_eval;
@@ -478,19 +433,19 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
                    ? utility(cat_loc, cheese_loc, mouse_loc, cats, cheeses,
                              depth, gr)
                    : MiniMax(gr, path, minmax_cost, cat_loc, cats, cheese_loc,
-                             cheeses, mouse_loc, mode, utility, agentId,
+                             cheeses, mouse_loc, mode, utility, (agentId + 1) % (1 + cats),
                              depth + 1, maxDepth, alpha, beta));
       cat_loc[kCatIndex][0] = prev_cat_loc[0][0];
       cat_loc[kCatIndex][1] = prev_cat_loc[0][1];
-      beta = fmin(beta, min_eval);
-      if (beta <= alpha) {
-        break;
+      if (mode == 1) {
+        beta = fmin(beta, min_eval);
+        if (beta <= alpha) {
+          break;
+        }
       }
     }
     return min_eval;
   }
-
-  return (0.0);
 }
 
 double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
@@ -518,24 +473,18 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
                  These arguments are as described in A1. Do have a look at your
      solution!
   */
-  int mouse_path[graph_size][2];
-  memset(mouse_path, -1, sizeof(mouse_path));
-  BFS(gr, mouse_path, cat_loc, cats, cheese_loc, cheeses, mouse_loc, 1 /* is_mouse */, -1);
-  int m_path_size=0;
-  while(mouse_path[m_path_size][0] != -1){
-    ++m_path_size;
-  }
-
+  // double dist = DBL_MIN;
+  // for (int c = 0; c < cheeses; ++c) {
+  //   double md = pow(mouse_loc[0][0] - cheese_loc[c][0], 2) +
+  //            pow(mouse_loc[0][1] - cheese_loc[c][1], 2);
+  //   dist = fmax(dist, 1000-md);
+  // }
+  // return dist;
+  int m_path_size = path_length(gr, mouse_loc, cheese_loc, cheeses);
   int sum_c_paths = 0;
   for(int c = 0; c < cats; ++c){
-    int cat_path[graph_size][2];
-    memset(cat_path, -1, sizeof(cat_path));
-    BFS(gr, cat_path, cat_loc, cats, cheese_loc, cheeses, mouse_loc, 0 /* is_mouse */, c);
-    int c_path_size=0;
-    while(cat_path[c_path_size][0] != -1){
-      ++c_path_size;
-    }
-    sum_c_paths = sum_c_paths + c_path_size;
+    int kCurrCatLoc[1][2] = {{cat_loc[c][0], cat_loc[c][1]}};
+    sum_c_paths += path_length(gr, kCurrCatLoc, mouse_loc, 1);
   }
 
   return (-pow((m_path_size - 10) / 3, 3) + sum_c_paths / cats);
