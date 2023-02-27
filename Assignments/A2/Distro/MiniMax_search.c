@@ -151,9 +151,9 @@ int is_cord_in_cords(Cord cord, int cords[][2], int num_cords) {
 }
 
 // Return path length to closest cheese, putting into account walls and stuff.
-int path_length(double gr[graph_size][4], int mouse_loc[1][2],
-                int cheese_loc[][2], int cheeses) {
-  Cord mouse_cord = {mouse_loc[0][0], mouse_loc[0][1]};
+int path_length(double gr[graph_size][4], int mouse_loc[2], int cheese_loc[][2],
+                int cheeses) {
+  Cord mouse_cord = {mouse_loc[0], mouse_loc[1]};
   int came_from[graph_size];
   bool visited[graph_size];
   memset(visited, false, sizeof(visited));
@@ -495,14 +495,23 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
   //   dist = fmax(dist, 1000-md);
   // }
   // return dist;
-  int m_path_size = path_length(gr, mouse_loc, cheese_loc, cheeses);
+  int m_path_size = path_length(gr, mouse_loc[0], cheese_loc, cheeses);
   int sum_c_paths = 0;
   int closest_cat = INT_MAX;
   for(int c = 0; c < cats; ++c){
-    int kCurrCatLoc[1][2] = {{cat_loc[c][0], cat_loc[c][1]}};
-    const int kPathLength = path_length(gr, kCurrCatLoc, mouse_loc, 1);
+    const int kPathLength = path_length(gr, cat_loc[c], mouse_loc, 1);
     sum_c_paths += kPathLength;
     closest_cat = fmin(closest_cat, kPathLength);
+  }
+  int farthest_closest_cat = INT_MIN;
+  int best_cheese;
+  assert(cheeses > 0);
+  for (int cheese = 0; cheese < cheeses; ++cheese) {
+    const int kPathLength = path_length(gr, cheese_loc[cheese], cat_loc, cats);
+    if (kPathLength > farthest_closest_cat) {
+      farthest_closest_cat = kPathLength;
+      best_cheese = cheese;
+    }
   }
 
   return (-3*((m_path_size - size_X) - sum_c_paths / cats) + closest_cat);
