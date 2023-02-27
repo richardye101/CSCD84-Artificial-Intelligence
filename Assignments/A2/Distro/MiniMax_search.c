@@ -402,11 +402,12 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
               : MiniMax(gr, path, minmax_cost, cat_loc, cats, cheese_loc,
                         cheeses, next_mouse_loc, mode, utility, (agentId + 1) % (1 + cats),
                         depth + 1, maxDepth, alpha, beta);
+      minmax_cost[next_mouse_loc[0][0]][next_mouse_loc[0][1]] = kEval;
       if (kEval > max_eval) {
         max_eval = kEval;
-        if (depth == 0){
-        path[0][0] = next_mouse_loc[0][0];
-        path[0][1] = next_mouse_loc[0][1];
+        if (depth == 0) {
+          path[0][0] = next_mouse_loc[0][0];
+          path[0][1] = next_mouse_loc[0][1];
         }
       }
       if (mode == 1) {
