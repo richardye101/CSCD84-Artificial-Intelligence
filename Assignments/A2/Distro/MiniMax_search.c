@@ -34,7 +34,7 @@ MinHeap* MinHeap_new(void) {
   return min_heap;
 }
 
-void MinHeap_insert(MinHeap* min_heap, Cord cord, int priority) {
+void MinHeap_insert(MinHeap* min_heap, Cord cord, double priority) {
   assert(min_heap != NULL);
   assert(min_heap->size != graph_size);
   int i;
@@ -147,7 +147,8 @@ int path_length(double gr[graph_size][4], int mouse_loc[2], int cheese_loc[2]) {
       }
       visited[cord_to_index(kNextCord)] = true;
       came_from[cord_to_index(kNextCord)] = cord_to_index(cord);
-      MinHeap_insert(min_heap, kNextCord, abs(kNextCord.x - mouse_loc[0]) + abs(kNextCord.y - mouse_loc[1]));
+      MinHeap_insert(min_heap, kNextCord, 
+		      pow(pow(kNextCord.x - cheese_loc[0], 2) + pow(kNextCord.y - cheese_loc[1], 2), 0.5));
     }
   }
   MinHeap_dtor(min_heap);
@@ -347,6 +348,9 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
   // TODO(@Sam): Figure out how assigning "path" works
   // path[0][0] = mouse_loc[0][0];
   // path[0][1] = mouse_loc[0][1];
+  if(mouse_loc[0][0]==-1 && mouse_loc[0][1]==-1){  
+    return 0;
+  }
   int checked = 0;
   if (depth >= maxDepth) {
     return utility(cat_loc, cheese_loc, mouse_loc, cats, cheeses, depth, gr);
@@ -474,7 +478,7 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
     } else {
       angle = atan(dy / dx);
     }
-    if (fabs(angle - average_cat_angle) > fabs(best_angle - average_cat_angle)) {
+    if (fabs(angle - average_cat_angle) / (fabs(dx)+fabs(dy)) > fabs(best_angle - average_cat_angle)) {
       best_angle = angle;
       best_cheese = cheese;
     }
@@ -486,10 +490,10 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
                                   pow((double)(mouse_loc[0][1] - cat_loc[cat][1]), 2),
                               0.5));
   }
-  double best_cheese_dist = path_length(gr, mouse_loc[0], cheese_loc[best_cheese]);
   // int best_cheese_dist = pow(mouse_loc[0][0] - cheese_loc[best_cheese][0], 2) +
   //                        pow(mouse_loc[0][1] - cheese_loc[best_cheese][1], 2);
   Cord mouse_cord = {mouse_loc[0][0], mouse_loc[0][1]};
+  double best_cheese_dist = path_length(gr, mouse_loc[0], cheese_loc[best_cheese]);    
   double res;
   if (is_cord_in_cords(mouse_cord, cat_loc, cats)) {
     res  = -2 * graph_size + depth;

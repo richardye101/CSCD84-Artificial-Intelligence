@@ -47,7 +47,7 @@ typedef struct Cord {
 
 typedef struct HeapItem {
   Cord cord;
-  int priority;
+  double priority;
 } HeapItem;
 
 typedef struct MinHeap {
@@ -58,7 +58,7 @@ typedef struct MinHeap {
 //
 // BEGIN STRUCT HELPER FUNCTION PROTOS
 MinHeap* MinHeap_new(void);
-void MinHeap_insert(MinHeap *min_heap, Cord cord, int priority);
+void MinHeap_insert(MinHeap *min_heap, Cord cord, double priority);
 Cord MinHeap_pop(MinHeap *min_heap);
 void MinHeap_dtor(MinHeap *min_heap);
 // END STRUCT HELPER FUNCTION PROTOS
