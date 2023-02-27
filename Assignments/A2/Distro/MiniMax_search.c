@@ -497,12 +497,12 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
   assert(cheeses > 0);
   const int kClosestCheese = path_length(gr, mouse_loc[0], cheese_loc, cheeses);
   Cord mouse_cord = {mouse_loc[0][0], mouse_loc[0][1]};
-  if (kClosestCheese < closest_cat ||
-      is_cord_in_cords(mouse_cord, cheese_loc,
-                       cheeses)) {
+  if (is_cord_in_cords(mouse_cord, cheese_loc, cheeses)) {
+    return graph_size << 2 - depth;
+  } else if (kClosestCheese < closest_cat) {
     return graph_size << 1;
   }
-  return graph_size - kClosestCheese + 2 * closest_cat;
+  return graph_size - kClosestCheese + closest_cat;
 }
 
 int checkForTerminal(int mouse_loc[1][2], int cat_loc[10][2],
