@@ -190,7 +190,7 @@ void BFS(double gr[graph_size][4], int path[graph_size][2],
   0 - cats: the index of the cat current being searched
   */
 
-  Cord cat_cord, mouse_cord = (Cord){mouse_loc[0][0], mouse_loc[0][1]};
+  Cord cat_cord, mouse_cord = {mouse_loc[0][0], mouse_loc[0][1]};
   int came_from[graph_size];
   memset(came_from, -1, sizeof(came_from));
   bool visited[graph_size];
@@ -228,16 +228,16 @@ void BFS(double gr[graph_size][4], int path[graph_size][2],
     }
 
     for (int direction = 0; direction < 4; ++direction) {
-      const Cord next_cord = get_next_cord(cord, direction);
+      const Cord kNextCord = get_next_cord(cord, direction);
       // Ensure valid, not visited, not wall, and not a cat.
-      if (!is_cord_valid(next_cord) || visited[cord_to_index(next_cord)] ||
+      if (!is_cord_valid(kNextCord) || visited[cord_to_index(kNextCord)] ||
           !gr[cord_to_index(cord)][direction] ||
-          is_cord_in_cords(next_cord, cat_loc, cats)) {
+          is_cord_in_cords(kNextCord, cat_loc, cats)) {
         continue;
       }
-      visited[cord_to_index(next_cord)] = true;
-      Deque_push_front(deque, next_cord);
-      came_from[cord_to_index(next_cord)] = cord_to_index(cord);
+      visited[cord_to_index(kNextCord)] = true;
+      Deque_push_front(deque, kNextCord);
+      came_from[cord_to_index(kNextCord)] = cord_to_index(cord);
     }
   }
   Deque_dtor(deque);
@@ -518,25 +518,27 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
                  These arguments are as described in A1. Do have a look at your
      solution!
   */
-  int mouse_path[graph_size][2] = {-1};
-  BFS(gr, mouse_path, cat_loc, cats, cheese_loc, cheeses, mouse_loc, 1, -1);
+  int mouse_path[graph_size][2];
+  memset(mouse_path, -1, sizeof(mouse_path));
+  BFS(gr, mouse_path, cat_loc, cats, cheese_loc, cheeses, mouse_loc, 1 /* is_mouse */, -1);
   int m_path_size=0;
-  while(*mouse_path[m_path_size] != -1){
+  while(mouse_path[m_path_size][0] != -1){
     ++m_path_size;
   }
 
   int sum_c_paths = 0;
   for(int c = 0; c < cats; ++c){
-    int cat_path[graph_size][2] = {-1};
-    BFS(gr, mouse_path, cat_loc, cats, cheese_loc, cheeses, mouse_loc, 0, c);
+    int cat_path[graph_size][2];
+    memset(cat_path, -1, sizeof(cat_path));
+    BFS(gr, cat_path, cat_loc, cats, cheese_loc, cheeses, mouse_loc, 0 /* is_mouse */, c);
     int c_path_size=0;
-    while(*cat_path[c_path_size] != -1){
+    while(cat_path[c_path_size][0] != -1){
       ++c_path_size;
     }
     sum_c_paths = sum_c_paths + c_path_size;
   }
 
-  return (-pow((m_path_size-10)/3,3) + sum_c_paths/cats);
+  return (-pow((m_path_size - 10) / 3, 3) + sum_c_paths / cats);
 }
 
 int checkForTerminal(int mouse_loc[1][2], int cat_loc[10][2],
