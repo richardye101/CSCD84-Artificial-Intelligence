@@ -386,13 +386,13 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
   // TODO(@Sam): Figure out how assigning "path" works
   // path[0][0] = mouse_loc[0][0];
   // path[0][1] = mouse_loc[0][1];
+  int checked = 0;
   if (depth >= maxDepth) {
     return utility(cat_loc, cheese_loc, mouse_loc, cats, cheeses, depth, gr);
   } else if (agentId == 0) {
     // Mouse - maximizing agent
     double max_eval = DBL_MIN;
     int next_mouse_loc[1][2];
-    int checked = 0;
     for (int direction = 0; direction < 4; ++direction) {
       set_next_loc(next_mouse_loc[0], mouse_loc, direction);
       if (!is_loc_valid(next_mouse_loc[0]) || !gr[loc_to_index(mouse_loc[0])][direction]) {
@@ -432,6 +432,9 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
       printf("Next step: %d %d | Num Cheeses: %d | Num checked locations: %d | Max Eval: %lf\n", path[0][0],
              path[0][1], cheeses, checked, max_eval);
     }
+    if (checked == 0) {
+      printf("CAt checked 0\n");
+    }
     return max_eval;
   } else {
     // Cat - minimizing agent
@@ -443,6 +446,7 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
       if (!is_loc_valid(cat_loc[kCatIndex]) || !gr[loc_to_index(prev_cat_loc[0])][direction]) {
         continue;
       }
+      ++checked;
       min_eval =
           fmin(min_eval,
                checkForTerminal(mouse_loc, cat_loc, cheese_loc, cats, cheeses)
@@ -459,6 +463,9 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
           break;
         }
       }
+    }
+    if (checked == 0) {
+      printf("CAt checked 0\n");
     }
     return min_eval;
   }
@@ -489,20 +496,53 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
                  These arguments are as described in A1. Do have a look at your
      solution!
   */
+  double average_cat_angle=0;
+  for (int cat=0; cat<cats; ++cat) {
+    double dy = cat_loc[cat][0] - mouse_loc[0][0];
+    double dx = cat_loc[cat][1] - mouse_loc[0][1];
+    if (fabs(dx) < 0.01) {
+      average_cat_angle += dy < 0 ? -M_PI / 2 : M_PI / 2;
+    }
+    average_cat_angle += atan(dy / dx);
+  }
+  int best_cheese = 0;
+  double best_angle = average_cat_angle;
+  for (int cheese=0; cheese<cheeses; ++cheese) {
+    double angle;
+    double dy = cheese_loc[cheese][0] - mouse_loc[0][0];
+    double dx = cheese_loc[cheese][1] - mouse_loc[0][1];
+    if (fabs(dx) < 0.01) {
+      angle = dy < 0 ? -M_PI / 2 : M_PI / 2;
+    } else {
+      angle = atan(dy / dx);
+    }
+    if (fabs(angle - average_cat_angle) > fabs(best_angle - average_cat_angle)) {
+      best_angle = angle;
+      best_cheese = cheese;
+    }
+  }
   int closest_cat = INT_MAX;
   for (int cat = 0; cat < cats; ++cat) {
     closest_cat = fmin(closest_cat, abs(mouse_loc[0][0] - cat_loc[cat][0]) +
                                         abs(mouse_loc[0][1] - cat_loc[cat][1]));
   }
-  assert(cheeses > 0);
-  const int kClosestCheese = path_length(gr, mouse_loc[0], cheese_loc, cheeses);
+  int best_cheese_dist = abs(mouse_loc[0][0] - cheese_loc[best_cheese][0]) +
+                         abs(mouse_loc[0][1] - cheese_loc[best_cheese][1]);
   Cord mouse_cord = {mouse_loc[0][0], mouse_loc[0][1]};
-  if (is_cord_in_cords(mouse_cord, cheese_loc, cheeses)) {
-    return graph_size << 2 - depth;
-  } else if (kClosestCheese < closest_cat) {
-    return graph_size << 1;
+  double res;
+  if (is_cord_in_cords(mouse_cord, cat_loc, cats)) {
+    res  = -graph_size + depth;
+  } else if (cheeses == 1 && is_cord_in_cords(mouse_cord, cheese_loc, cheeses)) {
+    res =  3 * graph_size - depth;
+  } else if (best_cheese_dist < closest_cat) {
+    res = 2 * graph_size - depth - best_cheese_dist + 2 * closest_cat;
+  } else {
+    res = graph_size - depth - best_cheese_dist + 2 * closest_cat;
   }
-  return graph_size - kClosestCheese + closest_cat;
+  if (res > 10000) {
+  printf("res: %lf\n", res);
+  }
+  return res;
 }
 
 int checkForTerminal(int mouse_loc[1][2], int cat_loc[10][2],
