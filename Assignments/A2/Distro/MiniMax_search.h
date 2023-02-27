@@ -27,6 +27,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <float.h>
+#include <limits.h>
 
 #include "board_layout.h"
 

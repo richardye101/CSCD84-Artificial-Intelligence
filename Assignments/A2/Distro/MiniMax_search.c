@@ -150,6 +150,7 @@ int is_cord_in_cords(Cord cord, int cords[][2], int num_cords) {
   return false;
 }
 
+// Return path length to closest cheese, putting into account walls and stuff.
 int path_length(double gr[graph_size][4], int mouse_loc[1][2],
                 int cheese_loc[][2], int cheeses) {
   Cord mouse_cord = {mouse_loc[0][0], mouse_loc[0][1]};
@@ -188,7 +189,7 @@ int path_length(double gr[graph_size][4], int mouse_loc[1][2],
     }
   }
   Deque_dtor(deque);
-  return graph_size;
+  return graph_size; // Path can't be any farther than graph_size
 }
 
 // BEGIN HELPER FUNCTION DEFS
@@ -390,11 +391,17 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
     // Mouse - maximizing agent
     double max_eval = DBL_MIN;
     int next_mouse_loc[1][2];
+    int checked = 0;
     for (int direction = 0; direction < 4; ++direction) {
       set_next_loc(next_mouse_loc[0], mouse_loc, direction);
       if (!is_loc_valid(next_mouse_loc[0]) || !gr[loc_to_index(mouse_loc[0])][direction]) {
         continue;
       }
+      if (next_mouse_loc[0][0] == -1) {
+        printf("Next mouse loc: %d %d\n", next_mouse_loc[0][0],
+               next_mouse_loc[0][1]);
+      }
+      ++checked;
       const double kEval =
           checkForTerminal(next_mouse_loc, cat_loc, cheese_loc, cats, cheeses)
               ? utility(cat_loc, cheese_loc, next_mouse_loc, cats, cheeses,
@@ -403,6 +410,9 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
                         cheeses, next_mouse_loc, mode, utility, (agentId + 1) % (1 + cats),
                         depth + 1, maxDepth, alpha, beta);
       minmax_cost[next_mouse_loc[0][0]][next_mouse_loc[0][1]] = kEval;
+      if (kEval == DBL_MIN) {
+        printf("THIS SHOULDN'T HAPPEN\n");
+      }
       if (kEval > max_eval) {
         max_eval = kEval;
         if (depth == 0) {
@@ -416,6 +426,10 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
           break;
         }
       }
+    }
+    if (depth == 0) {
+      printf("Next step: %d %d | Num Cheeses: %d | Num checked locations: %d | Max Eval: %lf\n", path[0][0],
+             path[0][1], cheeses, checked, max_eval);
     }
     return max_eval;
   } else {
@@ -483,12 +497,15 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
   // return dist;
   int m_path_size = path_length(gr, mouse_loc, cheese_loc, cheeses);
   int sum_c_paths = 0;
+  int closest_cat = INT_MAX;
   for(int c = 0; c < cats; ++c){
     int kCurrCatLoc[1][2] = {{cat_loc[c][0], cat_loc[c][1]}};
-    sum_c_paths += path_length(gr, kCurrCatLoc, mouse_loc, 1);
+    const int kPathLength = path_length(gr, kCurrCatLoc, mouse_loc, 1);
+    sum_c_paths += kPathLength;
+    closest_cat = fmin(closest_cat, kPathLength);
   }
 
-  return (-pow((m_path_size - 10) / 3, 3) + sum_c_paths / cats);
+  return (-3*((m_path_size - size_X) - sum_c_paths / cats) + closest_cat);
 }
 
 int checkForTerminal(int mouse_loc[1][2], int cat_loc[10][2],
