@@ -27,88 +27,50 @@
 #include "board_layout.h"
 
 // BEGIN STRUCT HELPER FUNCTION DEFS
-DequeItem *DequeItem_new(Cord cord) {
-  DequeItem *deque_item = (DequeItem *)malloc(sizeof(DequeItem));
-  assert(deque_item != NULL);
-  deque_item->cord = cord;
-  deque_item->prev = NULL;
-  deque_item->next = NULL;
-  return deque_item;
+MinHeap* MinHeap_new(void) {
+  MinHeap *min_heap = (MinHeap *)malloc(sizeof(MinHeap));
+  assert(min_heap != NULL);
+  min_heap->size = 0;
+  return min_heap;
 }
 
-Deque *Deque_new(void) {
-  Deque *deque = (Deque *)malloc(sizeof(Deque));
-  assert(deque != NULL);
-  deque->head = NULL;
-  deque->tail = NULL;
-  deque->size = 0;
-  return deque;
-}
-
-void Deque_push_front(Deque *deque, Cord cord) {
-  assert(deque != NULL);
-  DequeItem *deque_item = DequeItem_new(cord);
-  deque_item->next = deque->head;
-  deque_item->prev = NULL;
-  if (deque->tail == NULL) {
-    deque->head = deque->tail = deque_item;
-  } else {
-    deque->head->prev = deque_item;
-    deque->head = deque_item;
+void MinHeap_insert(MinHeap* min_heap, Cord cord, int priority) {
+  assert(min_heap != NULL);
+  assert(min_heap->size != graph_size);
+  int i;
+  for (i = min_heap->size; i != 0 && min_heap->data[(i - 1) / 2].priority > priority;
+       i = (i - 1) / 2) {
+    min_heap->data[i] = min_heap->data[(i - 1) / 2];
   }
-  ++deque->size;
+  min_heap->data[i].cord = cord;
+  min_heap->data[i].priority = priority;
+  ++min_heap->size;
 }
 
-void Deque_push_back(Deque *deque, Cord cord) {
-  assert(deque != NULL);
-  DequeItem *deque_item = DequeItem_new(cord);
-  deque_item->prev = deque->tail;
-  deque_item->next = NULL;
-  if (deque->head == NULL) {
-    deque->head = deque->tail = deque_item;
-  } else {
-    deque->tail->next = deque_item;
-    deque->tail = deque_item;
+Cord MinHeap_pop(MinHeap *min_heap) {
+  assert(min_heap != NULL);
+  assert(min_heap->size != 0);
+  Cord cord = min_heap->data[0].cord;
+  min_heap->data[0] = min_heap->data[min_heap->size - 1];
+  --min_heap->size;
+  for (int i = 0, l = 1, r = 2, next_i;
+       l < min_heap->size &&
+       min_heap->data[next_i =
+                          (r >= min_heap->size || (min_heap->data[r].priority >
+                                                   min_heap->data[l].priority))
+                              ? l
+                              : r]
+               .priority < min_heap->data[i].priority;
+       l = 2 * i + 1, r = 2 * i + 2, i = next_i) {
+    HeapItem temp = min_heap->data[i];
+    min_heap->data[i] = min_heap->data[next_i];
+    min_heap->data[next_i] = temp;
   }
-  ++deque->size;
-}
-
-Cord Deque_pop_front(Deque *deque) {
-  assert(deque != NULL);
-  assert(deque->size != 0);
-  Cord cord = deque->head->cord;
-  DequeItem *deque_item = deque->head;
-  if (deque->head == deque->tail) {
-    deque->head = deque->tail = NULL;
-  } else {
-    deque->head = deque->head->next;
-  }
-  free(deque_item);
-  --deque->size;
   return cord;
 }
 
-Cord Deque_pop_back(Deque *deque) {
-  assert(deque != NULL);
-  assert(deque->size != 0);
-  Cord cord = deque->tail->cord;
-  DequeItem *deque_item = deque->tail;
-  if (deque->head == deque->tail) {
-    deque->head = deque->tail = NULL;
-  } else {
-    deque->tail = deque->tail->prev;
-  }
-  free(deque_item);
-  --deque->size;
-  return cord;
-}
-
-void Deque_dtor(Deque *deque) {
-  assert(deque != NULL);
-  while (deque->size > 0) {
-    Deque_pop_back(deque);
-  }
-  free(deque);
+void MinHeap_dtor(MinHeap *min_heap) {
+  free(min_heap);
 }
 // BEGIN HELPER FUNCTION DEFS
 Cord get_next_cord(Cord cord, int direction) {
@@ -152,20 +114,19 @@ int is_cord_in_cords(Cord cord, int cords[][2], int num_cords) {
 }
 
 // Return path length to closest cheese, putting into account walls and stuff.
-int path_length(double gr[graph_size][4], int mouse_loc[2], int cheese_loc[][2],
-                int cheeses) {
+int path_length(double gr[graph_size][4], int mouse_loc[2], int cheese_loc[2]) {
   Cord mouse_cord = {mouse_loc[0], mouse_loc[1]};
   int came_from[graph_size];
   bool visited[graph_size];
   memset(visited, false, sizeof(visited));
 
-  Deque *deque = Deque_new();
+  MinHeap *min_heap = MinHeap_new();
   visited[cord_to_index(mouse_cord)] = true;
-  Deque_push_front(deque, mouse_cord);
+  MinHeap_insert(min_heap, mouse_cord, 0);
 
-  while (deque->size > 0) {
-    Cord cord = Deque_pop_back(deque);
-    if (is_cord_in_cords(cord, cheese_loc, cheeses)) {
+  while (min_heap->size > 0) {
+    Cord cord = MinHeap_pop(min_heap);
+    if (cord.x == cheese_loc[0] && cord.y == cheese_loc[1]) {
       // Found cheese - time step is done.
       const int kStartIndex = cord_to_index(mouse_cord);
       int goal_index = cord_to_index(cord);
@@ -174,7 +135,7 @@ int path_length(double gr[graph_size][4], int mouse_loc[2], int cheese_loc[][2],
       for (path_size = 0; goal_index != kStartIndex; ++path_size) {
         goal_index = came_from[goal_index];
       }
-      Deque_dtor(deque);
+      MinHeap_dtor(min_heap);
       return path_size;
     }
     for (int direction = 0; direction < 4; ++direction) {
@@ -186,10 +147,10 @@ int path_length(double gr[graph_size][4], int mouse_loc[2], int cheese_loc[][2],
       }
       visited[cord_to_index(kNextCord)] = true;
       came_from[cord_to_index(kNextCord)] = cord_to_index(cord);
-      Deque_push_front(deque, kNextCord);
+      MinHeap_insert(min_heap, kNextCord, abs(kNextCord.x - mouse_loc[0]) + abs(kNextCord.y - mouse_loc[1]));
     }
   }
-  Deque_dtor(deque);
+  MinHeap_dtor(min_heap);
   return graph_size; // Path can't be any farther than graph_size
 }
 
@@ -411,9 +372,6 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
                         cheeses, next_mouse_loc, mode, utility, (agentId + 1) % (1 + cats),
                         depth + 1, maxDepth, alpha, beta);
       minmax_cost[next_mouse_loc[0][0]][next_mouse_loc[0][1]] = kEval;
-      if (kEval == DBL_MIN) {
-        printf("THIS SHOULDN'T HAPPEN\n");
-      }
       if (kEval > max_eval) {
         max_eval = kEval;
         if (depth == 0) {
@@ -521,26 +479,33 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
       best_cheese = cheese;
     }
   }
-  int closest_cat = INT_MAX;
+  double closest_cat = DBL_MAX;
   for (int cat = 0; cat < cats; ++cat) {
-    closest_cat = fmin(closest_cat, abs(mouse_loc[0][0] - cat_loc[cat][0]) +
-                                        abs(mouse_loc[0][1] - cat_loc[cat][1]));
+    closest_cat =
+        fmin(closest_cat, pow(pow(mouse_loc[0][0] - cat_loc[cat][0], 2) +
+                              pow(mouse_loc[0][1] - cat_loc[cat][1], 2), 0.5));
   }
-  int best_cheese_dist = abs(mouse_loc[0][0] - cheese_loc[best_cheese][0]) +
-                         abs(mouse_loc[0][1] - cheese_loc[best_cheese][1]);
+  if (closest_cat < 10) {
+    closest_cat = -2 * closest_cat;
+  }
+  double best_cheese_dist = path_length(gr, mouse_loc[0], cheese_loc[best_cheese]);
+  best_cheese_dist *= 10;
+  // int best_cheese_dist = pow(mouse_loc[0][0] - cheese_loc[best_cheese][0], 2) +
+  //                        pow(mouse_loc[0][1] - cheese_loc[best_cheese][1], 2);
   Cord mouse_cord = {mouse_loc[0][0], mouse_loc[0][1]};
   double res;
   if (is_cord_in_cords(mouse_cord, cat_loc, cats)) {
     res  = -graph_size + depth;
-  } else if (cheeses == 1 && is_cord_in_cords(mouse_cord, cheese_loc, cheeses)) {
-    res =  3 * graph_size - depth;
-  } else if (best_cheese_dist < closest_cat) {
-    res = 2 * graph_size - depth - best_cheese_dist + 2 * closest_cat;
+  } else if (is_cord_in_cords(mouse_cord, cheese_loc, cheeses)) {
+    if (cheeses == 1) {
+      res =  3 * graph_size - depth;
+    } else {
+      res = 2 * graph_size - depth - best_cheese_dist + 30 * closest_cat;
+    }
+  } else if (best_cheese_dist < closest_cat && cheeses == 1) {
+    res = 1.5 * (double)graph_size - depth - best_cheese_dist + 30 * closest_cat;
   } else {
-    res = graph_size - depth - best_cheese_dist + 2 * closest_cat;
-  }
-  if (res > 10000) {
-  printf("res: %lf\n", res);
+    res = graph_size - depth - best_cheese_dist + 30 * closest_cat;
   }
   return res;
 }

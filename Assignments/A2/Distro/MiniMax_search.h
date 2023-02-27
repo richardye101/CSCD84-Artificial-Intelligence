@@ -45,25 +45,22 @@ typedef struct Cord {
   int x, y;
 } Cord;
 
-typedef struct DequeItem {
+typedef struct HeapItem {
   Cord cord;
-  struct DequeItem *prev, *next;
-} DequeItem;
+  int priority;
+} HeapItem;
 
-typedef struct Deque {
-  DequeItem *head;
-  DequeItem *tail;
+typedef struct MinHeap {
+  HeapItem data[graph_size];
   int size;
-} Deque;
+} MinHeap;
 // BEGIN STRUCT DEFS
 //
 // BEGIN STRUCT HELPER FUNCTION PROTOS
-DequeItem *DequeItem_new(Cord cord);
-Deque *Deque_new(void);
-void Deque_push_front(Deque *deque, Cord cord);
-void Deque_push_back(Deque *deque, Cord cord);
-Cord Deque_pop_front(Deque *deque); 
-Cord Deque_pop_back(Deque* deque);
+MinHeap* MinHeap_new(void);
+void MinHeap_insert(MinHeap *min_heap, Cord cord, int priority);
+Cord MinHeap_pop(MinHeap *min_heap);
+void MinHeap_dtor(MinHeap *min_heap);
 // END STRUCT HELPER FUNCTION PROTOS
 
 // BEGIN HELPER FUNCTION PROTOS
@@ -83,7 +80,7 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
                int agentId, int depth, int maxDepth, double alpha, double beta);
 
 int path_length(double gr[graph_size][4], int mouse_loc[2],
-                int cheese_loc[][2], int cheeses);
+                int cheese_loc[2]);
 
 double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
                int cats, int cheeses, int depth, double gr[graph_size][4]);
