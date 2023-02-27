@@ -24,6 +24,7 @@
 */
 
 #include "MiniMax_search.h"
+#include "board_layout.h"
 
 // BEGIN STRUCT HELPER FUNCTION DEFS
 DequeItem *DequeItem_new(Cord cord) {
@@ -488,33 +489,20 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
                  These arguments are as described in A1. Do have a look at your
      solution!
   */
-  // double dist = DBL_MIN;
-  // for (int c = 0; c < cheeses; ++c) {
-  //   double md = pow(mouse_loc[0][0] - cheese_loc[c][0], 2) +
-  //            pow(mouse_loc[0][1] - cheese_loc[c][1], 2);
-  //   dist = fmax(dist, 1000-md);
-  // }
-  // return dist;
-  int m_path_size = path_length(gr, mouse_loc[0], cheese_loc, cheeses);
-  int sum_c_paths = 0;
   int closest_cat = INT_MAX;
-  for(int c = 0; c < cats; ++c){
-    const int kPathLength = path_length(gr, cat_loc[c], mouse_loc, 1);
-    sum_c_paths += kPathLength;
-    closest_cat = fmin(closest_cat, kPathLength);
+  for (int cat = 0; cat < cats; ++cat) {
+    closest_cat = fmin(closest_cat, abs(mouse_loc[0][0] - cat_loc[cat][0]) +
+                                        abs(mouse_loc[0][1] - cat_loc[cat][1]));
   }
-  int farthest_closest_cat = INT_MIN;
-  int best_cheese;
   assert(cheeses > 0);
-  for (int cheese = 0; cheese < cheeses; ++cheese) {
-    const int kPathLength = path_length(gr, cheese_loc[cheese], cat_loc, cats);
-    if (kPathLength > farthest_closest_cat) {
-      farthest_closest_cat = kPathLength;
-      best_cheese = cheese;
-    }
+  const int kClosestCheese = path_length(gr, mouse_loc[0], cheese_loc, cheeses);
+  Cord mouse_cord = {mouse_loc[0][0], mouse_loc[0][1]};
+  if (kClosestCheese < closest_cat ||
+      is_cord_in_cords(mouse_cord, cheese_loc,
+                       cheeses)) {
+    return graph_size << 1;
   }
-
-  return (-3*((m_path_size - size_X) - sum_c_paths / cats) + closest_cat);
+  return graph_size - kClosestCheese + 2 * closest_cat;
 }
 
 int checkForTerminal(int mouse_loc[1][2], int cat_loc[10][2],
