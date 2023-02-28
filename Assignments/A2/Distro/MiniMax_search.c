@@ -509,8 +509,12 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
     average_cat_loc[0] += cat_loc[cat][0] / (double)cats;
     average_cat_loc[1] += cat_loc[cat][1] / (double)cats;
   }
-  double best_cheese_dist =
-      cheese_distance.cheese_distance[0][loc_to_index(mouse_loc[0])];
+  double best_cheese_dist = graph_size;
+  for (int cheese=0; cheese<cheeses; ++cheese) {
+    best_cheese_dist = fmin(
+        best_cheese_dist,
+        cheese_distance.cheese_distance[cheese][loc_to_index(mouse_loc[0])]);
+  }
   double closest_cat = graph_size;
   for (int cat = 0; cat < cats; ++cat) {
     closest_cat =
@@ -527,7 +531,7 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
   } else if (is_cord_in_cords(mouse_cord, cheese_loc, cheeses)) {
       res =  3 * graph_size - depth;
   } else {
-    res = graph_size - depth - 5 * best_cheese_dist + 1 * closest_cat;
+    res = graph_size - depth - 2 * best_cheese_dist + 3 * closest_cat;
   }
     // printf("%lf %lf %lf\n", best_cheese_dist, closest_cat, res);
   return res;
