@@ -195,7 +195,7 @@ void precompute_cheese_distance(double gr[graph_size][4], int cheese_loc[10][2],
       Cord cord = Deque_pop_front(deque);
       for (int direction = 0; direction < 4; ++direction) {
         Cord next_cord = get_next_cord(cord, direction);
-        if (!is_cord_valid(next_cord) || !gr[cord_to_index(cord)] ||
+        if (!is_cord_valid(next_cord) || !gr[cord_to_index(cord)][direction] ||
             visited[cord_to_index(next_cord)]) {
           continue;
         }
@@ -505,7 +505,7 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
     cheese_distance.cheeses = cheeses;
   }
   double average_cat_loc[2] = {0, 0};
-  for (int cat=0; cat<cats; ++cat) {
+  for (int cat = 0; cat < cats; ++cat) {
     average_cat_loc[0] += cat_loc[cat][0] / (double)cats;
     average_cat_loc[1] += cat_loc[cat][1] / (double)cats;
   }
@@ -525,15 +525,9 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
   if (is_cord_in_cords(mouse_cord, cat_loc, cats)) {
     res  = -2 * graph_size + depth;
   } else if (is_cord_in_cords(mouse_cord, cheese_loc, cheeses)) {
-    if (cheeses == 1) {
       res =  3 * graph_size - depth;
-    } else {
-      res = 2 * graph_size - depth - 2 * best_cheese_dist + closest_cat;
-    }
-  } else if (best_cheese_dist < closest_cat && cheeses == 1) {
-    res = 1.5 * (double)graph_size - depth - 2 * best_cheese_dist +  closest_cat;
   } else {
-    res = graph_size - depth - 2 * best_cheese_dist + 5 * closest_cat;
+    res = graph_size - depth - 5 * best_cheese_dist + 1 * closest_cat;
   }
     // printf("%lf %lf %lf\n", best_cheese_dist, closest_cat, res);
   return res;
