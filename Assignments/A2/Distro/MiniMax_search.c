@@ -188,14 +188,14 @@ void precompute_cheese_distance(double gr[graph_size][4], int cheese_loc[10][2],
            sizeof(cheese_distance.cheese_distance[cheese]));
     memset(visited, false, sizeof(visited));
     Cord cheese_cord = {cheese_loc[cheese][0], cheese_loc[cheese][1]};
-    cheese_distance.cheese_distance[cheese][loc_to_index(cheese_loc[cheese])] =
-        0;
+    cheese_distance.cheese_distance[cheese][cord_to_index(cheese_cord)] = 0;
+    visited[cord_to_index(cheese_cord)] = true;
     Deque_push_back(deque, cheese_cord);
     while (deque->size > 0) {
       Cord cord = Deque_pop_front(deque);
       for (int direction =0; direction < 4; ++ direction) {
         Cord next_cord = get_next_cord(cord, direction);
-        if (!is_cord_valid(next_cord) || !gr[cord_to_index(cord)]) {
+        if (!is_cord_valid(next_cord) || !gr[cord_to_index(cord)] || visited[cord_to_index(next_cord)]) {
           continue;
         }
         cheese_distance.cheese_distance[cheese][cord_to_index(next_cord)] =
