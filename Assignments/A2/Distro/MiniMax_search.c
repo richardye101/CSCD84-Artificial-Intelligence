@@ -437,7 +437,7 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
              path[0][1], cheeses, checked, max_eval);
     }
     if (checked == 0) {
-      printf("CAt checked 0\n");
+      // printf("CAt checked 0\n");
     }
     return max_eval;
   } else {
@@ -469,7 +469,7 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
       }
     }
     if (checked == 0) {
-      printf("CAt checked 0\n");
+      // printf("CAt checked 0\n");
     }
     return min_eval;
   }
@@ -509,13 +509,11 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
     average_cat_loc[0] += cat_loc[cat][0] / (double)cats;
     average_cat_loc[1] += cat_loc[cat][1] / (double)cats;
   }
-  int best_cheese = 0;
-  double best_angle = 0;
-  double mouse_loc_dbl[2] = {mouse_loc[0][0], mouse_loc[0][1]};
+  double best_cheese_dist = graph_size;
   for (int cheese=0; cheese<cheeses; ++cheese) {
-    double cheese_loc_dbl[2] = {cheese_loc[cheese][0], cheese_loc[cheese][1]};
-    double angle =
-        angle_three_points(average_cat_loc, mouse_loc_dbl, cheese_loc_dbl);
+    best_cheese_dist = fmin(
+        best_cheese_dist,
+        cheese_distance.cheese_distance[cheese][loc_to_index(mouse_loc[0])]);
   }
   double closest_cat = graph_size;
   for (int cat = 0; cat < cats; ++cat) {
@@ -527,9 +525,6 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
   // int best_cheese_dist = pow(mouse_loc[0][0] - cheese_loc[best_cheese][0], 2) +
   //                        pow(mouse_loc[0][1] - cheese_loc[best_cheese][1], 2);
   Cord mouse_cord = {mouse_loc[0][0], mouse_loc[0][1]};
-  double best_cheese_dist =
-      cheese_distance
-          .cheese_distance[best_cheese][loc_to_index(cheese_loc[best_cheese])];
   double res;
   if (is_cord_in_cords(mouse_cord, cat_loc, cats)) {
     res  = -2 * graph_size + depth;
@@ -544,7 +539,7 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
   } else {
     res = graph_size - depth - 2 * best_cheese_dist + 0.2 * closest_cat;
   }
-    printf("%lf %lf %lf\n", best_cheese_dist, closest_cat, res);
+    // printf("%lf %lf %lf\n", best_cheese_dist, closest_cat, res);
   return res;
 }
 
