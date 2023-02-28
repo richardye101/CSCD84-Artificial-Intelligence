@@ -390,8 +390,8 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
         continue;
       }
       if (next_mouse_loc[0][0] == -1) {
-        printf("Next mouse loc: %d %d\n", next_mouse_loc[0][0],
-               next_mouse_loc[0][1]);
+        //printf("Next mouse loc: %d %d\n", next_mouse_loc[0][0],
+               //next_mouse_loc[0][1]);
       }
       ++checked;
       const double kEval =
@@ -417,11 +417,11 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
       }
     }
     if (depth == 0) {
-      printf("Next step: %d %d | Num Cheeses: %d | Num checked locations: %d | Max Eval: %lf\n", path[0][0],
-             path[0][1], cheeses, checked, max_eval);
+      //printf("Next step: %d %d | Num Cheeses: %d | Num checked locations: %d | Max Eval: %lf\n", path[0][0],
+             //path[0][1], cheeses, checked, max_eval);
     }
     if (checked == 0) {
-      printf("CAt checked 0\n");
+      //printf("Cat checked 0\n");
     }
     return max_eval;
   } else {
@@ -453,7 +453,7 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
       }
     }
     if (checked == 0) {
-      printf("CAt checked 0\n");
+      //printf("Cat checked 0\n");
     }
     return min_eval;
   }
@@ -483,9 +483,10 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
 
                  These arguments are as described in A1. Do have a look at your
      solution!
-  */
-  if (cheese_distance.cheeses != cheeses) {
-    precompute_cheese_distance(gr, cheese_loc, cheeses);
+  */  
+if (cheese_distance.cheeses != cheeses) {
+    printf("Cheese_distance %d, cheeses %d\n", cheese_distance.cheeses, cheeses);
+	precompute_cheese_distance(gr, cheese_loc, cheeses);
     cheese_distance.cheeses = cheeses;
   }
   double average_cat_angle=0;
@@ -527,7 +528,7 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
   Cord mouse_cord = {mouse_loc[0][0], mouse_loc[0][1]};
   double best_cheese_dist =
       cheese_distance
-          .cheese_distance[best_cheese][loc_to_index(cheese_loc[best_cheese])];
+          .cheese_distance[best_cheese][loc_to_index(mouse_loc[0])];
   double res;
   if (is_cord_in_cords(mouse_cord, cat_loc, cats)) {
     res  = -2 * graph_size + depth;
@@ -538,11 +539,12 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
       res = 2 * graph_size - depth - 2 * best_cheese_dist + 10 * closest_cat;
     }
   } else if (best_cheese_dist < closest_cat && cheeses == 1) {
-    res = 1.5 * (double)graph_size - depth - 2 * best_cheese_dist + 0.2 * closest_cat;
+    res = 1.5 * (double)graph_size - depth - 1 * best_cheese_dist + 1 * closest_cat;
   } else {
-    res = graph_size - depth - 2 * best_cheese_dist + 0.2 * closest_cat;
+    printf("Best Cheese index %d\n", best_cheese);
+    res = graph_size - depth - 1 * best_cheese_dist + 1 * closest_cat;
   }
-    printf("%lf %lf %lf\n", best_cheese_dist, closest_cat, res);
+    //printf("%lf %lf %lf\n", best_cheese_dist, closest_cat, res);
   return res;
 }
 
