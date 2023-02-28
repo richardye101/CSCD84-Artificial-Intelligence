@@ -26,51 +26,91 @@
 #include "MiniMax_search.h"
 #include "board_layout.h"
 
+CheeseDistance cheese_distance = {.prev_cheeses = 0};
+
 // BEGIN STRUCT HELPER FUNCTION DEFS
-MinHeap* MinHeap_new(void) {
-  MinHeap *min_heap = (MinHeap *)malloc(sizeof(MinHeap));
-  assert(min_heap != NULL);
-  min_heap->size = 0;
-  return min_heap;
+DequeItem *DequeItem_new(Cord cord) {
+  DequeItem *deque_item = (DequeItem*)malloc(sizeof(DequeItem));
+  assert(deque_item != NULL);
+  deque_item->cord = cord;
+  deque_item->prev = NULL;
+  deque_item->next = NULL;
+  return deque_item;
 }
 
-void MinHeap_insert(MinHeap* min_heap, Cord cord, double priority) {
-  assert(min_heap != NULL);
-  assert(min_heap->size != graph_size);
-  int i;
-  for (i = min_heap->size; i != 0 && min_heap->data[(i - 1) / 2].priority > priority;
-       i = (i - 1) / 2) {
-    min_heap->data[i] = min_heap->data[(i - 1) / 2];
-  }
-  min_heap->data[i].cord = cord;
-  min_heap->data[i].priority = priority;
-  ++min_heap->size;
+Deque *Deque_new(void) {
+  Deque *deque = (Deque *)malloc(sizeof(Deque));
+  assert(deque != NULL);
+  deque->head = NULL;
+  deque->tail = NULL;
+  deque->size = 0;
+  return deque;
 }
 
-Cord MinHeap_pop(MinHeap *min_heap) {
-  assert(min_heap != NULL);
-  assert(min_heap->size != 0);
-  Cord cord = min_heap->data[0].cord;
-  min_heap->data[0] = min_heap->data[min_heap->size - 1];
-  --min_heap->size;
-  for (int i = 0, l = 1, r = 2, next_i;
-       l < min_heap->size &&
-       min_heap->data[next_i =
-                          (r >= min_heap->size || (min_heap->data[r].priority >
-                                                   min_heap->data[l].priority))
-                              ? l
-                              : r]
-               .priority < min_heap->data[i].priority;
-       l = 2 * i + 1, r = 2 * i + 2, i = next_i) {
-    HeapItem temp = min_heap->data[i];
-    min_heap->data[i] = min_heap->data[next_i];
-    min_heap->data[next_i] = temp;
+void Deque_push_front(Deque *deque, Cord cord) {
+  assert(deque != NULL);
+  DequeItem *deque_item = DequeItem_new(cord);
+  deque_item->next = deque->head;
+  deque_item->prev = NULL;
+  if (deque->tail == NULL) {
+    deque->head = deque->tail = deque_item;
+  } else {
+    deque->head->prev = deque_item;
+    deque->head = deque_item;
   }
+  ++deque->size;
+}
+
+void Deque_push_back(Deque *deque, Cord cord) {
+  assert(deque != NULL);
+  DequeItem *deque_item = DequeItem_new(cord);
+  deque_item->prev = deque->tail;
+  deque_item->next = NULL;
+  if (deque->head == NULL) {
+    deque->head = deque->tail = deque_item;
+  } else {
+    deque->tail->next = deque_item;
+    deque->tail = deque_item;
+  }
+  ++deque->size;
+}
+
+Cord Deque_pop_front(Deque *deque) {
+  assert(deque != NULL);
+  assert(deque->size != 0);
+  Cord cord = deque->head->cord;
+  DequeItem *deque_item = deque->head;
+  if (deque->head == deque->tail) {
+    deque->head = deque->tail = NULL;
+  } else {
+    deque->head = deque->head->next;
+  }
+  free(deque_item);
+  --deque->size;
   return cord;
 }
 
-void MinHeap_dtor(MinHeap *min_heap) {
-  free(min_heap);
+Cord Deque_pop_back(Deque* deque) {
+  assert(deque != NULL);
+  assert(deque->size != 0);
+  Cord cord = deque->tail->cord;
+  DequeItem* deque_item = deque->tail;
+  if (deque->head == deque->tail) {
+    deque->head = deque->tail = NULL;
+  } else {
+    deque->tail = deque->tail->prev;
+  }
+  free(deque_item);
+  --deque->size;
+  return cord;
+}
+
+void Deque_dtor(Deque* deque) {
+  assert(deque != NULL);
+  while (deque->size > 0) {
+    Deque_pop_back(deque);
+  }
+  free(deque);
 }
 // BEGIN HELPER FUNCTION DEFS
 Cord get_next_cord(Cord cord, int direction) {
@@ -113,48 +153,6 @@ int is_cord_in_cords(Cord cord, int cords[][2], int num_cords) {
   return false;
 }
 
-// Return path length to closest cheese, putting into account walls and stuff.
-int path_length(double gr[graph_size][4], int mouse_loc[2], int cheese_loc[2]) {
-  Cord mouse_cord = {mouse_loc[0], mouse_loc[1]};
-  int came_from[graph_size];
-  bool visited[graph_size];
-  memset(visited, false, sizeof(visited));
-
-  MinHeap *min_heap = MinHeap_new();
-  visited[cord_to_index(mouse_cord)] = true;
-  MinHeap_insert(min_heap, mouse_cord, 0);
-
-  while (min_heap->size > 0) {
-    Cord cord = MinHeap_pop(min_heap);
-    if (cord.x == cheese_loc[0] && cord.y == cheese_loc[1]) {
-      // Found cheese - time step is done.
-      const int kStartIndex = cord_to_index(mouse_cord);
-      int goal_index = cord_to_index(cord);
-      // find the length of the path
-      int path_size;
-      for (path_size = 0; goal_index != kStartIndex; ++path_size) {
-        goal_index = came_from[goal_index];
-      }
-      MinHeap_dtor(min_heap);
-      return path_size;
-    }
-    for (int direction = 0; direction < 4; ++direction) {
-      const Cord kNextCord = get_next_cord(cord, direction);
-      // Ensure valid, not visited, not wall, and not a cat.
-      if (!is_cord_valid(kNextCord) || visited[cord_to_index(kNextCord)] ||
-          !gr[cord_to_index(cord)][direction]) {
-        continue;
-      }
-      visited[cord_to_index(kNextCord)] = true;
-      came_from[cord_to_index(kNextCord)] = cord_to_index(cord);
-      MinHeap_insert(min_heap, kNextCord, 
-		      pow(pow(kNextCord.x - cheese_loc[0], 2) + pow(kNextCord.y - cheese_loc[1], 2), 0.5));
-    }
-  }
-  MinHeap_dtor(min_heap);
-  return graph_size; // Path can't be any farther than graph_size
-}
-
 // BEGIN HELPER FUNCTION DEFS
 int loc_to_index(int loc[2]) { return loc[0] + loc[1] * size_X; }
 void set_next_loc(int next_loc[2], int loc[1][2], int direction) {
@@ -178,6 +176,34 @@ void set_next_loc(int next_loc[2], int loc[1][2], int direction) {
 }
 int is_loc_valid(int loc[2]) {
   return 0 <= loc[0] && loc[0] < size_X && 0 <= loc[1] && loc[1] < size_Y;
+}
+void precompute_cheese_distance(int gr[graph_size][4], int cheese_loc[10][2],
+                                int cheeses) {
+  Deque* deque = Deque_new();
+  for (int cheese =0; cheese < cheeses; ++cheese) {
+    bool visited[graph_size];
+    memset(cheese_distance.cheese_distance[cheese], INT_MAX,
+           sizeof(cheese_distance.cheese_distance[cheese]));
+    memset(visited, false, sizeof(visited));
+    Cord cheese_cord = {cheese_loc[cheese][0], cheese_loc[cheese][1]};
+    cheese_distance.cheese_distance[cheese][loc_to_index(cheese_loc[cheese])] =
+        0;
+    Deque_push_back(deque, cheese_cord);
+    while (deque->size > 0) {
+      Cord cord = Deque_pop_front(deque);
+      for (int direction =0; direction < 4; ++ direction) {
+        Cord next_cord = get_next_cord(cord, direction);
+        if (!is_cord_valid(next_cord) || !gr[cord_to_index(cord)]) {
+          continue;
+        }
+        cheese_distance.cheese_distance[cheese][cord_to_index(next_cord)] =
+            cheese_distance.cheese_distance[cheese][cord_to_index(cord)] + 1;
+        visited[cord_to_index(next_cord)] = true;
+        Deque_push_back(deque, next_cord);
+      }
+    }
+  }
+  Deque_dtor(deque);
 }
 // END HELPER FUNCTION DEFS
 
@@ -493,7 +519,9 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
   // int best_cheese_dist = pow(mouse_loc[0][0] - cheese_loc[best_cheese][0], 2) +
   //                        pow(mouse_loc[0][1] - cheese_loc[best_cheese][1], 2);
   Cord mouse_cord = {mouse_loc[0][0], mouse_loc[0][1]};
-  double best_cheese_dist = path_length(gr, mouse_loc[0], cheese_loc[best_cheese]);    
+  double best_cheese_dist =
+      cheese_distance
+          .cheese_distance[best_cheese][loc_to_index(cheese_loc[best_cheese])];
   double res;
   if (is_cord_in_cords(mouse_cord, cat_loc, cats)) {
     res  = -2 * graph_size + depth;

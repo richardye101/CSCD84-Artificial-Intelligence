@@ -45,28 +45,40 @@ typedef struct Cord {
   int x, y;
 } Cord;
 
-typedef struct HeapItem {
+typedef struct DequeItem {
   Cord cord;
-  double priority;
-} HeapItem;
+  struct DequeItem *prev, *next;
+} DequeItem;
 
-typedef struct MinHeap {
-  HeapItem data[graph_size];
+typedef struct Deque {
+  DequeItem *head;
+  DequeItem *tail;
   int size;
-} MinHeap;
+} Deque;
+
+typedef struct CheeseDistance {
+  int cheese_distance[10][graph_size];
+  int prev_cheeses;
+  int curr_cheeses;
+} CheeseDistance;
 // BEGIN STRUCT DEFS
 //
 // BEGIN STRUCT HELPER FUNCTION PROTOS
-MinHeap* MinHeap_new(void);
-void MinHeap_insert(MinHeap *min_heap, Cord cord, double priority);
-Cord MinHeap_pop(MinHeap *min_heap);
-void MinHeap_dtor(MinHeap *min_heap);
+DequeItem *DequeItem_new(Cord cord);
+Deque *Deque_new(void);
+void Deque_push_front(Deque *deque, Cord cord);
+void Deque_push_back(Deque *deque, Cord cord);
+Cord Deque_pop_front(Deque *deque);
+Cord Deque_pop_back(Deque* deque);
+void Deque_dtor(Deque* deque);
 // END STRUCT HELPER FUNCTION PROTOS
 
 // BEGIN HELPER FUNCTION PROTOS
 int loc_to_index(int loc[2]);
 void set_next_loc(int next_loc[2], int loc[1][2], int direction);
 int is_loc_valid(int loc[2]);
+void precompute_cheese_distance(int gr[graph_size][4], int cheese_loc[10][2],
+                                int cheeses);
 // END HELPER FUNCTION PROTOS
 
 // Function prototypes for D84 - Unit 2 - MiniMax assignment solution
@@ -78,9 +90,6 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
                                  int mouse_loc[1][2], int cats, int cheeses,
                                  int depth, double gr[graph_size][4]),
                int agentId, int depth, int maxDepth, double alpha, double beta);
-
-int path_length(double gr[graph_size][4], int mouse_loc[2],
-                int cheese_loc[2]);
 
 double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
                int cats, int cheeses, int depth, double gr[graph_size][4]);
