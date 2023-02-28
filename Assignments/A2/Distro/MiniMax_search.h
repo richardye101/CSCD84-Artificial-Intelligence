@@ -58,8 +58,7 @@ typedef struct Deque {
 
 typedef struct CheeseDistance {
   int cheese_distance[10][graph_size];
-  int prev_cheeses;
-  int curr_cheeses;
+  int cheeses;
 } CheeseDistance;
 // BEGIN STRUCT DEFS
 //
@@ -77,7 +76,7 @@ void Deque_dtor(Deque* deque);
 int loc_to_index(int loc[2]);
 void set_next_loc(int next_loc[2], int loc[1][2], int direction);
 int is_loc_valid(int loc[2]);
-void precompute_cheese_distance(int gr[graph_size][4], int cheese_loc[10][2],
+void precompute_cheese_distance(double gr[graph_size][4], int cheese_loc[10][2],
                                 int cheeses);
 // END HELPER FUNCTION PROTOS
 

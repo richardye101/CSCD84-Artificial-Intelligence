@@ -26,7 +26,7 @@
 #include "MiniMax_search.h"
 #include "board_layout.h"
 
-CheeseDistance cheese_distance = {.prev_cheeses = 0};
+CheeseDistance cheese_distance = {.cheeses = 0};
 
 // BEGIN STRUCT HELPER FUNCTION DEFS
 DequeItem *DequeItem_new(Cord cord) {
@@ -174,10 +174,12 @@ void set_next_loc(int next_loc[2], int loc[1][2], int direction) {
       break;
   }
 }
+
 int is_loc_valid(int loc[2]) {
   return 0 <= loc[0] && loc[0] < size_X && 0 <= loc[1] && loc[1] < size_Y;
 }
-void precompute_cheese_distance(int gr[graph_size][4], int cheese_loc[10][2],
+
+void precompute_cheese_distance(double gr[graph_size][4], int cheese_loc[10][2],
                                 int cheeses) {
   Deque* deque = Deque_new();
   for (int cheese =0; cheese < cheeses; ++cheese) {
@@ -186,14 +188,14 @@ void precompute_cheese_distance(int gr[graph_size][4], int cheese_loc[10][2],
            sizeof(cheese_distance.cheese_distance[cheese]));
     memset(visited, false, sizeof(visited));
     Cord cheese_cord = {cheese_loc[cheese][0], cheese_loc[cheese][1]};
-    cheese_distance.cheese_distance[cheese][loc_to_index(cheese_loc[cheese])] =
-        0;
+    cheese_distance.cheese_distance[cheese][cord_to_index(cheese_cord)] = 0;
+    visited[cord_to_index(cheese_cord)] = true;
     Deque_push_back(deque, cheese_cord);
     while (deque->size > 0) {
       Cord cord = Deque_pop_front(deque);
       for (int direction =0; direction < 4; ++ direction) {
         Cord next_cord = get_next_cord(cord, direction);
-        if (!is_cord_valid(next_cord) || !gr[cord_to_index(cord)]) {
+        if (!is_cord_valid(next_cord) || !gr[cord_to_index(cord)] || visited[cord_to_index(next_cord)]) {
           continue;
         }
         cheese_distance.cheese_distance[cheese][cord_to_index(next_cord)] =
@@ -482,6 +484,10 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
                  These arguments are as described in A1. Do have a look at your
      solution!
   */
+  if (cheese_distance.cheeses != cheeses) {
+    precompute_cheese_distance(gr, cheese_loc, cheeses);
+    cheese_distance.cheeses = cheeses;
+  }
   double average_cat_angle=0;
   for (int cat=0; cat<cats; ++cat) {
     double dx = cat_loc[cat][0] - mouse_loc[0][0];
