@@ -372,9 +372,7 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
   // your code!
 
   // TODO(@Sam): Figure out how assigning "path" works
-  // path[0][0] = mouse_loc[0][0];
-  // path[0][1] = mouse_loc[0][1];
-  if(mouse_loc[0][0]==-1 && mouse_loc[0][1]==-1){  
+  if (mouse_loc[0][0] == -1 && mouse_loc[0][1] == -1) {
     return 0;
   }
   int checked = 0;
@@ -486,25 +484,27 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
   */
   double average_cat_angle=0;
   for (int cat=0; cat<cats; ++cat) {
-    double dy = cat_loc[cat][0] - mouse_loc[0][0];
-    double dx = cat_loc[cat][1] - mouse_loc[0][1];
+    double dx = cat_loc[cat][0] - mouse_loc[0][0];
+    double dy = cat_loc[cat][1] - mouse_loc[0][1];
     if (fabs(dx) < 0.01) {
       average_cat_angle += dy < 0 ? -M_PI / 2 : M_PI / 2;
     }
     average_cat_angle += atan(dy / dx);
   }
+  average_cat_angle /= (cats == 0) ? 1 : (double)cats;
   int best_cheese = 0;
   double best_angle = average_cat_angle;
   for (int cheese=0; cheese<cheeses; ++cheese) {
     double angle;
-    double dy = cheese_loc[cheese][0] - mouse_loc[0][0];
-    double dx = cheese_loc[cheese][1] - mouse_loc[0][1];
+    double dx = cheese_loc[cheese][0] - mouse_loc[0][0];
+    double dy = cheese_loc[cheese][1] - mouse_loc[0][1];
     if (fabs(dx) < 0.01) {
       angle = dy < 0 ? -M_PI / 2 : M_PI / 2;
     } else {
       angle = atan(dy / dx);
     }
-    if (fabs(angle - average_cat_angle) / (fabs(dx)+fabs(dy)) > fabs(best_angle - average_cat_angle)) {
+    if (fabs(angle + average_cat_angle) <
+        fabs(best_angle + average_cat_angle)) {
       best_angle = angle;
       best_cheese = cheese;
     }
