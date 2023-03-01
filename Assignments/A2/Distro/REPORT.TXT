@@ -4,15 +4,15 @@ Assignment 2 - MiniMax and Game Trees
 
 ________________________________________________
 
-Student Name 1 (last, first):
+Student Name 1 (last, first): Prokopchuk, Sam
 
 Student Name 2 (last, first):
 
-Student number 1:
+Student number 1: 1006570943
 
 Student number 2:
 
-UTORid 1:
+UTORid 1: prokopc3
 
 UTORid 2:
 
@@ -22,7 +22,7 @@ READ THIS AND SIGN YOUR NAME AT THE END:
 honesty and plaguarism. All work submitted as part
 of this assignment is my own.
 
-	Signed: _(student 1 name here)__	_(student 2 name here)__
+	Signed: _(Sam Prokopchuk)__	_(student 2 name here)__
 
 
 (-5 marks for failing to provide the identifying
@@ -41,10 +41,15 @@ but explain carefully when needed.
 2 .- (1 marks) Ignoring computation time, what is the effect of
      search depth (number of turns) on the chances of the mouse
      winning the game. 
+In general, the search depth increases the chance of the mouse winning the game.
+However, it's possible the utility function was "more-correct" at evaluating 
+depth k, than at depth k+1, for example.
 
 3 .- (1 marks) What situations will cause your mouse to lose?
      can these be fixed either with the utility function, or
      by changing the search depth? if so, how?
+The mouse will lose if:
+i.: It gets surrounded s.t. all its viable exits are occupied by cats.
 
 4 .- (1 marks) Compare cats with smartness=.8 against cats with
      smartness=1 - which are harder for your mouse to beat?
@@ -99,5 +104,4 @@ Marking:
 
 
 Total for A2:       / out of 50
-
 
