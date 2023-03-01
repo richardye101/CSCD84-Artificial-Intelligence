@@ -31,18 +31,15 @@
 
 #include "board_layout.h"
 
-// BEGIN DIRECTIONS
+// BEGIN CONST MACROS
 #define DIRECTION_UP 0
 #define DIRECTION_RIGHT 1
 #define DIRECTION_DOWN 2
 #define DIRECTION_LEFT 3
-// END DIRECTIONS
-
 #define BIG_DBL 1000000000.0
+// END CONST MACROS
 
 // BEGIN STRUCT DEFS
-
-// Deque will be used for both queue and stack
 typedef struct Cord {
   int x, y;
 } Cord;
@@ -64,26 +61,7 @@ typedef struct UtilCache {
   int cheeses;
   int target_cheese;
 } UtilCache;
-// BEGIN STRUCT DEFS
-//
-// BEGIN STRUCT HELPER FUNCTION PROTOS
-DequeItem *DequeItem_new(Cord cord);
-Deque *Deque_new(void);
-void Deque_push_front(Deque *deque, Cord cord);
-void Deque_push_back(Deque *deque, Cord cord);
-Cord Deque_pop_front(Deque *deque);
-Cord Deque_pop_back(Deque* deque);
-void Deque_dtor(Deque* deque);
-// END STRUCT HELPER FUNCTION PROTOS
-
-// BEGIN HELPER FUNCTION PROTOS
-int loc_to_index(int loc[2]);
-void set_next_loc(int next_loc[2], int loc[2], int direction);
-int is_loc_valid(int loc[2]);
-void precompute_cheese_distance(double gr[graph_size][4], int cheese_loc[10][2],
-                                int cheeses);
-double angle_three_points(double a[2], double b[2], double c[2]);
-// END HELPER FUNCTION PROTOS
+// END STRUCT DEFS
 
 // Function prototypes for D84 - Unit 2 - MiniMax assignment solution
 double MiniMax(double gr[graph_size][4], int path[1][2],
@@ -102,6 +80,30 @@ int checkForTerminal(int mouse_loc[1][2], int cat_loc[10][2],
                      int cheese_loc[10][2], int cats, int cheeses);
 // If you need to add any function prototypes yourself, you can do so *below* this line.
 
+// BEGIN STRUCT HELPER FUNCTION PROTOS
+DequeItem *DequeItem_new(Cord cord);
+Deque *Deque_new(void);
+void Deque_push_front(Deque *deque, Cord cord);
+void Deque_push_back(Deque *deque, Cord cord);
+Cord Deque_pop_front(Deque *deque);
+Cord Deque_pop_back(Deque* deque);
+void Deque_dtor(Deque* deque);
+// END STRUCT HELPER FUNCTION PROTOS
+
+// BEGIN HELPER FUNCTION PROTOS
+Cord get_next_cord(Cord cord, int direction); 
+Cord index_to_cord(int index); 
+int cord_to_index(Cord cord); 
+int is_index_valid(int index); 
+int is_cord_valid(Cord cord); 
+int equal_cords(Cord a, Cord b); 
+int is_cord_in_cords(Cord cord, int cords[][2], int num_cords); 
+int loc_to_index(int loc[2]); 
+void set_next_loc(int next_loc[2], int loc[2], int direction);
+int is_loc_valid(int loc[2]);
+void precompute_cheese_distance(double gr[graph_size][4], int cheese_loc[10][2],
+                                int cheeses);
+// END HELPER FUNCTION PROTOS
 
 #endif
 

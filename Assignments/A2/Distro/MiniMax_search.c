@@ -30,7 +30,7 @@ UtilCache util_cache = {.cheeses = 0, .target_cheese = -1};
 
 // BEGIN STRUCT HELPER FUNCTION DEFS
 DequeItem *DequeItem_new(Cord cord) {
-  DequeItem *deque_item = (DequeItem*)malloc(sizeof(DequeItem));
+  DequeItem *deque_item = (DequeItem *)malloc(sizeof(DequeItem));
   assert(deque_item != NULL);
   deque_item->cord = cord;
   deque_item->prev = NULL;
@@ -90,11 +90,11 @@ Cord Deque_pop_front(Deque *deque) {
   return cord;
 }
 
-Cord Deque_pop_back(Deque* deque) {
+Cord Deque_pop_back(Deque *deque) {
   assert(deque != NULL);
   assert(deque->size != 0);
   Cord cord = deque->tail->cord;
-  DequeItem* deque_item = deque->tail;
+  DequeItem *deque_item = deque->tail;
   if (deque->head == deque->tail) {
     deque->head = deque->tail = NULL;
   } else {
@@ -105,7 +105,7 @@ Cord Deque_pop_back(Deque* deque) {
   return cord;
 }
 
-void Deque_dtor(Deque* deque) {
+void Deque_dtor(Deque *deque) {
   assert(deque != NULL);
   while (deque->size > 0) {
     Deque_pop_back(deque);
@@ -158,20 +158,20 @@ int loc_to_index(int loc[2]) { return loc[0] + loc[1] * size_X; }
 void set_next_loc(int next_loc[2], int loc[2], int direction) {
   next_loc[0] = loc[0], next_loc[1] = loc[1];
   switch (direction) {
-    case DIRECTION_UP:
-      --next_loc[1];
-      break;
-    case DIRECTION_RIGHT:
-      ++next_loc[0];
-      break;
-    case DIRECTION_DOWN:
-      ++next_loc[1];
-      break;
-    case DIRECTION_LEFT:
-      --next_loc[0];
-      break;
-    default:
-      break;
+  case DIRECTION_UP:
+    --next_loc[1];
+    break;
+  case DIRECTION_RIGHT:
+    ++next_loc[0];
+    break;
+  case DIRECTION_DOWN:
+    ++next_loc[1];
+    break;
+  case DIRECTION_LEFT:
+    --next_loc[0];
+    break;
+  default:
+    break;
   }
 }
 
@@ -181,8 +181,8 @@ int is_loc_valid(int loc[2]) {
 
 void precompute_cheese_distance(double gr[graph_size][4], int cheese_loc[10][2],
                                 int cheeses) {
-  Deque* deque = Deque_new();
-  for (int cheese =0; cheese < cheeses; ++cheese) {
+  Deque *deque = Deque_new();
+  for (int cheese = 0; cheese < cheeses; ++cheese) {
     bool visited[graph_size];
     memset(util_cache.cheese_distance[cheese], INT_MAX,
            sizeof(util_cache.cheese_distance[cheese]));
@@ -209,18 +209,6 @@ void precompute_cheese_distance(double gr[graph_size][4], int cheese_loc[10][2],
   Deque_dtor(deque);
 }
 
-double angle_three_points(double a[2], double b[2], double c[2]) {
-  double ba[2] = {a[0] - b[0], a[1] - b[1]};
-  double bc[2] = {c[0] - b[0], c[1] - b[1]};
-  double num = ba[0] * bc[0] + ba[1] * bc[1];
-  double den = pow(pow(ba[0], 2) + pow(ba[1], 2), 0.5) +
-               pow(pow(bc[0], 2) + pow(bc[1], 2), 0.5);
-  if (fabs(den) < 0.001) {
-    return 0;
-  } else {
-    return acos(num / den);
-  }
-}
 // END HELPER FUNCTION DEFS
 
 double MiniMax(double gr[graph_size][4], int path[1][2],
@@ -362,8 +350,8 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
    *limited-depth BFS-like expansion. Once nodes below return values, your
    *function will propagate minimax utilities as per the minimax algorithm.
    *
-   *		Note that if alpha-beta pruning is specified, you must keep track
-   *of alphas and betas along the path.
+   *		Note that if alpha-beta pruning is specified, you must keep
+   *track of alphas and betas along the path.
    *
    *		You can use helper functions if it seems reasonable. Add them to
    *the MiniMax_search.h file and explain in your code why they are needed and
@@ -390,10 +378,9 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
   // TODO(@Sam): Figure out how assigning "path" works
   // path[0][0] = mouse_loc[0][0];
   // path[0][1] = mouse_loc[0][1];
-  if(mouse_loc[0][0]==-1 && mouse_loc[0][1]==-1){  
+  if (mouse_loc[0][0] == -1 && mouse_loc[0][1] == -1) {
     return 0;
   }
-  int checked = 0;
   if (depth >= maxDepth) {
     return utility(cat_loc, cheese_loc, mouse_loc, cats, cheeses, depth, gr);
   } else if (agentId == 0) {
@@ -402,17 +389,18 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
     int next_mouse_loc[1][2];
     for (int direction = 0; direction < 4; ++direction) {
       set_next_loc(next_mouse_loc[0], mouse_loc[0], direction);
-      if (!is_loc_valid(next_mouse_loc[0]) || !gr[loc_to_index(mouse_loc[0])][direction]) {
+      if (!is_loc_valid(next_mouse_loc[0]) ||
+          !gr[loc_to_index(mouse_loc[0])][direction]) {
         continue;
       }
-      ++checked;
       const double kEval =
           checkForTerminal(next_mouse_loc, cat_loc, cheese_loc, cats, cheeses)
               ? utility(cat_loc, cheese_loc, next_mouse_loc, cats, cheeses,
                         depth, gr)
               : MiniMax(gr, path, minmax_cost, cat_loc, cats, cheese_loc,
-                        cheeses, next_mouse_loc, mode, utility, (agentId + 1) % (1 + cats),
-                        depth + 1, maxDepth, alpha, beta);
+                        cheeses, next_mouse_loc, mode, utility,
+                        (agentId + 1) % (1 + cats), depth + 1, maxDepth, alpha,
+                        beta);
       minmax_cost[next_mouse_loc[0][0]][next_mouse_loc[0][1]] = kEval;
       if (kEval > max_eval) {
         max_eval = kEval;
@@ -428,13 +416,6 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
         }
       }
     }
-    if (depth == 0) {
-      // printf("Next step: %d %d | Num Cheeses: %d | Num checked locations: %d | Max Eval: %lf\n", path[0][0],
-      //        path[0][1], cheeses, checked, max_eval);
-    }
-    if (checked == 0) {
-      printf("Mouse checked 0\n");
-    }
     return max_eval;
   } else {
     // Cat - minimizing agent
@@ -444,31 +425,25 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
     memcpy(&next_cat_loc[0][0], &cat_loc[0][0], sizeof(next_cat_loc));
     for (int direction = 0; direction < 4; ++direction) {
       set_next_loc(next_cat_loc[kCatIndex], cat_loc[kCatIndex], direction);
-      if (!is_loc_valid(next_cat_loc[kCatIndex]) || !gr[loc_to_index(cat_loc[kCatIndex])][direction]) {
-        // printf("(%d, %d)=[%d]=>(%d, %d) | %d %f\n", cat_loc[kCatIndex][0],
-        //        cat_loc[kCatIndex][1], direction, next_cat_loc[kCatIndex][0],
-        //        next_cat_loc[kCatIndex][1], is_loc_valid(cat_loc[kCatIndex]),
-        //        gr[loc_to_index(cat_loc[kCatIndex])][direction]);
+      if (!is_loc_valid(next_cat_loc[kCatIndex]) ||
+          !gr[loc_to_index(cat_loc[kCatIndex])][direction]) {
         continue;
       }
-      ++checked;
-      min_eval =
-          fmin(min_eval,
-               checkForTerminal(mouse_loc, next_cat_loc, cheese_loc, cats, cheeses)
-                   ? utility(next_cat_loc, cheese_loc, mouse_loc, cats, cheeses,
-                             depth, gr)
-                   : MiniMax(gr, path, minmax_cost, next_cat_loc, cats, cheese_loc,
-                             cheeses, mouse_loc, mode, utility, (agentId + 1) % (1 + cats),
-                             depth + 1, maxDepth, alpha, beta));
+      min_eval = fmin(
+          min_eval,
+          checkForTerminal(mouse_loc, next_cat_loc, cheese_loc, cats, cheeses)
+              ? utility(next_cat_loc, cheese_loc, mouse_loc, cats, cheeses,
+                        depth, gr)
+              : MiniMax(gr, path, minmax_cost, next_cat_loc, cats, cheese_loc,
+                        cheeses, mouse_loc, mode, utility,
+                        (agentId + 1) % (1 + cats), depth + 1, maxDepth, alpha,
+                        beta));
       if (mode == 1) {
         beta = fmin(beta, min_eval);
         if (beta <= alpha) {
           break;
         }
       }
-    }
-    if (checked == 0) {
-      printf("Cat checked 0\n");
     }
     return min_eval;
   }
@@ -506,11 +481,10 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
     util_cache.target_cheese = -1;
   }
   if (util_cache.target_cheese == -1) {
-    printf("UPDATING TARGET CHEESE\n");
     int farthest_cat_distance = -10000;
     util_cache.target_cheese = 0;
-    for (int cheese=0; cheese < cheeses; ++cheese) {
-      for (int cat=0; cat<cats; ++cat) {
+    for (int cheese = 0; cheese < cheeses; ++cheese) {
+      for (int cat = 0; cat < cats; ++cat) {
         if (util_cache.cheese_distance[cheese][loc_to_index(cat_loc[cat])] >
             farthest_cat_distance) {
           farthest_cat_distance =
@@ -521,7 +495,7 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
     }
   }
   double average_cat_distance = 0;
-  for (int cat=0; cat < cats; ++cat) {
+  for (int cat = 0; cat < cats; ++cat) {
     const double kCatDistance =
         pow(pow((double)(mouse_loc[0][0] - cat_loc[cat][0]), 2) +
                 pow((double)(mouse_loc[0][1] - cat_loc[cat][1]), 2),
@@ -530,40 +504,14 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
   }
   Cord mouse_cord = {mouse_loc[0][0], mouse_loc[0][1]};
   if (is_cord_in_cords(mouse_cord, cat_loc, cats)) {
-     return -graph_size;
+    return -graph_size;
   } else if (is_cord_in_cords(mouse_cord, cheese_loc, cheeses)) {
     return graph_size - depth;
   }
-  return graph_size/2-util_cache.cheese_distance[util_cache.target_cheese]
-                                    [loc_to_index(mouse_loc[0])] + average_cat_distance / 10;
-  // double average_cat_distance = 0;
-  // double closest_cat_distance = DBL_MAX;
-  // for (int cat=0; cat < cats; ++cat) {
-  //   const double kCatDistance =
-  //       pow(pow((double)(mouse_loc[0][0] - cat_loc[cat][0]), 2) +
-  //               pow((double)(mouse_loc[0][1] - cat_loc[cat][1]), 2),
-  //           0.5);
-  //   average_cat_distance += kCatDistance / ((double)cats);
-  //   closest_cat_distance = fmin(closest_cat_distance, kCatDistance);
-  // }
-  // Cord mouse_cord = {mouse_loc[0][0], mouse_loc[0][1]};
-  // double res;
-  // const double kDepthDelta = ((double)depth) / 10;
-  // if (is_cord_in_cords(mouse_cord, cat_loc, cats)) {
-  //   res = kDepthDelta - graph_size;
-  // } else if (is_cord_in_cords(mouse_cord, cheese_loc, cheeses)) {
-  //   if (cheeses == 1) {
-  //     res = 2 * graph_size - kDepthDelta - target_cheese_distance +
-  //           average_cat_distance + 10 * closest_cat_distance;
-  //   } else {
-  //     res = graph_size - kDepthDelta - target_cheese_distance +
-  //           average_cat_distance + 10 * closest_cat_distance;
-  //   }
-  // } else {
-  //   res = graph_size - kDepthDelta - target_cheese_distance +
-  //         average_cat_distance + 10 * closest_cat_distance;
-  // }
-  // return res;
+  return graph_size / 2 -
+         util_cache.cheese_distance[util_cache.target_cheese]
+                                   [loc_to_index(mouse_loc[0])] +
+         average_cat_distance / 10;
 }
 
 int checkForTerminal(int mouse_loc[1][2], int cat_loc[10][2],
