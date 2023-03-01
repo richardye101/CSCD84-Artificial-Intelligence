@@ -45,7 +45,9 @@ but explain carefully when needed.
 2 .- (1 marks) Ignoring computation time, what is the effect of
      search depth (number of turns) on the chances of the mouse
      winning the game. 
-In general, the search depth increases the chance of the mouse winning the game.
+In general, the search depth increases the chance of the mouse winning the game. 
+It allows the game to play out with more turns therefore increasing the possibility 
+of reaching a goal state, or returning a more accurate utility value.
 However, it's possible the utility function was "more-correct" at evaluating 
 depth k, than at depth k+1, for example.
 
@@ -53,7 +55,11 @@ depth k, than at depth k+1, for example.
      can these be fixed either with the utility function, or
      by changing the search depth? if so, how?
 The mouse will lose if:
-i.: It gets surrounded s.t. all its viable exits are occupied by cats.
+- It gets surrounded s.t. all its viable paths to cheese are occupied by cats.
+- The mouse is headed in an optimal direction to the "best current" cheese but 
+fails to realize it would lead to the first case (being surrounded) after 
+obtaining this cheese. This can be fixed by increasing the search depth so the 
+mouse is aware this path leads to certain death, and pursue a different cheese. 
 
 4 .- (1 marks) Compare cats with smartness=.8 against cats with
      smartness=1 - which are harder for your mouse to beat?
@@ -61,12 +67,18 @@ i.: It gets surrounded s.t. all its viable exits are occupied by cats.
 
 5 .- (1 marks) Can the mouse be made unbeatable by having an
      optimal utility function?
-No, because there are only at most 10 cats and 10 cheeses which means that given a "bad" seed, the there could be no path to cheese where the mouse will not be met by a cat first.
+No, because there are only at most 10 cats and 10 cheeses which means that given
+ a "bad" seed, the there could be no path to cheese where the mouse will not be 
+met by a cat first. That is, if mouse starts off in a "bad" position such as 
+where it's surrounded by cats (q3) then there is no way it can win. 
 
 6 .- (2 bonus marks) Could a human playing the game in place
       of the mouse do better than your code? (yes, no, and
       a reasonable explanation of why)
-No, because the human would not have the information our mouse does, which is the shortest path to take to any given cheese, and which steps would result in certain failure.
+No, because the human would not have the information our mouse does, which is the 
+shortest path to take to any given cheese, and which steps would result in certain
+failure. A human may move the mouse assuming that it brings it closer to a cheese 
+but may fail to realize there actually is no path or that the cats have it surrounded.
 _____________________________________________________
 
 Mark with an 'x' where appropriate. If something is only
