@@ -4,17 +4,17 @@ Assignment 2 - MiniMax and Game Trees
 
 ________________________________________________
 
-Student Name 1 (last, first):
+Student Name 1 (last, first): Prokopchuk, Sam
 
-Student Name 2 (last, first):
+Student Name 2 (last, first): Ye, Rong Feng (Richard)
 
-Student number 1:
+Student number 1: 1006570943
 
-Student number 2:
+Student number 2: 1005035230
 
-UTORid 1:
+UTORid 1: prokopc3
 
-UTORid 2:
+UTORid 2: yerong1
 
 READ THIS AND SIGN YOUR NAME AT THE END:
 
@@ -22,7 +22,7 @@ READ THIS AND SIGN YOUR NAME AT THE END:
 honesty and plaguarism. All work submitted as part
 of this assignment is my own.
 
-	Signed: _(student 1 name here)__	_(student 2 name here)__
+	Signed: _(Sam Prokopchuk)__	_Richard Ye__
 
 
 (-5 marks for failing to provide the identifying
@@ -37,26 +37,71 @@ but explain carefully when needed.
      how their influence was evaluated and integrated into
      a single, meaningful value. Convince us that your utility
      makes sense!
+The utility function is designed in such a way that the required computation is
+essentially constant.
+We created a struct "UtilCache" to store precomputed distances to each cheese from every
+grid position.
+These "cheese_distance" property of this struct, is recalculated every time a cheese is eaten,
+so it always has the optimal path length at each cheese indexed correctly.
+We also track the "target" cheese, which is the current cheese we are trying to reach.
+This allows the utility function to calculate how good the current state is without any O(graph_size) searching.
+
+We also take into account the average distance from the mouse to all the cats, so the mouse is aware of its situation.
+
+The utility function will return:
+- (-graph_size) if the current state is one where the mouse is located at the same position as a cat
+- (graph_size-depth) if the current state is one where the mouse is located at the same position as a cat. It subtracts depth to reward finding a goal state at an earlier depth.
+- (graph_size/2 - target_cheese_distance + average_cat_distance) Otherwise.
+  - graph_size / 2 helps the minimax cost be slighly positive when in good positions,
+  - target_cheese_distance is subtracted as a lower distance to cheese is better.
+  - average_cat_distance is added as a lower average cat distance is a worse than being generally farther away from cats.
 
 2 .- (1 marks) Ignoring computation time, what is the effect of
      search depth (number of turns) on the chances of the mouse
      winning the game. 
+In general, the search depth increases the chance of the mouse winning the game. 
+It allows the game to play out with more turns therefore increasing the possibility 
+of reaching a goal state, or returning a more accurate utility value.
+However, it's possible the utility function was "more-correct" at evaluating 
+depth k, than at depth k+1, for example.
 
 3 .- (1 marks) What situations will cause your mouse to lose?
      can these be fixed either with the utility function, or
      by changing the search depth? if so, how?
+The mouse will lose if:
+- It gets surrounded s.t. all its viable paths to cheese are occupied by cats.
+- The mouse is headed in an optimal direction to the "best current" cheese but 
+fails to realize it would lead to the first case (being surrounded) after 
+obtaining this cheese. This can be fixed by increasing the search depth so the 
+mouse is aware this path leads to certain death, and pursue a different cheese. 
 
 4 .- (1 marks) Compare cats with smartness=.8 against cats with
      smartness=1 - which are harder for your mouse to beat?
      why do you think that is?
+Definitely the cats with smartness=1, as they always make the most optimal move. 
+On the other hand, the 0.8 cat might make a sub-optimal move, allowing our mouse to escape,
+for example, when it would have been cornered by 1 intelligence mice.
+
+On the other hand, it would seem the mice don't "work as a team" at 1 intelligence.
+It is theoretically possible then, that by not directly seeking the mouse (lower intelligence)
+the cats could inadvertently corner the mouse - when 1 intelligence cats wouldn't have. 
 
 5 .- (1 marks) Can the mouse be made unbeatable by having an
      optimal utility function?
+No, because there are only at most 5 cats and 10 cheeses which means that given
+ a "bad" seed, the there could be no path to cheese where the mouse will not be 
+met by a cat first. That is, if mouse starts off in a "bad" position such as 
+where it's surrounded by cats (q3) then there is no way it can win. 
 
 6 .- (2 bonus marks) Could a human playing the game in place
       of the mouse do better than your code? (yes, no, and
       a reasonable explanation of why)
+No, because the human would not have the information our mouse does, which is the 
+shortest path to take to any given cheese, and which steps would result in certain
+failure. A human may move the mouse assuming that it brings it closer to a cheese 
+but may fail to realize there actually is no path or that the cats have it surrounded.
 
+If the human had like 1 day to think per time step though, perhaps yes.
 _____________________________________________________
 
 Mark with an 'x' where appropriate. If something is only
@@ -65,12 +110,12 @@ doesn't work, or what problems exist.
 	
 	Complete/Working	Partial		Not done
 
-Utility
+Utility          x
  function
 
-MiniMax
+MiniMax          x
 
-Alpha/Beta
+Alpha/Beta       x
  pruning
 _____________________________________________________
 
@@ -99,5 +144,4 @@ Marking:
 
 
 Total for A2:       / out of 50
-
 

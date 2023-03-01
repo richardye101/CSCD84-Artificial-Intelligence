@@ -1,0 +1,13 @@
+idea 1:
+- run BFS for the cats to mouse, store path length as c_i for each ith cat
+- run BFS for the mouse to cheese, store path length as m 
+
+Let the mean of c_i be cbar
+
+The utility will be some function of these distances.
+I will use a negative cubic which gives larger utilities when m is smaller, and larger values when m is larger
+I will shift it to the right by 10, and divide by 3 (as a start)
+
+I will add cbar, which means the further the mouse is on average to the cat, the higher the utility.
+
+utility = -[ (m-10)/3 ]^3 + cbar
