@@ -534,7 +534,7 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
   } else if (is_cord_in_cords(mouse_cord, cheese_loc, cheeses)) {
     return graph_size - depth;
   }
-  return -util_cache.cheese_distance[util_cache.target_cheese]
+  return graph_size/2-util_cache.cheese_distance[util_cache.target_cheese]
                                     [loc_to_index(mouse_loc[0])] + average_cat_distance / 10;
   // double average_cat_distance = 0;
   // double closest_cat_distance = DBL_MAX;
