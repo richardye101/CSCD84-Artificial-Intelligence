@@ -155,8 +155,8 @@ int is_cord_in_cords(Cord cord, int cords[][2], int num_cords) {
 
 // BEGIN HELPER FUNCTION DEFS
 int loc_to_index(int loc[2]) { return loc[0] + loc[1] * size_X; }
-void set_next_loc(int next_loc[2], int loc[1][2], int direction) {
-  next_loc[0] = loc[0][0], next_loc[1] = loc[0][1];
+void set_next_loc(int next_loc[2], int loc[2], int direction) {
+  next_loc[0] = loc[0], next_loc[1] = loc[1];
   switch (direction) {
     case DIRECTION_UP:
       --next_loc[1];
@@ -401,7 +401,7 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
     double max_eval = DBL_MIN;
     int next_mouse_loc[1][2];
     for (int direction = 0; direction < 4; ++direction) {
-      set_next_loc(next_mouse_loc[0], mouse_loc, direction);
+      set_next_loc(next_mouse_loc[0], mouse_loc[0], direction);
       if (!is_loc_valid(next_mouse_loc[0]) || !gr[loc_to_index(mouse_loc[0])][direction]) {
         continue;
       }
@@ -419,6 +419,7 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
                         depth + 1, maxDepth, alpha, beta);
       minmax_cost[next_mouse_loc[0][0]][next_mouse_loc[0][1]] = kEval;
       if (kEval > max_eval) {
+        if (depth == 0) printf("kEval: %lf\n", kEval);
         max_eval = kEval;
         if (depth == 0) {
           path[0][0] = next_mouse_loc[0][0];
@@ -437,30 +438,33 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
              path[0][1], cheeses, checked, max_eval);
     }
     if (checked == 0) {
-      // printf("CAt checked 0\n");
+      printf("Mouse checked 0\n");
     }
     return max_eval;
   } else {
     // Cat - minimizing agent
     const int kCatIndex = agentId % cats;
     double min_eval = DBL_MAX;
-    int prev_cat_loc[1][2] = {{cat_loc[kCatIndex][0], cat_loc[kCatIndex][1]}};
+    int next_cat_loc[10][2];
+    memcpy(&next_cat_loc[0][0], &cat_loc[0][0], sizeof(next_cat_loc));
     for (int direction = 0; direction < 4; ++direction) {
-      set_next_loc(cat_loc[kCatIndex], prev_cat_loc, direction);
-      if (!is_loc_valid(cat_loc[kCatIndex]) || !gr[loc_to_index(prev_cat_loc[0])][direction]) {
+      set_next_loc(next_cat_loc[kCatIndex], cat_loc[kCatIndex], direction);
+      if (!is_loc_valid(next_cat_loc[kCatIndex]) || !gr[loc_to_index(cat_loc[kCatIndex])][direction]) {
+        // printf("(%d, %d)=[%d]=>(%d, %d) | %d %f\n", cat_loc[kCatIndex][0],
+        //        cat_loc[kCatIndex][1], direction, next_cat_loc[kCatIndex][0],
+        //        next_cat_loc[kCatIndex][1], is_loc_valid(cat_loc[kCatIndex]),
+        //        gr[loc_to_index(cat_loc[kCatIndex])][direction]);
         continue;
       }
       ++checked;
       min_eval =
           fmin(min_eval,
-               checkForTerminal(mouse_loc, cat_loc, cheese_loc, cats, cheeses)
-                   ? utility(cat_loc, cheese_loc, mouse_loc, cats, cheeses,
+               checkForTerminal(mouse_loc, next_cat_loc, cheese_loc, cats, cheeses)
+                   ? utility(next_cat_loc, cheese_loc, mouse_loc, cats, cheeses,
                              depth, gr)
-                   : MiniMax(gr, path, minmax_cost, cat_loc, cats, cheese_loc,
+                   : MiniMax(gr, path, minmax_cost, next_cat_loc, cats, cheese_loc,
                              cheeses, mouse_loc, mode, utility, (agentId + 1) % (1 + cats),
                              depth + 1, maxDepth, alpha, beta));
-      cat_loc[kCatIndex][0] = prev_cat_loc[0][0];
-      cat_loc[kCatIndex][1] = prev_cat_loc[0][1];
       if (mode == 1) {
         beta = fmin(beta, min_eval);
         if (beta <= alpha) {
@@ -469,7 +473,7 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
       }
     }
     if (checked == 0) {
-      // printf("CAt checked 0\n");
+      printf("Cat checked 0\n");
     }
     return min_eval;
   }
@@ -518,6 +522,10 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
         }
       }
     }
+  }
+  Cord mouse_cord = {mouse_loc[0][0], mouse_loc[0][1]};
+  if (is_cord_in_cords(mouse_cord, cat_loc, cats)) {
+     return -graph_size;
   }
   return -util_cache.cheese_distance[util_cache.target_cheese]
                                     [loc_to_index(mouse_loc[0])];

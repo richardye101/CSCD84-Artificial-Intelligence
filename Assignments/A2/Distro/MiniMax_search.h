@@ -76,7 +76,7 @@ void Deque_dtor(Deque* deque);
 
 // BEGIN HELPER FUNCTION PROTOS
 int loc_to_index(int loc[2]);
-void set_next_loc(int next_loc[2], int loc[1][2], int direction);
+void set_next_loc(int next_loc[2], int loc[2], int direction);
 int is_loc_valid(int loc[2]);
 void precompute_cheese_distance(double gr[graph_size][4], int cheese_loc[10][2],
                                 int cheeses);
