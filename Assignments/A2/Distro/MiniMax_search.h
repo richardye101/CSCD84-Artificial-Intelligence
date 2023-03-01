@@ -38,6 +38,8 @@
 #define DIRECTION_LEFT 3
 // END DIRECTIONS
 
+#define BIG_DBL 1000000000.0
+
 // BEGIN STRUCT DEFS
 
 // Deque will be used for both queue and stack

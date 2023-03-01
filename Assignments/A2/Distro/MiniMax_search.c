@@ -398,16 +398,12 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
     return utility(cat_loc, cheese_loc, mouse_loc, cats, cheeses, depth, gr);
   } else if (agentId == 0) {
     // Mouse - maximizing agent
-    double max_eval = DBL_MIN;
+    double max_eval = -BIG_DBL;
     int next_mouse_loc[1][2];
     for (int direction = 0; direction < 4; ++direction) {
       set_next_loc(next_mouse_loc[0], mouse_loc[0], direction);
       if (!is_loc_valid(next_mouse_loc[0]) || !gr[loc_to_index(mouse_loc[0])][direction]) {
         continue;
-      }
-      if (next_mouse_loc[0][0] == -1) {
-        printf("Next mouse loc: %d %d\n", next_mouse_loc[0][0],
-               next_mouse_loc[0][1]);
       }
       ++checked;
       const double kEval =
@@ -424,6 +420,11 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
         if (depth == 0) {
           path[0][0] = next_mouse_loc[0][0];
           path[0][1] = next_mouse_loc[0][1];
+        }
+      } else if (max_eval == -BIG_DBL) {
+        printf("WTF: kEval: %lf, max_eval: %lf\n", kEval, max_eval);
+        if (max_eval == 0) {
+          printf("HMM\n");
         }
       }
       if (mode == 1) {
@@ -444,7 +445,7 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
   } else {
     // Cat - minimizing agent
     const int kCatIndex = agentId % cats;
-    double min_eval = DBL_MAX;
+    double min_eval = BIG_DBL;
     int next_cat_loc[10][2];
     memcpy(&next_cat_loc[0][0], &cat_loc[0][0], sizeof(next_cat_loc));
     for (int direction = 0; direction < 4; ++direction) {
@@ -524,10 +525,15 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
     }
   }
   Cord mouse_cord = {mouse_loc[0][0], mouse_loc[0][1]};
+  double res = (is_cord_in_cords(mouse_cord, cat_loc, cats))
+                   ? -graph_size
+                   : -util_cache.cheese_distance[util_cache.target_cheese]
+                                                [loc_to_index(mouse_loc[0])];
+  return res;
   if (is_cord_in_cords(mouse_cord, cat_loc, cats)) {
      return -graph_size;
   }
-  return -util_cache.cheese_distance[util_cache.target_cheese]
+  return graph_size-util_cache.cheese_distance[util_cache.target_cheese]
                                     [loc_to_index(mouse_loc[0])];
   // double average_cat_distance = 0;
   // double closest_cat_distance = DBL_MAX;
