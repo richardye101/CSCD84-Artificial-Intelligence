@@ -153,7 +153,6 @@ int is_cord_in_cords(Cord cord, int cords[][2], int num_cords) {
   return false;
 }
 
-// BEGIN HELPER FUNCTION DEFS
 int loc_to_index(int loc[2]) { return loc[0] + loc[1] * size_X; }
 void set_next_loc(int next_loc[2], int loc[2], int direction) {
   next_loc[0] = loc[0], next_loc[1] = loc[1];
@@ -511,7 +510,7 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
   return graph_size / 2 -
          util_cache.cheese_distance[util_cache.target_cheese]
                                    [loc_to_index(mouse_loc[0])] +
-         average_cat_distance / 10;
+         average_cat_distance;
 }
 
 int checkForTerminal(int mouse_loc[1][2], int cat_loc[10][2],
