@@ -41,6 +41,15 @@ but explain carefully when needed.
      how their influence was evaluated and integrated into
      a single, meaningful value. Convince us that your utility
      makes sense!
+The utility function is designed in such a way that the required computation is basically constant.
+We created a struct to store precomputed distances to each cheese from every grid position in the maze in arrays for each cheese. These arrays are recalculated every time a cheese is eaten, so it always has the optimal path length at each cheese indexed correctly. We also track the "target" cheese, which is the current cheese we are trying to reach. This allows the utility function to calculate how good the current state is without "searching".
+
+We also take into account the average distance from the mouse to all the cats, so the mouse is aware of its situation.
+
+The utility function will return:
+- (-graph_size) if the current state is one where the mouse is located at the same position as a cat
+- (graph_size-depth) if the current state is one where the mouse is located at the same position as a cat. It subtracts depth to reward finding a goal state at an earlier depth.
+- (graph_size/2 - distance_to_cheese_from_cur_location + average_cat_distance / 10) graph_size/2 helps the minimax cost be positive in good positions, although because its a linear addition, it doesn't actually affect the utility. We subtract distance_to_cheese_from_cur_location as a lower distance to cheese is a better state than a larger distance. We add average_cat_distance as a lower average cat distance is a worse state while a higher distance is better. We divide by 10 to de-emphasize the importance of avoiding cats.
 
 2 .- (1 marks) Ignoring computation time, what is the effect of
      search depth (number of turns) on the chances of the mouse
@@ -64,6 +73,7 @@ mouse is aware this path leads to certain death, and pursue a different cheese.
 4 .- (1 marks) Compare cats with smartness=.8 against cats with
      smartness=1 - which are harder for your mouse to beat?
      why do you think that is?
+Definitely the cats with smartness=1, as they always make the most optimal move. 
 
 5 .- (1 marks) Can the mouse be made unbeatable by having an
      optimal utility function?
