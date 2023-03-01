@@ -26,7 +26,7 @@
 #include "MiniMax_search.h"
 #include "board_layout.h"
 
-CheeseDistance cheese_distance = {.cheeses = 0};
+UtilCache util_cache = {.cheeses = 0, .target_cheese = -1};
 
 // BEGIN STRUCT HELPER FUNCTION DEFS
 DequeItem *DequeItem_new(Cord cord) {
@@ -184,11 +184,11 @@ void precompute_cheese_distance(double gr[graph_size][4], int cheese_loc[10][2],
   Deque* deque = Deque_new();
   for (int cheese =0; cheese < cheeses; ++cheese) {
     bool visited[graph_size];
-    memset(cheese_distance.cheese_distance[cheese], INT_MAX,
-           sizeof(cheese_distance.cheese_distance[cheese]));
+    memset(util_cache.cheese_distance[cheese], INT_MAX,
+           sizeof(util_cache.cheese_distance[cheese]));
     memset(visited, false, sizeof(visited));
     Cord cheese_cord = {cheese_loc[cheese][0], cheese_loc[cheese][1]};
-    cheese_distance.cheese_distance[cheese][cord_to_index(cheese_cord)] = 0;
+    util_cache.cheese_distance[cheese][cord_to_index(cheese_cord)] = 0;
     visited[cord_to_index(cheese_cord)] = true;
     Deque_push_back(deque, cheese_cord);
     while (deque->size > 0) {
@@ -199,8 +199,8 @@ void precompute_cheese_distance(double gr[graph_size][4], int cheese_loc[10][2],
             visited[cord_to_index(next_cord)]) {
           continue;
         }
-        cheese_distance.cheese_distance[cheese][cord_to_index(next_cord)] =
-            cheese_distance.cheese_distance[cheese][cord_to_index(cord)] + 1;
+        util_cache.cheese_distance[cheese][cord_to_index(next_cord)] =
+            util_cache.cheese_distance[cheese][cord_to_index(cord)] + 1;
         visited[cord_to_index(next_cord)] = true;
         Deque_push_back(deque, next_cord);
       }
@@ -500,41 +500,55 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
                  These arguments are as described in A1. Do have a look at your
      solution!
   */
-  if (cheese_distance.cheeses != cheeses) {
+  if (util_cache.cheeses != cheeses) {
+    memset(util_cache.been_at, false, sizeof(util_cache.been_at));
     precompute_cheese_distance(gr, cheese_loc, cheeses);
-    cheese_distance.cheeses = cheeses;
+    util_cache.cheeses = cheeses;
   }
-  double average_cat_loc[2] = {0, 0};
-  for (int cat = 0; cat < cats; ++cat) {
-    average_cat_loc[0] += cat_loc[cat][0] / (double)cats;
-    average_cat_loc[1] += cat_loc[cat][1] / (double)cats;
+  if (util_cache.target_cheese == -1) {
+    int closest_cat_distance = INT_MAX;
+    util_cache.target_cheese = 0;
+    for (int cheese=0; cheese < cheeses; ++cheese) {
+      for (int cat=0; cat<cats; ++cat) {
+        if (util_cache.cheese_distance[cheese][loc_to_index(cat_loc[cat])] <
+            closest_cat_distance) {
+          closest_cat_distance =
+              util_cache.cheese_distance[cheese][loc_to_index(cat_loc[cat])];
+          util_cache.target_cheese = cheese;
+        }
+      }
+    }
   }
-  double best_cheese_dist = graph_size;
-  for (int cheese=0; cheese<cheeses; ++cheese) {
-    best_cheese_dist = fmin(
-        best_cheese_dist,
-        cheese_distance.cheese_distance[cheese][loc_to_index(mouse_loc[0])]);
-  }
-  double closest_cat = graph_size;
-  for (int cat = 0; cat < cats; ++cat) {
-    closest_cat =
-        fmin(closest_cat, pow(pow((double)(mouse_loc[0][0] - cat_loc[cat][0]), 2) +
-                                  pow((double)(mouse_loc[0][1] - cat_loc[cat][1]), 2),
-                              0.5));
-  }
-  // int best_cheese_dist = pow(mouse_loc[0][0] - cheese_loc[best_cheese][0], 2) +
-  //                        pow(mouse_loc[0][1] - cheese_loc[best_cheese][1], 2);
-  Cord mouse_cord = {mouse_loc[0][0], mouse_loc[0][1]};
-  double res;
-  if (is_cord_in_cords(mouse_cord, cat_loc, cats)) {
-    res  = -2 * graph_size + depth;
-  } else if (is_cord_in_cords(mouse_cord, cheese_loc, cheeses)) {
-      res =  3 * graph_size - depth;
-  } else {
-    res = graph_size - depth - 2 * best_cheese_dist + 3 * closest_cat;
-  }
-    // printf("%lf %lf %lf\n", best_cheese_dist, closest_cat, res);
-  return res;
+  return -util_cache.cheese_distance[util_cache.target_cheese]
+                                    [loc_to_index(mouse_loc[0])];
+  // double average_cat_distance = 0;
+  // double closest_cat_distance = DBL_MAX;
+  // for (int cat=0; cat < cats; ++cat) {
+  //   const double kCatDistance =
+  //       pow(pow((double)(mouse_loc[0][0] - cat_loc[cat][0]), 2) +
+  //               pow((double)(mouse_loc[0][1] - cat_loc[cat][1]), 2),
+  //           0.5);
+  //   average_cat_distance += kCatDistance / ((double)cats);
+  //   closest_cat_distance = fmin(closest_cat_distance, kCatDistance);
+  // }
+  // Cord mouse_cord = {mouse_loc[0][0], mouse_loc[0][1]};
+  // double res;
+  // const double kDepthDelta = ((double)depth) / 10;
+  // if (is_cord_in_cords(mouse_cord, cat_loc, cats)) {
+  //   res = kDepthDelta - graph_size;
+  // } else if (is_cord_in_cords(mouse_cord, cheese_loc, cheeses)) {
+  //   if (cheeses == 1) {
+  //     res = 2 * graph_size - kDepthDelta - target_cheese_distance +
+  //           average_cat_distance + 10 * closest_cat_distance;
+  //   } else {
+  //     res = graph_size - kDepthDelta - target_cheese_distance +
+  //           average_cat_distance + 10 * closest_cat_distance;
+  //   }
+  // } else {
+  //   res = graph_size - kDepthDelta - target_cheese_distance +
+  //         average_cat_distance + 10 * closest_cat_distance;
+  // }
+  // return res;
 }
 
 int checkForTerminal(int mouse_loc[1][2], int cat_loc[10][2],

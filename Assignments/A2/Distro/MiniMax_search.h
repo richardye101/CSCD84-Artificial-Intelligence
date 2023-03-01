@@ -56,10 +56,12 @@ typedef struct Deque {
   int size;
 } Deque;
 
-typedef struct CheeseDistance {
+typedef struct UtilCache {
   int cheese_distance[10][graph_size];
+  bool been_at[graph_size];
   int cheeses;
-} CheeseDistance;
+  int target_cheese;
+} UtilCache;
 // BEGIN STRUCT DEFS
 //
 // BEGIN STRUCT HELPER FUNCTION PROTOS
