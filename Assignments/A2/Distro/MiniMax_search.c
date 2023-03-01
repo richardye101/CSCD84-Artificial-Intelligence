@@ -507,18 +507,26 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
   }
   if (util_cache.target_cheese == -1) {
     printf("UPDATING TARGET CHEESE\n");
-    int closest_cat_distance = INT_MAX;
+    int farthest_cat_distance = -10000;
     util_cache.target_cheese = 0;
     for (int cheese=0; cheese < cheeses; ++cheese) {
       for (int cat=0; cat<cats; ++cat) {
-        if (util_cache.cheese_distance[cheese][loc_to_index(cat_loc[cat])] <
-            closest_cat_distance) {
-          closest_cat_distance =
+        if (util_cache.cheese_distance[cheese][loc_to_index(cat_loc[cat])] >
+            farthest_cat_distance) {
+          farthest_cat_distance =
               util_cache.cheese_distance[cheese][loc_to_index(cat_loc[cat])];
           util_cache.target_cheese = cheese;
         }
       }
     }
+  }
+  double average_cat_distance = 0;
+  for (int cat=0; cat < cats; ++cat) {
+    const double kCatDistance =
+        pow(pow((double)(mouse_loc[0][0] - cat_loc[cat][0]), 2) +
+                pow((double)(mouse_loc[0][1] - cat_loc[cat][1]), 2),
+            0.5);
+    average_cat_distance += kCatDistance / ((double)cats);
   }
   Cord mouse_cord = {mouse_loc[0][0], mouse_loc[0][1]};
   if (is_cord_in_cords(mouse_cord, cat_loc, cats)) {
@@ -527,7 +535,7 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
     return graph_size - depth;
   }
   return -util_cache.cheese_distance[util_cache.target_cheese]
-                                    [loc_to_index(mouse_loc[0])];
+                                    [loc_to_index(mouse_loc[0])] + average_cat_distance / 10;
   // double average_cat_distance = 0;
   // double closest_cat_distance = DBL_MAX;
   // for (int cat=0; cat < cats; ++cat) {
