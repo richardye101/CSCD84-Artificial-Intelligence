@@ -415,16 +415,10 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
                         depth + 1, maxDepth, alpha, beta);
       minmax_cost[next_mouse_loc[0][0]][next_mouse_loc[0][1]] = kEval;
       if (kEval > max_eval) {
-        if (depth == 0) printf("kEval: %lf\n", kEval);
         max_eval = kEval;
         if (depth == 0) {
           path[0][0] = next_mouse_loc[0][0];
           path[0][1] = next_mouse_loc[0][1];
-        }
-      } else if (max_eval == -BIG_DBL) {
-        printf("WTF: kEval: %lf, max_eval: %lf\n", kEval, max_eval);
-        if (max_eval == 0) {
-          printf("HMM\n");
         }
       }
       if (mode == 1) {
@@ -435,8 +429,8 @@ double MiniMax(double gr[graph_size][4], int path[1][2],
       }
     }
     if (depth == 0) {
-      printf("Next step: %d %d | Num Cheeses: %d | Num checked locations: %d | Max Eval: %lf\n", path[0][0],
-             path[0][1], cheeses, checked, max_eval);
+      // printf("Next step: %d %d | Num Cheeses: %d | Num checked locations: %d | Max Eval: %lf\n", path[0][0],
+      //        path[0][1], cheeses, checked, max_eval);
     }
     if (checked == 0) {
       printf("Mouse checked 0\n");
@@ -509,8 +503,10 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
     memset(util_cache.been_at, false, sizeof(util_cache.been_at));
     precompute_cheese_distance(gr, cheese_loc, cheeses);
     util_cache.cheeses = cheeses;
+    util_cache.target_cheese = -1;
   }
   if (util_cache.target_cheese == -1) {
+    printf("UPDATING TARGET CHEESE\n");
     int closest_cat_distance = INT_MAX;
     util_cache.target_cheese = 0;
     for (int cheese=0; cheese < cheeses; ++cheese) {
@@ -525,15 +521,12 @@ double utility(int cat_loc[10][2], int cheese_loc[10][2], int mouse_loc[1][2],
     }
   }
   Cord mouse_cord = {mouse_loc[0][0], mouse_loc[0][1]};
-  double res = (is_cord_in_cords(mouse_cord, cat_loc, cats))
-                   ? -graph_size
-                   : -util_cache.cheese_distance[util_cache.target_cheese]
-                                                [loc_to_index(mouse_loc[0])];
-  return res;
   if (is_cord_in_cords(mouse_cord, cat_loc, cats)) {
      return -graph_size;
+  } else if (is_cord_in_cords(mouse_cord, cheese_loc, cheeses)) {
+    return graph_size - depth;
   }
-  return graph_size-util_cache.cheese_distance[util_cache.target_cheese]
+  return -util_cache.cheese_distance[util_cache.target_cheese]
                                     [loc_to_index(mouse_loc[0])];
   // double average_cat_distance = 0;
   // double closest_cat_distance = DBL_MAX;
