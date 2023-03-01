@@ -6,15 +6,15 @@ ________________________________________________
 
 Student Name 1 (last, first): Prokopchuk, Sam
 
-Student Name 2 (last, first):
+Student Name 2 (last, first): Ye, Rong Feng (Richard)
 
 Student number 1: 1006570943
 
-Student number 2:
+Student number 2: 1005035230
 
 UTORid 1: prokopc3
 
-UTORid 2:
+UTORid 2: yerong1
 
 READ THIS AND SIGN YOUR NAME AT THE END:
 
@@ -22,7 +22,11 @@ READ THIS AND SIGN YOUR NAME AT THE END:
 honesty and plaguarism. All work submitted as part
 of this assignment is my own.
 
+<<<<<<< Updated upstream
 	Signed: _(Sam Prokopchuk)__	_(student 2 name here)__
+=======
+	Signed: _(Sam Prokopchuk)__	_Richard Ye__
+>>>>>>> Stashed changes
 
 
 (-5 marks for failing to provide the identifying
@@ -57,11 +61,12 @@ i.: It gets surrounded s.t. all its viable exits are occupied by cats.
 
 5 .- (1 marks) Can the mouse be made unbeatable by having an
      optimal utility function?
+No, because there are only at most 10 cats and 10 cheeses which means that given a "bad" seed, the there could be no path to cheese where the mouse will not be met by a cat first.
 
 6 .- (2 bonus marks) Could a human playing the game in place
       of the mouse do better than your code? (yes, no, and
       a reasonable explanation of why)
-
+No, because the human would not have the information our mouse does, which is the shortest path to take to any given cheese, and which steps would result in certain failure.
 _____________________________________________________
 
 Mark with an 'x' where appropriate. If something is only
@@ -70,12 +75,12 @@ doesn't work, or what problems exist.
 	
 	Complete/Working	Partial		Not done
 
-Utility
+Utility          x
  function
 
-MiniMax
+MiniMax          x
 
-Alpha/Beta
+Alpha/Beta       x
  pruning
 _____________________________________________________
 
