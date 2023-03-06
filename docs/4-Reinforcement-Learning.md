@@ -37,6 +37,7 @@ Define a quantity $V^{*}(s) =$ value of state s $= \max_{\Pi}\mathbb{E}\left[ \s
 >This is the max expected value of a given state $s$, indicating whether the state is good or not informing the quality.
 
 It can be computed under the process:
+
 - Given a state $s$ the agent will take an action $a$, receive a reward $r$, and end up at some state $s'$ . This can be used to compute $V^{*}(s)$
 	- $<s,a,r,s'>$
 
@@ -44,16 +45,16 @@ Rewrite
 $$
 \begin{aligned}
 V^{*}(s) &= max_{a}\left( R(s,a) +\\
-\gamma \sum_{s'\in S \text{ reachable from }s}T(s,a,s')V^{*}(s)\right)\\
+\gamma \sum_{s'\in S \text{ reachable from }s}T(s,a,s')V^{*}(s')\right)\\
 \text{Where }& R(s,a) \text{ is the Reward from taking action a from state s}\\
 &T(s,a,s') \text{is the Transition fnc: prob of ending up at s' from s under action }a\\
-&V^{*}(s) \text{ is the value at the neighbour of } s
+&V^{*}(s') \text{ is the value at the neighbour of } s
 \end{aligned}
 $$
 
 Which gets rid of the infinite sum.
 
-### Value Iteration
+## Value Iteration
 Initialize $V^{*}(s) = 0$, and a table $Q(s,a)=\emptyset$ 
 
 Repeat until $\Pi$ is *good enough*.
@@ -61,7 +62,7 @@ Repeat until $\Pi$ is *good enough*.
 ```
 for all s in S
 	for all a in A
-		Q(s,a) = R(s,a) + gamma \sum_s' T(s,a,s')V*(s')
+		Q(s,a) = R(s,a) + gamma \sum_{s' \in S} T(s,a,s')V*(s')
 		
 	update V*(s) = max_a Q(s,a)
 	update Pi(s) = argmax_a Q(s,a)
@@ -76,3 +77,52 @@ This training can run offline (not during game time) so there are no time constr
 
 After training, we get a look up table for actions to take, so given a state $s$ we select a few $a$ from $\Pi(s)$.
 
+## Estimating the Transition function
+If we want the real transition function:
+
+- We could to run the real thing, but thats time consuming, slow, and could be affected by the environment.
+- We could run a simulation, but that could probably not generalize well.
+
+We can actually just tweak the learning process (value iteration), to get it.
+
+### Q-learning
+
+**Goal: Try to ignore the transition function**
+*We still have to design the reward function ourselves*
+
+Initially, set:
+
+- $Q(s,a)=0$
+- $\Pi(s) =$ random action
+- Determine initial state $s$
+- Set $\gamma$ to whatever, and new param $\alpha$ which represents a **gradient** to smth v small
+
+```
+N = a lot of training rounds
+for (i in 1...N):
+	from current state,	get random action
+	simulate agent doing the action, and sees what happens
+		- find out the reward r(s,a)
+		- find out resulting state s', which becomes cur state
+			- if end game, choose a random state s as cur state
+	# preform gradient descent (the second and third terms)
+	Q(s,a) += alpha * [r(s,a) + 
+					   gamma * max_{a'} Q(s',a') - 
+					   Q(s,a)]
+update policy Pi
+```
+
+All of this requires a lot of careful sampling (not sampling same nodes, not getting stuck in a strongly connected subset of the graph)
+
+### Improvement to Q-learning
+
+We have $K$ rounds of training:
+```
+for (j in 0...K):
+	do prev code
+	
+	in round j of K:
+		choose randomly action a with P(a) = 1-j/K
+	else:
+		choose action in Pi(s)
+```
