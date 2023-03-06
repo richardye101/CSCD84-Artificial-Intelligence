@@ -42,6 +42,7 @@ It can be computed under the process:
 	- $<s,a,r,s'>$
 
 Rewrite 
+
 $$
 \begin{aligned}
 V^{*}(s) &= max_{a}\left( R(s,a) +\\
@@ -109,7 +110,7 @@ for (i in 1...N):
 	Q(s,a) += alpha * [r(s,a) + 
 					   gamma * max_{a'} Q(s',a') - 
 					   Q(s,a)]
-update policy Pi
+update policy Pi(s) for all s
 ```
 
 All of this requires a lot of careful sampling (not sampling same nodes, not getting stuck in a strongly connected subset of the graph)
@@ -126,3 +127,5 @@ for (j in 0...K):
 	else:
 		choose action in Pi(s)
 ```
+
+This basically 
