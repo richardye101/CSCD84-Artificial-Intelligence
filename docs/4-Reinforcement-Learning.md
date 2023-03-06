@@ -86,7 +86,7 @@ If we want the real transition function:
 
 We can actually just tweak the learning process (value iteration), to get it.
 
-### Q-learning
+## Q-learning
 
 **Goal: Try to ignore the transition function**
 *We still have to design the reward function ourselves*
@@ -96,7 +96,7 @@ Initially, set:
 - $Q(s,a)=0$
 - $\Pi(s) =$ random action
 - Determine initial state $s$
-- Set $\gamma$ to whatever, and new param $\alpha$ which represents a **gradient** to smth v small
+- Set $\gamma$ to whatever, and new param $\alpha$ which represents a **gradient** to smth that should be small
 
 ```
 N = a lot of training rounds
@@ -104,8 +104,9 @@ for (i in 1...N):
 	from current state,	get random action
 	simulate agent doing the action, and sees what happens
 		- find out the reward r(s,a)
-		- find out resulting state s', which becomes cur state
+		- find out next state s', which becomes cur state
 			- if end game, choose a random state s as cur state
+	
 	# preform gradient descent (the second and third terms)
 	Q(s,a) += alpha * [r(s,a) + 
 					   gamma * max_{a'} Q(s',a') - 
@@ -128,4 +129,29 @@ for (j in 0...K):
 		choose action in Pi(s)
 ```
 
-This basically 
+This basically chooses a random action a less and less of the time as the number of rounds goes on, as this implies that as we continue the learning, the policy should be relied on more as it should contain the best action.
+
+This whole q-learning thing can be hard because:
+
+- the state space can be huge.
+- We need to build an actual simulator
+- the agent will be trained on a specific state space/environment, but given a new one it may not do well (not generalized)
+
+## Feature-based Q-Learning
+We can generalize using feature based Q-learning
+
+We create a set of abstracted features that can be used to estimate the reward from a certain state $Q(s)$. This is different form before as its not a table, it is:
+
+$$
+Q(s) = \sum_{i}w_{i}f_{i}(s)
+$$
+
+>A weighted sum of the features we can evaluate for a given state. These features will work on any maze, and aren't tied to any specific seed. The weights will need updating.
+
+Instead of updating $Q(s,a)$ in the Q-learning loop, we have
+```
+w_t += alpha * f_t (s) * [r + gamma Q(s') - Q(s)]
+```
+
+Which just updates the weights, but doesn't actually update the policy. yet.
+
