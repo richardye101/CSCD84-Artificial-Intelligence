@@ -49,6 +49,22 @@ void QLearn_update(int s, int a, double r, int s_new, double *QTable) {
   /***********************************************************************************************
    * TO DO: Complete this function
    ***********************************************************************************************/
+  int next_mouse_pos[1][2];
+  double best_q_value = -BIG_DBL;
+  for (int action = 0; action < 4; ++action) {
+    set_next_pos(next_mouse_pos, mouse_pos, action);
+    if (!is_pos_valid(next_mouse_pos[0]) ||
+        !gr[pos_to_index(next_mouse_pos[0])]) {
+      continue;
+    }
+    double q_value = QTable[get_q_table_index(s_new, action)];
+    if (q_value > best_q_value) {
+      best_q_value = q_value;
+    }
+  }
+  assert(best_q_value != -BIG_DBL);
+  QTable[get_q_table_index(s, a)] +=
+      alpha * (r + lambda * (best_q_value - QTable[get_q_table_index(s, a)]));
 }
 
 int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2],
@@ -132,31 +148,31 @@ int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2],
   /***********************************************************************************************
    * TO DO: Complete this function
    ***********************************************************************************************/
-   if (get_random_uniform(0, 1) <= pct) {
-     // Exploit
-     int size_Y = graph_size / size_X;
-     int best_action = -1;
-     double best_q_value = -BIG_DBL;
-     for (int action=0; action<numActions; ++action) {
-       int next_mouse_pos[1][2];
-       set_next_pos(next_mouse_pos[0], mouse_pos[0], action);
-       if (!is_pos_valid(next_mouse_pos[0], size_X, size_Y) ||
-           !gr[pos_to_index(next_mouse_pos[0])]) {
-         continue;
-       }
-       double q_value =
-           QTable[get_q_table_index(mouse_pos, cats, cheeses, action)];
-       if (q_value > best_q_value)  {
-         best_q_value = q_value;
-         best_action = action;
-       }
-     }
-     assert(0 <= best_action && best_action < numActions);
-     return best_action;
-   } else {
-     // Explore
-     return (int)get_random_uniform(0, 4);
-   }
+  if (get_random_uniform(0, 1) <= pct) {
+    // Exploit
+    int size_Y = graph_size / size_X;
+    int best_action = -1;
+    double best_q_value = -BIG_DBL;
+    for (int action = 0; action < numActions; ++action) {
+      int next_mouse_pos[1][2];
+      set_next_pos(next_mouse_pos[0], mouse_pos[0], action);
+      if (!is_pos_valid(next_mouse_pos[0], size_X, size_Y) ||
+          !gr[pos_to_index(next_mouse_pos[0])]) {
+        continue;
+      }
+      double q_value = QTable[get_q_table_index(
+          get_state_index(next_mouse_pos, cats, cheeses), action)];
+      if (q_value > best_q_value) {
+        best_q_value = q_value;
+        best_action = action;
+      }
+    }
+    assert(0 <= best_action && best_action < numActions);
+    return best_action;
+  } else {
+    // Explore
+    return (int)get_random_uniform(0, 4);
+  }
 }
 
 double QLearn_reward(double gr[max_graph_size][4], int mouse_pos[1][2],
@@ -180,7 +196,7 @@ double QLearn_reward(double gr[max_graph_size][4], int mouse_pos[1][2],
   /***********************************************************************************************
    * TO DO: Complete this function
    ***********************************************************************************************/
-  if (is_loc_in_locs(mouse_pos[0], cats, 1)) {
+  if (is_pos_in_poss(mouse_pos[0], cats)) {
     return -graph_size;
   } else if (is_loc_in_locs(mouse_pos[0], cheeses, 1)) {
     return graph_size;
@@ -230,14 +246,12 @@ int feat_QLearn_action(double gr[max_graph_size][4], double weights[25],
   /***********************************************************************************************
    * TO DO: Complete this function
    ***********************************************************************************************/
-  if (get_random_uniform(0,1) <= pct) {
+  if (get_random_uniform(0, 1) <= pct) {
     // Exploit
   } else {
     // Explore
     return (int)get_random_uniform(0, 4);
   }
-
-  return (0); // <--- replace this while you're at it!
 }
 
 void evaluateFeatures(double gr[max_graph_size][4], double features[25],
@@ -276,7 +290,7 @@ double Qsa(double weights[25], double features[25]) {
    * TO DO: Complete this function
    ***********************************************************************************************/
   double res = 0;
-  for (int i=0; i<numFeatures; ++i) {
+  for (int i = 0; i < numFeatures; ++i) {
     res += weights[i] * features[i];
   }
   return res;
@@ -300,10 +314,19 @@ void maxQsa(double gr[max_graph_size][4], double weights[25],
    ***********************************************************************************************/
   *maxU = -BIG_DBL;
   *maxA = -1;
-  for (int action=0; action<numActions; ++action) {
-    int next_mouse_pos[1][2];
+  int next_mouse_pos[1][2];
+  double features[25];
+  for (int action = 0; action < numActions; ++action) {
     set_next_pos(next_mouse_pos[0], mouse_pos[0], action);
-    if (!gr
+    if (!pos_is_valid(next_mouse_pos[0]) ||
+        !gr[pos_to_index(next_mouse_pos[0])]) {
+      continue;
+    }
+    double q_value = Qsa(weights, features);
+    if (q_value > *maxU) {
+      *maxU = q_value;
+      *maxA = action;
+    }
   }
   assert(0 <= *maxA && *maxA < numActions);
 }
@@ -343,9 +366,11 @@ void set_next_pos(int next_pos[2], int pos[2], int direction) {
 }
 
 // Return if poss contains a position equal to pos, false otherwise.
-bool is_pos_in_poss(int pos[2], int poss[][2], int num_poss) {
-  for (int i = 0; i < num_poss; ++i) {
-    if (pos[0] == poss[i][0] && pos[1] == poss[i][1]) {
+bool is_pos_in_poss(int pos[2], int poss[5][2]) {
+  for (int i = 0; i < 5; ++i) {
+    if (poss[i][0] == -1) {
+      return false;
+    } else if (pos[0] == poss[i][0] && pos[1] == poss[i][1]) {
       return true;
     }
   }
@@ -360,9 +385,9 @@ int get_state_index(int mouse_loc[1][2], int cats[5][2], int cheeses[5][2]) {
 }
 
 // Return the q table index provided the entity locations and action.
-int get_q_table_index(int mouse_loc[1][2], int cats[5][2], int cheeses[5][2], int action) {
+int get_q_table_index(int state, int action) {
   assert(0 <= action && action < 4);
-  return 4 * get_state_index(mouse_loc, cats, cheeses) + action;
+  return 4 * state + action;
 }
 
 int pos_to_index(int pos[2]) { return pos[0] + pos[1] * size_X; }
