@@ -220,6 +220,18 @@ void feat_QLearn_update(double gr[max_graph_size][4], double weights[25],
   /***********************************************************************************************
    * TO DO: Complete this function
    ***********************************************************************************************/
+  double maxU; //maxQsa value
+  int maxA; //maxQsa action, not required here?
+  double features[25];
+  double q_value;
+
+  maxQsa(gr, weights, mouse_pos, cats, cheeses, size_X, graph_size, &maxU, &maxA);
+  evaluateFeatures(gr, features, mouse_pos, cats, cheeses, size_X, graph_size);
+  q_value = Qsa(weights, features);
+
+  for(int i = 0; i<25; ++i){
+    weights[i] += alpha * (reward + lambda * (maxU-q_value) ) * features[i];
+  }
 }
 
 int feat_QLearn_action(double gr[max_graph_size][4], double weights[25],
@@ -245,6 +257,11 @@ int feat_QLearn_action(double gr[max_graph_size][4], double weights[25],
    ***********************************************************************************************/
   if (get_random_uniform(0, 1) <= pct) {
     // Exploit
+    double maxU; // not required here
+    int maxA;
+    maxQsa(gr, weights, mouse_pos, cats,
+           cheeses, size_X, graph_size, &maxU, &maxA);
+    return maxA;
   } else {
     // Explore
     return (int)get_random_uniform(0, 4);
@@ -311,14 +328,16 @@ void maxQsa(double gr[max_graph_size][4], double weights[25],
    ***********************************************************************************************/
   *maxU = -BIG_DBL;
   *maxA = -1;
+  int size_Y = graph_size / size_X;
   int next_mouse_pos[1][2];
-  double features[25];
   for (int action = 0; action < numActions; ++action) {
+    double features[25];
     set_next_pos(next_mouse_pos[0], mouse_pos[0], action);
-    if (!pos_is_valid(next_mouse_pos[0]) ||
+    if (!pos_is_valid(next_mouse_pos[0], size_X, size_Y) ||
         !gr[pos_to_index(next_mouse_pos[0])]) {
       continue;
     }
+    evaluateFeatures(gr, features, next_mouse_pos, cats, cheeses, size_X, graph_size);
     double q_value = Qsa(weights, features);
     if (q_value > *maxU) {
       *maxU = q_value;
