@@ -57,10 +57,7 @@ void QLearn_update(int s, int a, double r, int s_new, double *QTable) {
         !gr[pos_to_index(next_mouse_pos[0])]) {
       continue;
     }
-    double q_value = QTable[get_q_table_index(s_new, action)];
-    if (q_value > best_q_value) {
-      best_q_value = q_value;
-    }
+    best_q_value = fmax(best_q_value, QTable[get_q_table_index(s_new, action)]);
   }
   assert(best_q_value != -BIG_DBL);
   QTable[get_q_table_index(s, a)] +=
