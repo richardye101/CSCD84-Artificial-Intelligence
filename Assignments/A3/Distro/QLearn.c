@@ -292,6 +292,7 @@ void evaluateFeatures(double gr[max_graph_size][4], double features[25],
   /***********************************************************************************************
    * TO DO: Complete this function
    ***********************************************************************************************/
+  features[0] = feature_1(gr, features, mouse_pos, cats, size_X, graph_size);
 }
 
 double Qsa(double weights[25], double features[25]) {
@@ -415,4 +416,54 @@ int pos_to_index(int pos[2], int size_X) { return pos[0] + pos[1] * size_X; }
 
 int is_pos_valid(int pos[2], int size_X, int size_Y) {
   return 0 <= pos[0] && pos[0] < size_X && 0 <= pos[1] && pos[1] < size_Y;
+}
+
+// Avg Cat Dist Feature 
+double feature_1(double gr[max_graph_size][4], double features[25],
+                      int mouse_pos[1][2], int cats[5][2],
+                      int size_X, int graph_size){
+  // -1 is terrible, aka cats are right on top
+  // 1 is great, aka cats are across the map from the mouse
+  double max_dist = pow(pow((double)(size_X), 2) +
+                pow((double)(graph_size / size_X), 2),
+            0.5); 
+  double average_cat_distance = 0;
+  int num_cat = 0;
+  while (cats[num_cat][0] != -1) {
+    const double kCatDistance =
+        pow(pow((double)(mouse_pos[0][0] - cats[num_cat][0]), 2) +
+                pow((double)(mouse_pos[0][1] - cats[num_cat][1]), 2),
+            0.5);
+    average_cat_distance += kCatDistance;
+    ++num_cat;
+  }
+  // Get avg distance and normalize on max distance to [0,1]
+  average_cat_distance /= num_cat * max_dist;
+  // manipulate range to [-0.5, 0.5] *2 = [-1, 1]
+  return (average_cat_distance-0.5)*2;
+}
+
+// Mouse Dist Feature 
+double feature_1(double gr[max_graph_size][4], double features[25],
+                      int mouse_pos[1][2], int cats[5][2],
+                      int size_X, int graph_size){
+  // -1 is terrible, aka cats are right on top
+  // 1 is great, aka cats are across the map from the mouse
+  double max_dist = pow(pow((double)(size_X), 2) +
+                pow((double)(graph_size / size_X), 2),
+            0.5); 
+  double average_cat_distance = 0;
+  int num_cat = 0;
+  while (cats[num_cat][0] != -1) {
+    const double kCatDistance =
+        pow(pow((double)(mouse_pos[0][0] - cats[num_cat][0]), 2) +
+                pow((double)(mouse_pos[0][1] - cats[num_cat][1]), 2),
+            0.5);
+    average_cat_distance += kCatDistance;
+    ++num_cat;
+  }
+  // Get avg distance and normalize on max distance to [0,1]
+  average_cat_distance /= num_cat * max_dist;
+  // manipulate range to [-0.5, 0.5] *2 = [-1, 1]
+  return (average_cat_distance-0.5)*2;
 }
