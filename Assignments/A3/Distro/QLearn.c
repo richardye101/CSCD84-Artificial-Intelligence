@@ -53,8 +53,8 @@ void QLearn_update(int s, int a, double r, int s_new, double *QTable) {
   double best_q_value = -BIG_DBL;
   for (int action = 0; action < 4; ++action) {
     set_next_pos(next_mouse_pos, mouse_pos, action);
-    if (!is_pos_valid(next_mouse_pos[0]) ||
-        !gr[pos_to_index(next_mouse_pos[0])]) {
+    if (!is_pos_valid(next_mouse_pos[0], size_X, size_Y) ||
+        !gr[pos_to_index(next_mouse_pos[0], size_X)]) {
       continue;
     }
     best_q_value = fmax(best_q_value, QTable[get_q_table_index(s_new, action)]);
@@ -154,11 +154,11 @@ int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2],
       int next_mouse_pos[1][2];
       set_next_pos(next_mouse_pos[0], mouse_pos[0], action);
       if (!is_pos_valid(next_mouse_pos[0], size_X, size_Y) ||
-          !gr[pos_to_index(next_mouse_pos[0])]) {
+          !gr[pos_to_index(next_mouse_pos[0], size_X)]) {
         continue;
       }
       double q_value = QTable[get_q_table_index(
-          get_state_index(next_mouse_pos, cats, cheeses), action)];
+          get_state_index(next_mouse_pos, cats, cheeses, size_X, graph_size), action)];
       if (q_value > best_q_value) {
         best_q_value = q_value;
         best_action = action;
@@ -168,7 +168,7 @@ int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2],
     return best_action;
   } else {
     // Explore
-    return (int)(drand45()*4);
+    return (int)(drand48()*4);
   }
 }
 
@@ -333,8 +333,8 @@ void maxQsa(double gr[max_graph_size][4], double weights[25],
   for (int action = 0; action < numActions; ++action) {
     double features[25];
     set_next_pos(next_mouse_pos[0], mouse_pos[0], action);
-    if (!pos_is_valid(next_mouse_pos[0], size_X, size_Y) ||
-        !gr[pos_to_index(next_mouse_pos[0])]) {
+    if (!is_pos_valid(next_mouse_pos[0], size_X, size_Y) ||
+        !gr[pos_to_index(next_mouse_pos[0], size_X)]) {
       continue;
     }
     evaluateFeatures(gr, features, next_mouse_pos, cats, cheeses, size_X, graph_size);
@@ -393,10 +393,15 @@ bool is_pos_in_poss(int pos[2], int poss[5][2]) {
   return false;
 }
 
+//Determines if mouse on cheese?
+bool is_loc_in_locs(int loc[2], int locs[][2], int num_locs){
+  // @Sam to-do
+}
+
 // Return the state index given the provided entity locations.
-int get_state_index(int mouse_loc[1][2], int cats[5][2], int cheeses[5][2]) {
+int get_state_index(int mouse_loc[1][2], int cats[5][2], int cheeses[5][2], int size_X, int graph_size) {
   return (mouse_loc[0][0] + (mouse_loc[0][1] * size_X)) +
-         graph_size * (cats[0][0] + (cat[0][1] * size_X)) +
+         graph_size * (cats[0][0] + (cats[0][1] * size_X)) +
          graph_size * graph_size * (cheeses[0][0] + (cheeses[0][1] * size_X));
 }
 
@@ -406,7 +411,7 @@ int get_q_table_index(int state, int action) {
   return 4 * state + action;
 }
 
-int pos_to_index(int pos[2]) { return pos[0] + pos[1] * size_X; }
+int pos_to_index(int pos[2], int size_X) { return pos[0] + pos[1] * size_X; }
 
 int is_pos_valid(int pos[2], int size_X, int size_Y) {
   return 0 <= pos[0] && pos[0] < size_X && 0 <= pos[1] && pos[1] < size_Y;
