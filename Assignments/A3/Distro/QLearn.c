@@ -145,7 +145,7 @@ int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2],
   /***********************************************************************************************
    * TO DO: Complete this function
    ***********************************************************************************************/
-  if (drand48() <= pct) {
+  if (get_random_uniform(0, 1) <= pct) {
     // Exploit
     int size_Y = graph_size / size_X;
     int best_action = -1;
@@ -168,7 +168,7 @@ int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2],
     return best_action;
   } else {
     // Explore
-    return (int)(drand48()*4);
+    return (int)get_random_uniform(0, 4 - EPSILON);
   }
 }
 
@@ -255,7 +255,7 @@ int feat_QLearn_action(double gr[max_graph_size][4], double weights[25],
   /***********************************************************************************************
    * TO DO: Complete this function
    ***********************************************************************************************/
-  if (drand48() <= pct) {
+  if (get_random_uniform(0, 1) <= pct) {
     // Exploit
     double maxU; // not required here
     int maxA;
@@ -264,7 +264,7 @@ int feat_QLearn_action(double gr[max_graph_size][4], double weights[25],
     return maxA;
   } else {
     // Explore
-    return (int)(drand48()*4);
+    return (int)get_random_uniform(0, 4 - EPSILON);
   }
 }
 
@@ -354,7 +354,7 @@ void maxQsa(double gr[max_graph_size][4], double weights[25],
 // Return random uniform double value between min and max
 double get_random_uniform(double min, double max) {
   assert(min < max);
-  double res = min + (max - min) * ((double)rand() / (double)RAND_MAX);
+  double res = min + (max - min) * drand48();
   // Ensure not outside of range by some floating point precision epsilon.
   return (res < min) ? min : ((res > max) ? max : res);
 }
