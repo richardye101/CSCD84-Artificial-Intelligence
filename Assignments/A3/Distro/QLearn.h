@@ -21,19 +21,19 @@
 
 // Generally needed includes
 // #include <malloc.h>
+#include <assert.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 #include <time.h>
 
 #define alpha .01 // Learning rate for standard Q-Learning
 #define lambda .5 // Discount rate for future rewards
 #define max_graph_size 32 * 32
 
-#define numFeatures 2 // UPDATE THIS to be the number of features you have
+#define numFeatures 3 // UPDATE THIS to be the number of features you have
 #define numActions 4
 #define BIG_DBL 1000000.0
 #define EPSILON 1e-9
@@ -77,10 +77,21 @@ double get_random_uniform(double min, double max);
 void set_next_pos(int next_pos[2], int pos[2], int direction);
 bool is_pos_in_poss(int pos[2], int poss[][2]);
 bool is_loc_in_locs(int loc[2], int locs[][2], int num_locs);
-int get_state_index(int mouse_loc[1][2], int cats[5][2], int cheeses[5][2], int size_X, int graph_size);
+int get_state_index(int mouse_loc[1][2], int cats[5][2], int cheeses[5][2],
+                    int size_X, int graph_size);
 int get_q_table_index(int state, int action);
 int pos_to_index(int pos[2], int size_X);
 int is_pos_valid(int pos[2], int size_X, int size_Y);
+bool deadEnd(double gr[max_graph_size][4], int mouse_pos[1][2], int size_X);
+double avg_cat_feat(double gr[max_graph_size][4], double features[numFeatures],
+                    int mouse_pos[1][2], int cats[5][2], int size_X,
+                    int graph_size);
+double closest_cat_feat(double gr[max_graph_size][4],
+                        double features[numFeatures], int mouse_pos[1][2],
+                        int cats[5][2], int size_X, int graph_size);
+double cheese_feat(double gr[max_graph_size][4], double features[numFeatures],
+                   int mouse_pos[1][2], int cheeses[5][2], int size_X,
+                   int graph_size);
 // END HELPER FUNCTION PROTOS
 
 // Seed random generator using time:

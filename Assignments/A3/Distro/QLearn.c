@@ -158,7 +158,8 @@ int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2],
         continue;
       }
       double q_value = QTable[get_q_table_index(
-          get_state_index(next_mouse_pos, cats, cheeses, size_X, graph_size), action)];
+          get_state_index(next_mouse_pos, cats, cheeses, size_X, graph_size),
+          action)];
       if (q_value > best_q_value) {
         best_q_value = q_value;
         best_action = action;
@@ -198,13 +199,17 @@ double QLearn_reward(double gr[max_graph_size][4], int mouse_pos[1][2],
   } else if (is_loc_in_locs(mouse_pos[0], cheeses, 1)) {
     return graph_size;
   } else {
+    if (deadEnd(gr, mouse_pos, size_X)) {
+      return -3;
+    }
     return (0); // <--- of course, you will change this as well!
   }
 }
 
-void feat_QLearn_update(double gr[max_graph_size][4], double weights[25],
-                        double reward, int mouse_pos[1][2], int cats[5][2],
-                        int cheeses[5][2], int size_X, int graph_size) {
+void feat_QLearn_update(double gr[max_graph_size][4],
+                        double weights[numFeatures], double reward,
+                        int mouse_pos[1][2], int cats[5][2], int cheeses[5][2],
+                        int size_X, int graph_size) {
   /*
     This function performs the Q-learning adjustment to all the weights
     associated with your features. Unlike standard Q-learning, you don't receive
@@ -220,23 +225,25 @@ void feat_QLearn_update(double gr[max_graph_size][4], double weights[25],
   /***********************************************************************************************
    * TO DO: Complete this function
    ***********************************************************************************************/
-  double maxU; //maxQsa value
-  int maxA; //maxQsa action, not required here?
-  double features[25];
+  double maxU; // maxQsa value
+  int maxA;    // maxQsa action, not required here?
+  double features[numFeatures];
   double q_value;
 
-  maxQsa(gr, weights, mouse_pos, cats, cheeses, size_X, graph_size, &maxU, &maxA);
+  maxQsa(gr, weights, mouse_pos, cats, cheeses, size_X, graph_size, &maxU,
+         &maxA);
   evaluateFeatures(gr, features, mouse_pos, cats, cheeses, size_X, graph_size);
   q_value = Qsa(weights, features);
 
-  for(int i = 0; i<25; ++i){
-    weights[i] += alpha * (reward + lambda * (maxU-q_value) ) * features[i];
+  for (int i = 0; i < numFeatures; ++i) {
+    weights[i] += alpha * (reward + lambda * (maxU - q_value)) * features[i];
   }
 }
 
-int feat_QLearn_action(double gr[max_graph_size][4], double weights[25],
-                       int mouse_pos[1][2], int cats[5][2], int cheeses[5][2],
-                       double pct, int size_X, int graph_size) {
+int feat_QLearn_action(double gr[max_graph_size][4],
+                       double weights[numFeatures], int mouse_pos[1][2],
+                       int cats[5][2], int cheeses[5][2], double pct,
+                       int size_X, int graph_size) {
   /*
     Similar to its counterpart for standard Q-learning, this function returns
     the index of the next action to be taken by the mouse.
@@ -259,18 +266,18 @@ int feat_QLearn_action(double gr[max_graph_size][4], double weights[25],
     // Exploit
     double maxU; // not required here
     int maxA;
-    maxQsa(gr, weights, mouse_pos, cats,
-           cheeses, size_X, graph_size, &maxU, &maxA);
+    maxQsa(gr, weights, mouse_pos, cats, cheeses, size_X, graph_size, &maxU,
+           &maxA);
     return maxA;
   } else {
-    // Explore
     return (int)get_random_uniform(0, 4 - EPSILON);
   }
 }
 
-void evaluateFeatures(double gr[max_graph_size][4], double features[25],
-                      int mouse_pos[1][2], int cats[5][2], int cheeses[5][2],
-                      int size_X, int graph_size) {
+void evaluateFeatures(double gr[max_graph_size][4],
+                      double features[numFeatures], int mouse_pos[1][2],
+                      int cats[5][2], int cheeses[5][2], int size_X,
+                      int graph_size) {
   /*
    This function evaluates all the features you defined for the game
    configuration given by the input mouse, cats, and cheese positions. You are
@@ -292,10 +299,16 @@ void evaluateFeatures(double gr[max_graph_size][4], double features[25],
   /***********************************************************************************************
    * TO DO: Complete this function
    ***********************************************************************************************/
-  features[0] = feature_1(gr, features, mouse_pos, cats, size_X, graph_size);
+  // Avg Cat Dist Feature
+  features[0] = avg_cat_feat(gr, features, mouse_pos, cats, size_X, graph_size);
+  // Closest Cat Dist Feature
+  features[1] = closest_dist(gr, features, mouse_pos, cats, size_X, graph_size);
+  // Closest Cheese Dist Feature
+  features[2] =
+      closest_dist(gr, features, mouse_pos, cheeses, size_X, graph_size);
 }
 
-double Qsa(double weights[25], double features[25]) {
+double Qsa(double weights[numFeatures], double features[numFeatures]) {
   /*
     Compute and return the Qsa value given the input features and current
     weights
@@ -311,7 +324,7 @@ double Qsa(double weights[25], double features[25]) {
   return res;
 }
 
-void maxQsa(double gr[max_graph_size][4], double weights[25],
+void maxQsa(double gr[max_graph_size][4], double weights[numFeatures],
             int mouse_pos[1][2], int cats[5][2], int cheeses[5][2], int size_X,
             int graph_size, double *maxU, int *maxA) {
   /*
@@ -332,13 +345,14 @@ void maxQsa(double gr[max_graph_size][4], double weights[25],
   int size_Y = graph_size / size_X;
   int next_mouse_pos[1][2];
   for (int action = 0; action < numActions; ++action) {
-    double features[25];
+    double features[numFeatures];
     set_next_pos(next_mouse_pos[0], mouse_pos[0], action);
     if (!is_pos_valid(next_mouse_pos[0], size_X, size_Y) ||
         !gr[pos_to_index(next_mouse_pos[0], size_X)]) {
       continue;
     }
-    evaluateFeatures(gr, features, next_mouse_pos, cats, cheeses, size_X, graph_size);
+    evaluateFeatures(gr, features, next_mouse_pos, cats, cheeses, size_X,
+                     graph_size);
     double q_value = Qsa(weights, features);
     if (q_value > *maxU) {
       *maxU = q_value;
@@ -394,13 +408,14 @@ bool is_pos_in_poss(int pos[2], int poss[5][2]) {
   return false;
 }
 
-//Determines if mouse on cheese?
-bool is_loc_in_locs(int loc[2], int locs[][2], int num_locs){
+// Determines if mouse on cheese?
+bool is_loc_in_locs(int loc[2], int locs[][2], int num_locs) {
   // @Sam to-do
 }
 
 // Return the state index given the provided entity locations.
-int get_state_index(int mouse_loc[1][2], int cats[5][2], int cheeses[5][2], int size_X, int graph_size) {
+int get_state_index(int mouse_loc[1][2], int cats[5][2], int cheeses[5][2],
+                    int size_X, int graph_size) {
   return (mouse_loc[0][0] + (mouse_loc[0][1] * size_X)) +
          graph_size * (cats[0][0] + (cats[0][1] * size_X)) +
          graph_size * graph_size * (cheeses[0][0] + (cheeses[0][1] * size_X));
@@ -418,40 +433,25 @@ int is_pos_valid(int pos[2], int size_X, int size_Y) {
   return 0 <= pos[0] && pos[0] < size_X && 0 <= pos[1] && pos[1] < size_Y;
 }
 
-// Avg Cat Dist Feature 
-double feature_1(double gr[max_graph_size][4], double features[25],
-                      int mouse_pos[1][2], int cats[5][2],
-                      int size_X, int graph_size){
-  // -1 is terrible, aka cats are right on top
-  // 1 is great, aka cats are across the map from the mouse
-  double max_dist = pow(pow((double)(size_X), 2) +
-                pow((double)(graph_size / size_X), 2),
-            0.5); 
-  double average_cat_distance = 0;
-  int num_cat = 0;
-  while (cats[num_cat][0] != -1) {
-    const double kCatDistance =
-        pow(pow((double)(mouse_pos[0][0] - cats[num_cat][0]), 2) +
-                pow((double)(mouse_pos[0][1] - cats[num_cat][1]), 2),
-            0.5);
-    average_cat_distance += kCatDistance;
-    ++num_cat;
+bool deadEnd(double gr[max_graph_size][4], int mouse_pos[1][2], int size_X) {
+  int walls = 0;
+  for (int i = 0; i < 4; ++i) {
+    walls += gr[pos_to_index(mouse_pos[0], size_X)][i];
   }
-  // Get avg distance and normalize on max distance to [0,1]
-  average_cat_distance /= num_cat * max_dist;
-  // manipulate range to [-0.5, 0.5] *2 = [-1, 1]
-  return (average_cat_distance-0.5)*2;
+  if (walls > 2) {
+    return (true);
+  }
+  return (false);
 }
 
-// Mouse Dist Feature 
-double feature_1(double gr[max_graph_size][4], double features[25],
-                      int mouse_pos[1][2], int cats[5][2],
-                      int size_X, int graph_size){
+// Avg Cat Dist Feature
+double avg_cat_feat(double gr[max_graph_size][4], double features[numFeatures],
+                    int mouse_pos[1][2], int cats[5][2], int size_X,
+                    int graph_size) {
   // -1 is terrible, aka cats are right on top
   // 1 is great, aka cats are across the map from the mouse
-  double max_dist = pow(pow((double)(size_X), 2) +
-                pow((double)(graph_size / size_X), 2),
-            0.5); 
+  double max_dist = pow(
+      pow((double)(size_X), 2) + pow((double)(graph_size / size_X), 2), 0.5);
   double average_cat_distance = 0;
   int num_cat = 0;
   while (cats[num_cat][0] != -1) {
@@ -465,5 +465,27 @@ double feature_1(double gr[max_graph_size][4], double features[25],
   // Get avg distance and normalize on max distance to [0,1]
   average_cat_distance /= num_cat * max_dist;
   // manipulate range to [-0.5, 0.5] *2 = [-1, 1]
-  return (average_cat_distance-0.5)*2;
+  return (average_cat_distance - 0.5) * 2;
+}
+
+// Closest Cat Dist Feature and Closest Cheese Dist Feature
+double closest_dist(double gr[max_graph_size][4], double features[numFeatures],
+                    int mouse_pos[1][2], int agents[5][2], int size_X,
+                    int graph_size) {
+  // -1 is terrible, aka cats are right on top
+  // 1 is great, aka cats are across the map from the mouse
+  double max_dist = pow(
+      pow((double)(size_X), 2) + pow((double)(graph_size / size_X), 2), 0.5);
+  double closest_dist = max_dist;
+  int num_agent = 0;
+  while (agents[num_agent][0] != -1) {
+    double dist =
+        pow(pow((double)(mouse_pos[0][0] - agents[num_agent][0]), 2) +
+                pow((double)(mouse_pos[0][1] - agents[num_agent][1]), 2),
+            0.5);
+    closest_dist = fmin(dist, closest_dist);
+    ++num_agent;
+  }
+  closest_dist /= max_dist;
+  return (closest_dist - 0.5) * 2;
 }
