@@ -36,6 +36,7 @@
 #define numFeatures 2 // UPDATE THIS to be the number of features you have
 #define numActions 4
 #define BIG_DBL 1000000.0
+#define EPSILON 1e-9
 
 enum direction { UP = 0, RIGHT = 1, DOWN = 2, LEFT = 3 };
 
