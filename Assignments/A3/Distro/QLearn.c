@@ -150,7 +150,7 @@ int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2],
       int next_mouse_pos[1][2];
       set_next_pos(next_mouse_pos[0], mouse_pos[0], action);
       if (!is_pos_valid(next_mouse_pos[0], size_X, size_Y) ||
-          !gr[pos_to_index(next_mouse_pos[0], size_X)]) {
+          !gr[pos_to_index(mouse_pos[0], size_X)][action]) {
         continue;
       }
       double q_value = QTable[get_q_table_index(
@@ -349,7 +349,7 @@ void maxQsa(double gr[max_graph_size][4], double weights[25],
     double features[25];
     set_next_pos(next_mouse_pos[0], mouse_pos[0], action);
     if (!is_pos_valid(next_mouse_pos[0], size_X, size_Y) ||
-        !gr[pos_to_index(next_mouse_pos[0], size_X)]) {
+        !gr[pos_to_index(mouse_pos[0], size_X)][action]) {
       continue;
     }
     evaluateFeatures(gr, features, next_mouse_pos, cats, cheeses, size_X,
