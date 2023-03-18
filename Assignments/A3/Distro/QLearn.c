@@ -307,10 +307,9 @@ void evaluateFeatures(double gr[max_graph_size][4], double features[25],
   // Is dead_end Feature
   features[3] = dead_end(gr, mouse_pos, size_X) ? -1 : 0;
   double best_angle = M_PI;
-  int num_cheese = 0;
-  while (cheeses[num_cheese][0] != -1) {
+  
+  for (int num_cheese = 0; cheeses[num_cheese][0] != -1; ++num_cheese) {
     best_angle = fmin(best_angle, angle(mouse_pos, cats, cheeses[num_cheese]));
-    ++num_cheese;
   }
   features[4] = best_angle / M_PI;
 }
@@ -449,13 +448,12 @@ double avg_cat_feat(double gr[max_graph_size][4], double features[25],
   double max_dist =
       sqrt(pow((double)(size_X), 2) + pow((double)(graph_size / size_X), 2));
   double average_cat_distance = 0;
-  int num_cat = 0;
-  while (cats[num_cat][0] != -1) {
+  int num_cat;
+  for (num_cat = 0; cats[num_cat][0] != -1; ++num_cat) {
     const double kCatDistance =
         sqrt(pow((double)(mouse_pos[0][0] - cats[num_cat][0]), 2) +
              pow((double)(mouse_pos[0][1] - cats[num_cat][1]), 2));
     average_cat_distance += kCatDistance;
-    ++num_cat;
   }
   // Get avg distance and normalize on max distance to [0,1]
   average_cat_distance /= num_cat * max_dist;
@@ -490,17 +488,15 @@ bool dead_end(double gr[max_graph_size][4], int mouse_pos[1][2], int size_X) {
   for (int i = 0; i < 4; ++i) {
     walls += gr[pos_to_index(mouse_pos[0], size_X)][i];
   }
-
   return (walls > 2);
 }
 
 // Define a function that calculates the angle between three points
 double angle(int mouse_pos[1][2], int cats[5][2], int cheese[2]) {
   int num_c = 0, c_x = 0, c_y = 0;
-  while (cats[num_c][0] != -1) {
+  for (num_c = 0;cats[num_c][0] != -1; ++num_c) {
     c_x += cats[num_c][0];
     c_y += cats[num_c][1];
-    ++num_c;
   }
 
   // Calculate the lengths of the sides
