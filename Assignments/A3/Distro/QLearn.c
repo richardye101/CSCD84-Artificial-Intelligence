@@ -500,8 +500,8 @@ double angle(int mouse_pos[1][2], int cats[5][2], int cheese[2]) {
   }
 
   // Calculate the lengths of the sides
-  double mx = (c_x / num_c) - mouse_pos[0][0];
-  double my = (c_y / num_c) - mouse_pos[0][1];
+  double mx = ((double)c_x / (double)num_c) - mouse_pos[0][0];
+  double my = ((double)c_y / (double)num_c) - mouse_pos[0][1];
   double cx = cheese[0] - mouse_pos[0][0];
   double cy = cheese[1] - mouse_pos[0][1];
   double angle = atan2(my, mx) - atan2(cy, cx);
