@@ -40,14 +40,6 @@
 
 enum direction { UP = 0, RIGHT = 1, DOWN = 2, LEFT = 3 };
 
-// BEGIN STRUCT DEFS
-typedef struct Point
-{
-  double x;
-  double y;
-} Point;
-// END STRUCT DEFS
-
 // Function prototypes for D84 - Unit 3 - Reinforcement Learning
 void QLearn_update(int s, int a, double r, int s_new, double *QTable);
 int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2],
@@ -96,8 +88,7 @@ double avg_cat_feat(double gr[max_graph_size][4], double features[numFeatures],
 double closest_dist(double gr[max_graph_size][4], double features[25],
                     int mouse_pos[1][2], int agents[5][2], int size_X,
                     int graph_size);
-bool deadEnd(double gr[max_graph_size][4], int mouse_pos[1][2], int size_X);
-double length(Point p1, Point p2);
+bool dead_end(double gr[max_graph_size][4], int mouse_pos[1][2], int size_X);
 double angle(int mouse_pos[1][2], int cats[5][2], int cheese[2]);
 // END HELPER FUNCTION PROTOS
 

@@ -146,32 +146,31 @@ int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2],
    * TO DO: Complete this function
    ***********************************************************************************************/
   if (get_random_uniform(0, 1) <= pct) {
-    if (get_random_uniform(0, 1) <= pct) {
-      // Exploit
-      int size_Y = graph_size / size_X;
-      int best_action = -1;
-      double best_q_value = -BIG_DBL;
-      for (int action = 0; action < numActions; ++action) {
-        int next_mouse_pos[1][2];
-        set_next_pos(next_mouse_pos[0], mouse_pos[0], action);
-        if (!is_pos_valid(next_mouse_pos[0], size_X, size_Y) ||
-            !gr[pos_to_index(next_mouse_pos[0], size_X)]) {
-          continue;
-        }
-        double q_value = QTable[get_q_table_index(
-            get_state_index(next_mouse_pos, cats, cheeses, size_X, graph_size),
-            action)];
-        if (q_value > best_q_value) {
-          best_q_value = q_value;
-          best_action = action;
-        }
+
+    // Exploit
+    int size_Y = graph_size / size_X;
+    int best_action = -1;
+    double best_q_value = -BIG_DBL;
+    for (int action = 0; action < numActions; ++action) {
+      int next_mouse_pos[1][2];
+      set_next_pos(next_mouse_pos[0], mouse_pos[0], action);
+      if (!is_pos_valid(next_mouse_pos[0], size_X, size_Y) ||
+          !gr[pos_to_index(next_mouse_pos[0], size_X)]) {
+        continue;
       }
-      assert(0 <= best_action && best_action < numActions);
-      return best_action;
-    } else {
-      // Explore
-      return (int)get_random_uniform(0, 4 - EPSILON);
+      double q_value = QTable[get_q_table_index(
+          get_state_index(next_mouse_pos, cats, cheeses, size_X, graph_size),
+          action)];
+      if (q_value > best_q_value) {
+        best_q_value = q_value;
+        best_action = action;
+      }
     }
+    assert(0 <= best_action && best_action < numActions);
+    return best_action;
+  } else {
+    // Explore
+    return (int)get_random_uniform(0, 4 - EPSILON);
   }
 }
 
@@ -200,7 +199,7 @@ double QLearn_reward(double gr[max_graph_size][4], int mouse_pos[1][2],
     return -graph_size;
   } else if (is_loc_in_locs(mouse_pos[0], cheeses, 1)) {
     return graph_size;
-  } else if (deadEnd(gr, mouse_pos, size_X)) {
+  } else if (dead_end(gr, mouse_pos, size_X)) {
     return -3;
   } else {
     return (0); // <--- of course, you will change this as well!
@@ -305,8 +304,8 @@ void evaluateFeatures(double gr[max_graph_size][4], double features[25],
   // Closest Cheese Dist Feature
   features[2] =
       closest_dist(gr, features, mouse_pos, cheeses, size_X, graph_size);
-  // Is DeadEnd Feature
-  features[3] = deadEnd(gr, mouse_pos, size_X) ? -1 : 0;
+  // Is dead_end Feature
+  features[3] = dead_end(gr, mouse_pos, size_X) ? -1 : 0;
   double best_angle = M_PI;
   int num_cheese = 0;
   while (cheeses[num_cheese][0] != -1) {
@@ -441,21 +440,20 @@ int is_pos_valid(int pos[2], int size_X, int size_Y) {
   return 0 <= pos[0] && pos[0] < size_X && 0 <= pos[1] && pos[1] < size_Y;
 }
 
-// Avg Cat Dist Feature
+// Feature: Returns the avg distance to the cats from the mouse between [-1, 1]
 double avg_cat_feat(double gr[max_graph_size][4], double features[25],
                     int mouse_pos[1][2], int cats[5][2], int size_X,
                     int graph_size) {
   // -1 is terrible, aka cats are right on top
   // 1 is great, aka cats are across the map from the mouse
-  double max_dist = pow(
-      pow((double)(size_X), 2) + pow((double)(graph_size / size_X), 2), 0.5);
+  double max_dist =
+      sqrt(pow((double)(size_X), 2) + pow((double)(graph_size / size_X), 2));
   double average_cat_distance = 0;
   int num_cat = 0;
   while (cats[num_cat][0] != -1) {
     const double kCatDistance =
-        pow(pow((double)(mouse_pos[0][0] - cats[num_cat][0]), 2) +
-                pow((double)(mouse_pos[0][1] - cats[num_cat][1]), 2),
-            0.5);
+        sqrt(pow((double)(mouse_pos[0][0] - cats[num_cat][0]), 2) +
+             pow((double)(mouse_pos[0][1] - cats[num_cat][1]), 2));
     average_cat_distance += kCatDistance;
     ++num_cat;
   }
@@ -465,43 +463,35 @@ double avg_cat_feat(double gr[max_graph_size][4], double features[25],
   return (average_cat_distance - 0.5) * 2;
 }
 
-// Closest Cat Dist Feature and Closest Cheese Dist Feature
+/* Feature: Returns the distance to the closest agent in agents from the mouse
+ between [-1, 1] Possible agents: Cat, Cheese*/
 double closest_dist(double gr[max_graph_size][4], double features[25],
                     int mouse_pos[1][2], int agents[5][2], int size_X,
                     int graph_size) {
   // -1 is terrible, aka cats are right on top
   // 1 is great, aka cats are across the map from the mouse
-  double max_dist = pow(
-      pow((double)(size_X), 2) + pow((double)(graph_size / size_X), 2), 0.5);
+  double max_dist =
+      sqrt(pow((double)(size_X), 2) + pow((double)(graph_size / size_X), 2));
   double closest_dist = max_dist;
-  int num_agent = 0;
-  while (agents[num_agent][0] != -1) {
+
+  for (int num_agent = 0; agents[num_agent][0] != -1; ++num_agent) {
     double dist =
-        pow(pow((double)(mouse_pos[0][0] - agents[num_agent][0]), 2) +
-                pow((double)(mouse_pos[0][1] - agents[num_agent][1]), 2),
-            0.5);
+        sqrt(pow((double)(mouse_pos[0][0] - agents[num_agent][0]), 2) +
+             pow((double)(mouse_pos[0][1] - agents[num_agent][1]), 2));
     closest_dist = fmin(dist, closest_dist);
-    ++num_agent;
   }
   closest_dist /= max_dist;
   return (closest_dist - 0.5) * 2;
 }
 
 // Check if currenty at dead end
-bool deadEnd(double gr[max_graph_size][4], int mouse_pos[1][2], int size_X) {
+bool dead_end(double gr[max_graph_size][4], int mouse_pos[1][2], int size_X) {
   int walls = 0;
   for (int i = 0; i < 4; ++i) {
     walls += gr[pos_to_index(mouse_pos[0], size_X)][i];
   }
-  if (walls > 2) {
-    return (true);
-  }
-  return (false);
-}
 
-// Helper function for angle
-double length(Point p1, Point p2) {
-  return sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
+  return (walls > 2);
 }
 
 // Define a function that calculates the angle between three points
@@ -512,14 +502,12 @@ double angle(int mouse_pos[1][2], int cats[5][2], int cheese[2]) {
     c_y += cats[num_c][1];
     ++num_c;
   }
-  Point mouse = {mouse_pos[0][0], mouse_pos[0][1]};
-  Point avg_cat = {c_x / num_c, c_y / num_c};
-  Point closest_cheese = {cheese[0], cheese[1]};
+
   // Calculate the lengths of the sides
-  double mx = avg_cat.x - mouse.x;
-  double my = avg_cat.y - mouse.y;
-  double cx = closest_cheese.x - mouse.x;
-  double cy = closest_cheese.y - mouse.y;
+  double mx = (c_x / num_c) - mouse_pos[0][0];
+  double my = (c_y / num_c) - mouse_pos[0][1];
+  double cx = cheese[0] - mouse_pos[0][0];
+  double cy = cheese[1] - mouse_pos[0][1];
   double angle = atan2(my, mx) - atan2(cy, cx);
 
   // Take acute angle
