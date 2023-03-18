@@ -76,7 +76,6 @@ int checkForGoal(int x, int y, int pos[5][2]);
 double get_random_uniform(double min, double max);
 void set_next_pos(int next_pos[2], int pos[2], int direction);
 bool is_pos_in_poss(int pos[2], int poss[][2]);
-bool is_loc_in_locs(int loc[2], int locs[][2], int num_locs);
 int get_state_index(int mouse_loc[1][2], int cats[5][2], int cheeses[5][2],
                     int size_X, int graph_size);
 int get_q_table_index(int state, int action);
@@ -92,7 +91,7 @@ bool dead_end(double gr[max_graph_size][4], int mouse_pos[1][2], int size_X);
 double angle(int mouse_pos[1][2], int cats[5][2], int cheese[2]);
 // END HELPER FUNCTION PROTOS
 
-// Seed random generator using time:
+// Set random seed:
 // srand((unsigned)time(NULL));
 
 #endif // __QLearn_header

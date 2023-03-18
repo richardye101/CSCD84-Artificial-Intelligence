@@ -52,11 +52,6 @@ void QLearn_update(int s, int a, double r, int s_new, double *QTable) {
   int next_mouse_pos[1][2];
   double best_q_value = -BIG_DBL;
   for (int action = 0; action < 4; ++action) {
-    set_next_pos(next_mouse_pos, mouse_pos, action);
-    if (!is_pos_valid(next_mouse_pos[0], size_X, size_Y) ||
-        !gr[pos_to_index(next_mouse_pos[0], size_X)]) {
-      continue;
-    }
     best_q_value = fmax(best_q_value, QTable[get_q_table_index(s_new, action)]);
   }
   assert(best_q_value != -BIG_DBL);
@@ -197,7 +192,7 @@ double QLearn_reward(double gr[max_graph_size][4], int mouse_pos[1][2],
    ***********************************************************************************************/
   if (is_pos_in_poss(mouse_pos[0], cats)) {
     return -graph_size;
-  } else if (is_loc_in_locs(mouse_pos[0], cheeses, 1)) {
+  } else if (is_pos_in_poss(mouse_pos[0], cheeses)) {
     return graph_size;
   } else if (dead_end(gr, mouse_pos, size_X)) {
     return -3;
@@ -383,19 +378,19 @@ double get_random_uniform(double min, double max) {
 // Sets pos to correct value if step taken in direction direction.
 void set_next_pos(int next_pos[2], int pos[2], int direction) {
   assert(0 <= direction && direction < 4);
-  memcpy(next_pos, pos, sizeof(pos));
+  memcpy(&next_pos[0], &pos[0], 2 * sizeof(int));
   switch (direction) {
   case UP:
-    --pos[1];
+    --next_pos[1];
     break;
   case DOWN:
-    ++pos[1];
+    ++next_pos[1];
     break;
   case LEFT:
-    --pos[0];
+    --next_pos[0];
     break;
   case RIGHT:
-    ++pos[0];
+    ++next_pos[0];
     break;
   default:
     break;
@@ -412,11 +407,6 @@ bool is_pos_in_poss(int pos[2], int poss[5][2]) {
     }
   }
   return false;
-}
-
-// Determines if mouse on cheese?
-bool is_loc_in_locs(int loc[2], int locs[][2], int num_locs) {
-  // @Sam to-do
 }
 
 // Return the state index given the provided entity locations.
@@ -488,7 +478,7 @@ bool dead_end(double gr[max_graph_size][4], int mouse_pos[1][2], int size_X) {
   for (int i = 0; i < 4; ++i) {
     walls += gr[pos_to_index(mouse_pos[0], size_X)][i];
   }
-  return (walls > 2);
+  return walls > 2;
 }
 
 // Define a function that calculates the angle between three points
