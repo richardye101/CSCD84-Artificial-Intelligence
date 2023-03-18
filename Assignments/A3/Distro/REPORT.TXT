@@ -4,15 +4,15 @@ Assignment 3 - Reinforcement Learning - Q Learning
 
 ________________________________________________
 
-Student Name 1 (last, first):
+Student Name 1 (last, first): Ye, Rong Feng (Richard)
 
-Student Name 2 (last, first):
+Student Name 2 (last, first): Prokopchuk, Samuel
 
-Student number 1:
+Student number 1: 1005035230
 
 Student number 2:
 
-UTORid 1:
+UTORid 1: yerong1
 
 UTORid 2:
 
@@ -22,7 +22,7 @@ READ THIS AND SIGN YOUR NAME AT THE END:
 honesty and plaguarism. All work submitted as part
 of this assignment is my own.
 
-	Signed: _(student 1 name here)__	_(student 2 name here)__
+	Signed: _Rong Feng (Richard) Ye__	_(student 2 name here)__
 
 
 (-5 marks for failing to provide the identifying

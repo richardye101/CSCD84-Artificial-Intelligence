@@ -197,7 +197,7 @@ double QLearn_reward(double gr[max_graph_size][4], int mouse_pos[1][2],
   } else if (dead_end(gr, mouse_pos, size_X)) {
     return -3;
   } else {
-    return 0; // <--- of course, you will change this as well!
+    return closest_dist(gr, mouse_pos, cheeses, size_X, graph_size); // <--- of course, you will change this as well!
   }
 }
 
@@ -293,16 +293,15 @@ void evaluateFeatures(double gr[max_graph_size][4], double features[25],
    * TO DO: Complete this function
    ***********************************************************************************************/
   // Avg Cat Dist Feature
-  features[0] = avg_cat_feat(gr, features, mouse_pos, cats, size_X, graph_size);
+  features[0] = avg_cat_feat(gr, mouse_pos, cats, size_X, graph_size);
   // Closest Cat Dist Feature
-  features[1] = closest_dist(gr, features, mouse_pos, cats, size_X, graph_size);
+  features[1] = closest_dist(gr, mouse_pos, cats, size_X, graph_size);
   // Closest Cheese Dist Feature
-  features[2] =
-      closest_dist(gr, features, mouse_pos, cheeses, size_X, graph_size);
+  features[2] = closest_dist(gr, mouse_pos, cheeses, size_X, graph_size);
   // Is dead_end Feature
   features[3] = dead_end(gr, mouse_pos, size_X) ? -1 : 0;
-  double best_angle = M_PI;
 
+  double best_angle = M_PI;
   for (int num_cheese = 0; cheeses[num_cheese][0] != -1; ++num_cheese) {
     best_angle = fmin(best_angle, angle(mouse_pos, cats, cheeses[num_cheese]));
   }
@@ -430,9 +429,8 @@ int is_pos_valid(int pos[2], int size_X, int size_Y) {
 }
 
 // Feature: Returns the avg distance to the cats from the mouse between [-1, 1]
-double avg_cat_feat(double gr[max_graph_size][4], double features[25],
-                    int mouse_pos[1][2], int cats[5][2], int size_X,
-                    int graph_size) {
+double avg_cat_feat(double gr[max_graph_size][4], int mouse_pos[1][2],
+                    int cats[5][2], int size_X, int graph_size) {
   // -1 is terrible, aka cats are right on top
   // 1 is great, aka cats are across the map from the mouse
   double max_dist =
@@ -452,10 +450,9 @@ double avg_cat_feat(double gr[max_graph_size][4], double features[25],
 }
 
 /* Feature: Returns the distance to the closest agent in agents from the mouse
- between [-1, 1] Possible agents: Cat, Cheese*/
-double closest_dist(double gr[max_graph_size][4], double features[25],
-                    int mouse_pos[1][2], int agents[5][2], int size_X,
-                    int graph_size) {
+ between [-1, 1], Possible agents: Cat, Cheese*/
+double closest_dist(double gr[max_graph_size][4], int mouse_pos[1][2],
+                    int agents[5][2], int size_X, int graph_size) {
   // -1 is terrible, aka cats are right on top
   // 1 is great, aka cats are across the map from the mouse
   double max_dist =
