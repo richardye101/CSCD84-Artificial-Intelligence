@@ -165,7 +165,7 @@ int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2],
     return best_action;
   } else {
     // Explore
-    return (int)get_random_uniform(0, 4 - EPSILON);
+    return get_random_legal_action(gr, mouse_pos, size_X, graph_size);
   }
 }
 
@@ -197,7 +197,7 @@ double QLearn_reward(double gr[max_graph_size][4], int mouse_pos[1][2],
   } else if (dead_end(gr, mouse_pos, size_X)) {
     return -3;
   } else {
-    return (0); // <--- of course, you will change this as well!
+    return 0; // <--- of course, you will change this as well!
   }
 }
 
@@ -264,7 +264,7 @@ int feat_QLearn_action(double gr[max_graph_size][4], double weights[25],
     return maxA;
   } else {
     // Explore
-    return (int)get_random_uniform(0, 4 - EPSILON);
+    return get_random_legal_action(gr, mouse_pos, size_X, graph_size);
   }
 }
 
@@ -498,4 +498,22 @@ double angle(int mouse_pos[1][2], int cats[5][2], int cheese[2]) {
 
   // Take acute angle
   return (angle > M_PI) ? (2 * M_PI - angle) : angle;
+}
+
+int get_random_legal_action(double gr[max_graph_size][4], int mouse_pos[1][2],
+                            int size_X, int graph_size) {
+  int size_Y = graph_size / size_X;
+  int legal_actions[4];
+  int num_legal_actions = 0;
+  int next_mouse_pos[1][2];
+  for (int action = 0; action < 4; ++action) {
+    set_next_pos(next_mouse_pos[0], mouse_pos[0], action);
+    if (!is_pos_valid(next_mouse_pos[0], size_X, size_Y) ||
+        !gr[pos_to_index(mouse_pos[0], size_X)][action]) {
+      continue;
+    }
+    legal_actions[num_legal_actions] = action;
+    ++num_legal_actions;
+  }
+  return legal_actions[(int)get_random_uniform(0, num_legal_actions - EPSILON)];
 }
