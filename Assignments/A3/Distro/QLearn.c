@@ -307,7 +307,7 @@ void evaluateFeatures(double gr[max_graph_size][4], double features[25],
   // Is dead_end Feature
   features[3] = dead_end(gr, mouse_pos, size_X) ? -1 : 0;
   double best_angle = M_PI;
-  
+
   for (int num_cheese = 0; cheeses[num_cheese][0] != -1; ++num_cheese) {
     best_angle = fmin(best_angle, angle(mouse_pos, cats, cheeses[num_cheese]));
   }
@@ -351,7 +351,7 @@ void maxQsa(double gr[max_graph_size][4], double weights[25],
   int size_Y = graph_size / size_X;
   int next_mouse_pos[1][2];
   for (int action = 0; action < numActions; ++action) {
-    double features[numFeatures];
+    double features[25];
     set_next_pos(next_mouse_pos[0], mouse_pos[0], action);
     if (!is_pos_valid(next_mouse_pos[0], size_X, size_Y) ||
         !gr[pos_to_index(next_mouse_pos[0], size_X)]) {
@@ -450,10 +450,10 @@ double avg_cat_feat(double gr[max_graph_size][4], double features[25],
   double average_cat_distance = 0;
   int num_cat;
   for (num_cat = 0; cats[num_cat][0] != -1; ++num_cat) {
-    const double kCatDistance =
+    average_cat_distance +=
         sqrt(pow((double)(mouse_pos[0][0] - cats[num_cat][0]), 2) +
              pow((double)(mouse_pos[0][1] - cats[num_cat][1]), 2));
-    average_cat_distance += kCatDistance;
+    ;
   }
   // Get avg distance and normalize on max distance to [0,1]
   average_cat_distance /= num_cat * max_dist;
@@ -473,10 +473,10 @@ double closest_dist(double gr[max_graph_size][4], double features[25],
   double closest_dist = max_dist;
 
   for (int num_agent = 0; agents[num_agent][0] != -1; ++num_agent) {
-    double dist =
-        sqrt(pow((double)(mouse_pos[0][0] - agents[num_agent][0]), 2) +
-             pow((double)(mouse_pos[0][1] - agents[num_agent][1]), 2));
-    closest_dist = fmin(dist, closest_dist);
+    closest_dist =
+        fmin(closest_dist,
+             sqrt(pow((double)(mouse_pos[0][0] - agents[num_agent][0]), 2) +
+                  pow((double)(mouse_pos[0][1] - agents[num_agent][1]), 2)));
   }
   closest_dist /= max_dist;
   return (closest_dist - 0.5) * 2;
@@ -494,7 +494,7 @@ bool dead_end(double gr[max_graph_size][4], int mouse_pos[1][2], int size_X) {
 // Define a function that calculates the angle between three points
 double angle(int mouse_pos[1][2], int cats[5][2], int cheese[2]) {
   int num_c = 0, c_x = 0, c_y = 0;
-  for (num_c = 0;cats[num_c][0] != -1; ++num_c) {
+  for (num_c = 0; cats[num_c][0] != -1; ++num_c) {
     c_x += cats[num_c][0];
     c_y += cats[num_c][1];
   }
