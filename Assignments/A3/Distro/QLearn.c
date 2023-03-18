@@ -146,6 +146,7 @@ int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2],
    * TO DO: Complete this function
    ***********************************************************************************************/
   if (get_random_uniform(0, 1) <= pct) {
+
     // Exploit
     int size_Y = graph_size / size_X;
     int best_action = -1;
@@ -158,7 +159,8 @@ int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2],
         continue;
       }
       double q_value = QTable[get_q_table_index(
-          get_state_index(next_mouse_pos, cats, cheeses, size_X, graph_size), action)];
+          get_state_index(next_mouse_pos, cats, cheeses, size_X, graph_size),
+          action)];
       if (q_value > best_q_value) {
         best_q_value = q_value;
         best_action = action;
@@ -176,15 +178,15 @@ double QLearn_reward(double gr[max_graph_size][4], int mouse_pos[1][2],
                      int cats[5][2], int cheeses[5][2], int size_X,
                      int graph_size) {
   /*
-    This function computes and returns a reward for the state represented by the
-    input mouse, cat, and cheese position.
+    This function computes and returns a reward for the state represented by
+    the input mouse, cat, and cheese position.
 
     You can make this function as simple or as complex as you like. But it
     should return positive values for states that are favorable to the mouse,
     and negative values for states that are bad for the mouse.
 
-    I am providing you with the graph, in case you want to do some processing on
-    the maze in order to decide the reward.
+    I am providing you with the graph, in case you want to do some processing
+    on the maze in order to decide the reward.
 
     This function should return a maximim/minimum reward when the mouse
     eats/gets eaten respectively.
@@ -197,6 +199,8 @@ double QLearn_reward(double gr[max_graph_size][4], int mouse_pos[1][2],
     return -graph_size;
   } else if (is_loc_in_locs(mouse_pos[0], cheeses, 1)) {
     return graph_size;
+  } else if (dead_end(gr, mouse_pos, size_X)) {
+    return -3;
   } else {
     return (0); // <--- of course, you will change this as well!
   }
@@ -207,11 +211,11 @@ void feat_QLearn_update(double gr[max_graph_size][4], double weights[25],
                         int cheeses[5][2], int size_X, int graph_size) {
   /*
     This function performs the Q-learning adjustment to all the weights
-    associated with your features. Unlike standard Q-learning, you don't receive
-    a <s,a,r,s'> tuple, instead, you receive the current state (mouse, cats, and
-    cheese potisions), and the reward associated with this action (this is
-    called immediately after the mouse makes a move, so implicit in this is the
-    mouse having selected some action)
+    associated with your features. Unlike standard Q-learning, you don't
+    receive a <s,a,r,s'> tuple, instead, you receive the current state (mouse,
+    cats, and cheese potisions), and the reward associated with this action
+    (this is called immediately after the mouse makes a move, so implicit in
+    this is the mouse having selected some action)
 
     Your code must then evaluate the update and apply it to the weights in the
     weight array.
@@ -220,17 +224,18 @@ void feat_QLearn_update(double gr[max_graph_size][4], double weights[25],
   /***********************************************************************************************
    * TO DO: Complete this function
    ***********************************************************************************************/
-  double maxU; //maxQsa value
-  int maxA; //maxQsa action, not required here?
-  double features[25];
+  double maxU; // maxQsa value
+  int maxA;    // maxQsa action, not required here?
+  double features[numFeatures];
   double q_value;
 
-  maxQsa(gr, weights, mouse_pos, cats, cheeses, size_X, graph_size, &maxU, &maxA);
+  maxQsa(gr, weights, mouse_pos, cats, cheeses, size_X, graph_size, &maxU,
+         &maxA);
   evaluateFeatures(gr, features, mouse_pos, cats, cheeses, size_X, graph_size);
   q_value = Qsa(weights, features);
 
-  for(int i = 0; i<25; ++i){
-    weights[i] += alpha * (reward + lambda * (maxU-q_value) ) * features[i];
+  for (int i = 0; i < numFeatures; ++i) {
+    weights[i] += alpha * (reward + lambda * (maxU - q_value)) * features[i];
   }
 }
 
@@ -259,8 +264,8 @@ int feat_QLearn_action(double gr[max_graph_size][4], double weights[25],
     // Exploit
     double maxU; // not required here
     int maxA;
-    maxQsa(gr, weights, mouse_pos, cats,
-           cheeses, size_X, graph_size, &maxU, &maxA);
+    maxQsa(gr, weights, mouse_pos, cats, cheeses, size_X, graph_size, &maxU,
+           &maxA);
     return maxA;
   } else {
     // Explore
@@ -280,9 +285,9 @@ void evaluateFeatures(double gr[max_graph_size][4], double features[25],
    Take some time to think about what features would be useful to have, the
    better your features, the smarter your mouse!
 
-   Note that instead of passing down the number of cats and the number of cheese
-   chunks (too many parms!) the arrays themselves will tell you what are valid
-   cat/cheese locations.
+   Note that instead of passing down the number of cats and the number of
+   cheese chunks (too many parms!) the arrays themselves will tell you what
+   are valid cat/cheese locations.
 
    You can have up to 5 cats and up to 5 cheese chunks, and array entries for
    the remaining cats/cheese will have a value of -1 - check this when
@@ -292,6 +297,21 @@ void evaluateFeatures(double gr[max_graph_size][4], double features[25],
   /***********************************************************************************************
    * TO DO: Complete this function
    ***********************************************************************************************/
+  // Avg Cat Dist Feature
+  features[0] = avg_cat_feat(gr, features, mouse_pos, cats, size_X, graph_size);
+  // Closest Cat Dist Feature
+  features[1] = closest_dist(gr, features, mouse_pos, cats, size_X, graph_size);
+  // Closest Cheese Dist Feature
+  features[2] =
+      closest_dist(gr, features, mouse_pos, cheeses, size_X, graph_size);
+  // Is dead_end Feature
+  features[3] = dead_end(gr, mouse_pos, size_X) ? -1 : 0;
+  double best_angle = M_PI;
+
+  for (int num_cheese = 0; cheeses[num_cheese][0] != -1; ++num_cheese) {
+    best_angle = fmin(best_angle, angle(mouse_pos, cats, cheeses[num_cheese]));
+  }
+  features[4] = best_angle / M_PI;
 }
 
 double Qsa(double weights[25], double features[25]) {
@@ -315,9 +335,9 @@ void maxQsa(double gr[max_graph_size][4], double weights[25],
             int graph_size, double *maxU, int *maxA) {
   /*
     Given the state represented by the input positions for mouse, cats, and
-    cheese, this function evaluates the Q-value at all possible neighbour states
-    and returns the max. The maximum value is returned in maxU and the index of
-    the action corresponding to this value is returned in maxA.
+    cheese, this function evaluates the Q-value at all possible neighbour
+    states and returns the max. The maximum value is returned in maxU and the
+    index of the action corresponding to this value is returned in maxA.
 
     You should make sure the function does not evaluate moves that would make
     the mouse walk through a wall.
@@ -337,7 +357,8 @@ void maxQsa(double gr[max_graph_size][4], double weights[25],
         !gr[pos_to_index(next_mouse_pos[0], size_X)]) {
       continue;
     }
-    evaluateFeatures(gr, features, next_mouse_pos, cats, cheeses, size_X, graph_size);
+    evaluateFeatures(gr, features, next_mouse_pos, cats, cheeses, size_X,
+                     graph_size);
     double q_value = Qsa(weights, features);
     if (q_value > *maxU) {
       *maxU = q_value;
@@ -393,13 +414,14 @@ bool is_pos_in_poss(int pos[2], int poss[5][2]) {
   return false;
 }
 
-//Determines if mouse on cheese?
-bool is_loc_in_locs(int loc[2], int locs[][2], int num_locs){
+// Determines if mouse on cheese?
+bool is_loc_in_locs(int loc[2], int locs[][2], int num_locs) {
   // @Sam to-do
 }
 
 // Return the state index given the provided entity locations.
-int get_state_index(int mouse_loc[1][2], int cats[5][2], int cheeses[5][2], int size_X, int graph_size) {
+int get_state_index(int mouse_loc[1][2], int cats[5][2], int cheeses[5][2],
+                    int size_X, int graph_size) {
   return (mouse_loc[0][0] + (mouse_loc[0][1] * size_X)) +
          graph_size * (cats[0][0] + (cats[0][1] * size_X)) +
          graph_size * graph_size * (cheeses[0][0] + (cheeses[0][1] * size_X));
@@ -415,4 +437,75 @@ int pos_to_index(int pos[2], int size_X) { return pos[0] + pos[1] * size_X; }
 
 int is_pos_valid(int pos[2], int size_X, int size_Y) {
   return 0 <= pos[0] && pos[0] < size_X && 0 <= pos[1] && pos[1] < size_Y;
+}
+
+// Feature: Returns the avg distance to the cats from the mouse between [-1, 1]
+double avg_cat_feat(double gr[max_graph_size][4], double features[25],
+                    int mouse_pos[1][2], int cats[5][2], int size_X,
+                    int graph_size) {
+  // -1 is terrible, aka cats are right on top
+  // 1 is great, aka cats are across the map from the mouse
+  double max_dist =
+      sqrt(pow((double)(size_X), 2) + pow((double)(graph_size / size_X), 2));
+  double average_cat_distance = 0;
+  int num_cat;
+  for (num_cat = 0; cats[num_cat][0] != -1; ++num_cat) {
+    average_cat_distance +=
+        sqrt(pow((double)(mouse_pos[0][0] - cats[num_cat][0]), 2) +
+             pow((double)(mouse_pos[0][1] - cats[num_cat][1]), 2));
+    ;
+  }
+  // Get avg distance and normalize on max distance to [0,1]
+  average_cat_distance /= num_cat * max_dist;
+  // manipulate range to [-0.5, 0.5] *2 = [-1, 1]
+  return (average_cat_distance - 0.5) * 2;
+}
+
+/* Feature: Returns the distance to the closest agent in agents from the mouse
+ between [-1, 1] Possible agents: Cat, Cheese*/
+double closest_dist(double gr[max_graph_size][4], double features[25],
+                    int mouse_pos[1][2], int agents[5][2], int size_X,
+                    int graph_size) {
+  // -1 is terrible, aka cats are right on top
+  // 1 is great, aka cats are across the map from the mouse
+  double max_dist =
+      sqrt(pow((double)(size_X), 2) + pow((double)(graph_size / size_X), 2));
+  double closest_dist = max_dist;
+
+  for (int num_agent = 0; agents[num_agent][0] != -1; ++num_agent) {
+    closest_dist =
+        fmin(closest_dist,
+             sqrt(pow((double)(mouse_pos[0][0] - agents[num_agent][0]), 2) +
+                  pow((double)(mouse_pos[0][1] - agents[num_agent][1]), 2)));
+  }
+  closest_dist /= max_dist;
+  return (closest_dist - 0.5) * 2;
+}
+
+// Check if currenty at dead end
+bool dead_end(double gr[max_graph_size][4], int mouse_pos[1][2], int size_X) {
+  int walls = 0;
+  for (int i = 0; i < 4; ++i) {
+    walls += gr[pos_to_index(mouse_pos[0], size_X)][i];
+  }
+  return (walls > 2);
+}
+
+// Define a function that calculates the angle between three points
+double angle(int mouse_pos[1][2], int cats[5][2], int cheese[2]) {
+  int num_c = 0, c_x = 0, c_y = 0;
+  for (num_c = 0; cats[num_c][0] != -1; ++num_c) {
+    c_x += cats[num_c][0];
+    c_y += cats[num_c][1];
+  }
+
+  // Calculate the lengths of the sides
+  double mx = ((double)c_x / (double)num_c) - mouse_pos[0][0];
+  double my = ((double)c_y / (double)num_c) - mouse_pos[0][1];
+  double cx = cheese[0] - mouse_pos[0][0];
+  double cy = cheese[1] - mouse_pos[0][1];
+  double angle = atan2(my, mx) - atan2(cy, cx);
+
+  // Take acute angle
+  return (angle > M_PI) ? (2 * M_PI - angle) : angle;
 }
