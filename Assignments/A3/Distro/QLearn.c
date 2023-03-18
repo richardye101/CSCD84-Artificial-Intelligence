@@ -146,6 +146,7 @@ int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2],
    * TO DO: Complete this function
    ***********************************************************************************************/
   if (get_random_uniform(0, 1) <= pct) {
+  if (get_random_uniform(0, 1) <= pct) {
     // Exploit
     int size_Y = graph_size / size_X;
     int best_action = -1;
@@ -270,6 +271,7 @@ int feat_QLearn_action(double gr[max_graph_size][4],
            &maxA);
     return maxA;
   } else {
+    // Explore
     return (int)get_random_uniform(0, 4 - EPSILON);
   }
 }
