@@ -146,31 +146,32 @@ int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2],
    * TO DO: Complete this function
    ***********************************************************************************************/
   if (get_random_uniform(0, 1) <= pct) {
-  if (get_random_uniform(0, 1) <= pct) {
-    // Exploit
-    int size_Y = graph_size / size_X;
-    int best_action = -1;
-    double best_q_value = -BIG_DBL;
-    for (int action = 0; action < numActions; ++action) {
-      int next_mouse_pos[1][2];
-      set_next_pos(next_mouse_pos[0], mouse_pos[0], action);
-      if (!is_pos_valid(next_mouse_pos[0], size_X, size_Y) ||
-          !gr[pos_to_index(next_mouse_pos[0], size_X)]) {
-        continue;
+    if (get_random_uniform(0, 1) <= pct) {
+      // Exploit
+      int size_Y = graph_size / size_X;
+      int best_action = -1;
+      double best_q_value = -BIG_DBL;
+      for (int action = 0; action < numActions; ++action) {
+        int next_mouse_pos[1][2];
+        set_next_pos(next_mouse_pos[0], mouse_pos[0], action);
+        if (!is_pos_valid(next_mouse_pos[0], size_X, size_Y) ||
+            !gr[pos_to_index(next_mouse_pos[0], size_X)]) {
+          continue;
+        }
+        double q_value = QTable[get_q_table_index(
+            get_state_index(next_mouse_pos, cats, cheeses, size_X, graph_size),
+            action)];
+        if (q_value > best_q_value) {
+          best_q_value = q_value;
+          best_action = action;
+        }
       }
-      double q_value = QTable[get_q_table_index(
-          get_state_index(next_mouse_pos, cats, cheeses, size_X, graph_size),
-          action)];
-      if (q_value > best_q_value) {
-        best_q_value = q_value;
-        best_action = action;
-      }
+      assert(0 <= best_action && best_action < numActions);
+      return best_action;
+    } else {
+      // Explore
+      return (int)get_random_uniform(0, 4 - EPSILON);
     }
-    assert(0 <= best_action && best_action < numActions);
-    return best_action;
-  } else {
-    // Explore
-    return (int)get_random_uniform(0, 4 - EPSILON);
   }
 }
 
@@ -178,15 +179,15 @@ double QLearn_reward(double gr[max_graph_size][4], int mouse_pos[1][2],
                      int cats[5][2], int cheeses[5][2], int size_X,
                      int graph_size) {
   /*
-    This function computes and returns a reward for the state represented by the
-    input mouse, cat, and cheese position.
+    This function computes and returns a reward for the state represented by
+    the input mouse, cat, and cheese position.
 
     You can make this function as simple or as complex as you like. But it
     should return positive values for states that are favorable to the mouse,
     and negative values for states that are bad for the mouse.
 
-    I am providing you with the graph, in case you want to do some processing on
-    the maze in order to decide the reward.
+    I am providing you with the graph, in case you want to do some processing
+    on the maze in order to decide the reward.
 
     This function should return a maximim/minimum reward when the mouse
     eats/gets eaten respectively.
@@ -199,25 +200,23 @@ double QLearn_reward(double gr[max_graph_size][4], int mouse_pos[1][2],
     return -graph_size;
   } else if (is_loc_in_locs(mouse_pos[0], cheeses, 1)) {
     return graph_size;
+  } else if (deadEnd(gr, mouse_pos, size_X)) {
+    return -3;
   } else {
-    if (deadEnd(gr, mouse_pos, size_X)) {
-      return -3;
-    }
     return (0); // <--- of course, you will change this as well!
   }
 }
 
-void feat_QLearn_update(double gr[max_graph_size][4],
-                        double weights[25], double reward,
-                        int mouse_pos[1][2], int cats[5][2], int cheeses[5][2],
-                        int size_X, int graph_size) {
+void feat_QLearn_update(double gr[max_graph_size][4], double weights[25],
+                        double reward, int mouse_pos[1][2], int cats[5][2],
+                        int cheeses[5][2], int size_X, int graph_size) {
   /*
     This function performs the Q-learning adjustment to all the weights
-    associated with your features. Unlike standard Q-learning, you don't receive
-    a <s,a,r,s'> tuple, instead, you receive the current state (mouse, cats, and
-    cheese potisions), and the reward associated with this action (this is
-    called immediately after the mouse makes a move, so implicit in this is the
-    mouse having selected some action)
+    associated with your features. Unlike standard Q-learning, you don't
+    receive a <s,a,r,s'> tuple, instead, you receive the current state (mouse,
+    cats, and cheese potisions), and the reward associated with this action
+    (this is called immediately after the mouse makes a move, so implicit in
+    this is the mouse having selected some action)
 
     Your code must then evaluate the update and apply it to the weights in the
     weight array.
@@ -241,10 +240,9 @@ void feat_QLearn_update(double gr[max_graph_size][4],
   }
 }
 
-int feat_QLearn_action(double gr[max_graph_size][4],
-                       double weights[25], int mouse_pos[1][2],
-                       int cats[5][2], int cheeses[5][2], double pct,
-                       int size_X, int graph_size) {
+int feat_QLearn_action(double gr[max_graph_size][4], double weights[25],
+                       int mouse_pos[1][2], int cats[5][2], int cheeses[5][2],
+                       double pct, int size_X, int graph_size) {
   /*
     Similar to its counterpart for standard Q-learning, this function returns
     the index of the next action to be taken by the mouse.
@@ -276,10 +274,9 @@ int feat_QLearn_action(double gr[max_graph_size][4],
   }
 }
 
-void evaluateFeatures(double gr[max_graph_size][4],
-                      double features[25], int mouse_pos[1][2],
-                      int cats[5][2], int cheeses[5][2], int size_X,
-                      int graph_size) {
+void evaluateFeatures(double gr[max_graph_size][4], double features[25],
+                      int mouse_pos[1][2], int cats[5][2], int cheeses[5][2],
+                      int size_X, int graph_size) {
   /*
    This function evaluates all the features you defined for the game
    configuration given by the input mouse, cats, and cheese positions. You are
@@ -289,9 +286,9 @@ void evaluateFeatures(double gr[max_graph_size][4],
    Take some time to think about what features would be useful to have, the
    better your features, the smarter your mouse!
 
-   Note that instead of passing down the number of cats and the number of cheese
-   chunks (too many parms!) the arrays themselves will tell you what are valid
-   cat/cheese locations.
+   Note that instead of passing down the number of cats and the number of
+   cheese chunks (too many parms!) the arrays themselves will tell you what
+   are valid cat/cheese locations.
 
    You can have up to 5 cats and up to 5 cheese chunks, and array entries for
    the remaining cats/cheese will have a value of -1 - check this when
@@ -312,7 +309,7 @@ void evaluateFeatures(double gr[max_graph_size][4],
   features[3] = deadEnd(gr, mouse_pos, size_X) ? -1 : 0;
   double best_angle = M_PI;
   int num_cheese = 0;
-  while(cheeses[num_cheese][0] != -1){
+  while (cheeses[num_cheese][0] != -1) {
     best_angle = fmin(best_angle, angle(mouse_pos, cats, cheeses[num_cheese]));
     ++num_cheese;
   }
@@ -340,9 +337,9 @@ void maxQsa(double gr[max_graph_size][4], double weights[25],
             int graph_size, double *maxU, int *maxA) {
   /*
     Given the state represented by the input positions for mouse, cats, and
-    cheese, this function evaluates the Q-value at all possible neighbour states
-    and returns the max. The maximum value is returned in maxU and the index of
-    the action corresponding to this value is returned in maxA.
+    cheese, this function evaluates the Q-value at all possible neighbour
+    states and returns the max. The maximum value is returned in maxU and the
+    index of the action corresponding to this value is returned in maxA.
 
     You should make sure the function does not evaluate moves that would make
     the mouse walk through a wall.
