@@ -154,7 +154,7 @@ int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2],
         continue;
       }
       double q_value = QTable[get_q_table_index(
-          get_state_index(next_mouse_pos, cats, cheeses, size_X, graph_size),
+          get_state_index(mouse_pos, cats, cheeses, size_X, graph_size),
           action)];
       if (q_value > best_q_value) {
         best_q_value = q_value;
