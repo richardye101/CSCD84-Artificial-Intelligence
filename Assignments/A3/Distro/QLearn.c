@@ -140,10 +140,9 @@ int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2],
   /***********************************************************************************************
    * TO DO: Complete this function
    ***********************************************************************************************/
+  int size_Y = graph_size / size_X;
   if (get_random_uniform(0, 1) <= pct) {
-
     // Exploit
-    int size_Y = graph_size / size_X;
     int best_action = -1;
     double best_q_value = -BIG_DBL;
     for (int action = 0; action < numActions; ++action) {
@@ -165,7 +164,20 @@ int QLearn_action(double gr[max_graph_size][4], int mouse_pos[1][2],
     return best_action;
   } else {
     // Explore
-    return (int)get_random_uniform(0, 4 - EPSILON);
+    bool cannot_explore = true;
+    int action;
+    while(cannot_explore){
+      int cur_action = (int)get_random_uniform(0, 4 - EPSILON);
+      int next_mouse_pos[1][2];
+      set_next_pos(next_mouse_pos[0], mouse_pos[0], cur_action);
+      if (!is_pos_valid(next_mouse_pos[0], size_X, size_Y) ||
+          !gr[pos_to_index(next_mouse_pos[0], size_X)]) {
+        continue;
+      }
+      action = cur_action;
+      cannot_explore = false;
+    }
+    return action;
   }
 }
 
@@ -263,8 +275,21 @@ int feat_QLearn_action(double gr[max_graph_size][4], double weights[25],
            &maxA);
     return maxA;
   } else {
-    // Explore
-    return (int)get_random_uniform(0, 4 - EPSILON);
+    int size_Y = graph_size / size_X;
+    bool cannot_explore = true;
+    int action;
+    while(cannot_explore){
+      int cur_action = (int)get_random_uniform(0, 4 - EPSILON);
+      int next_mouse_pos[1][2];
+      set_next_pos(next_mouse_pos[0], mouse_pos[0], cur_action);
+      if (!is_pos_valid(next_mouse_pos[0], size_X, size_Y) ||
+          !gr[pos_to_index(next_mouse_pos[0], size_X)]) {
+        continue;
+      }
+      action = cur_action;
+      cannot_explore = false;
+    }
+    return action;
   }
 }
 
