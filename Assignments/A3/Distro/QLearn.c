@@ -194,10 +194,8 @@ double QLearn_reward(double gr[max_graph_size][4], int mouse_pos[1][2],
     return -5.0;
   } else if (is_pos_in_poss(mouse_pos[0], cheeses)) {
     return 5.0;
-  //} else if (dead_end(gr, mouse_pos, size_X)) {
-  //  return -3.0;
   } else {
-    return -closest_dist(gr, mouse_pos, cheeses, size_X, graph_size) + 0.5*closest_dist(gr, mouse_pos, cats, size_X, graph_size);
+    return 0;
   }
 }
 
