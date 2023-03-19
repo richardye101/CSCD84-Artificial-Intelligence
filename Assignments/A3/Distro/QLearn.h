@@ -21,21 +21,21 @@
 
 // Generally needed includes
 // #include <malloc.h>
+#include <assert.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 #include <time.h>
 
 #define alpha .01 // Learning rate for standard Q-Learning
 #define lambda .5 // Discount rate for future rewards
 #define max_graph_size 32 * 32
 
-#define numFeatures 5 // UPDATE THIS to be the number of features you have
+#define numFeatures 3 // UPDATE THIS to be the number of features you have
 #define numActions 4
-#define BIG_DBL 1000000.0
+#define BIG_DBL 1000000000000.0
 #define EPSILON 1e-9
 
 enum direction { UP = 0, RIGHT = 1, DOWN = 2, LEFT = 3 };
@@ -81,12 +81,10 @@ int get_state_index(int mouse_loc[1][2], int cats[5][2], int cheeses[5][2],
 int get_q_table_index(int state, int action);
 int pos_to_index(int pos[2], int size_X);
 int is_pos_valid(int pos[2], int size_X, int size_Y);
-double avg_cat_feat(double gr[max_graph_size][4], double features[numFeatures],
-                    int mouse_pos[1][2], int cats[5][2], int size_X,
-                    int graph_size);
-double closest_dist(double gr[max_graph_size][4], double features[25],
-                    int mouse_pos[1][2], int agents[5][2], int size_X,
-                    int graph_size);
+double avg_cat_feat(double gr[max_graph_size][4], int mouse_pos[1][2],
+                    int cats[5][2], int size_X, int graph_size);
+double closest_dist(double gr[max_graph_size][4], int mouse_pos[1][2],
+                    int agents[5][2], int size_X, int graph_size);
 bool dead_end(double gr[max_graph_size][4], int mouse_pos[1][2], int size_X);
 double angle(int mouse_pos[1][2], int cats[5][2], int cheese[2]);
 int get_random_legal_action(double gr[max_graph_size][4], int mouse_pos[1][2],
