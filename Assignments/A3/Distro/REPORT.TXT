@@ -45,18 +45,18 @@ but explain carefully when needed.
      (1 mark) # Experiment 1, 10000 training trials, 20 rounds, random seed 1522,
      # 8x8 grid, cat-smartness .9
 
-     Initial mouse winning rate (first rate obtained when training starts): 0.062982
+     Initial mouse winning rate (first rate obtained when training starts): 0.064054
 
      Train your mouse, and once trained, run the evaluation and  
-     record the mouse winning rate: 0.584883
+     record the mouse winning rate: 0.744650
 
      (1 mark) # Experiment 2, 1000000 training trials, 50 rounds, random seed 1522,
      # 8x8 grid, cat-smartness .9
 
-     Initial mouse winning rate (first rate obtained when training starts): 0.065032
+     Initial mouse winning rate (first rate obtained when training starts): 0.064892
 
      Train your mouse, and once trained, run the evaluation and  
-     record the mouse winning rate: 0.789951
+     record the mouse winning rate: 0.957173
 
      (1 mark) Would the mouse keep improving and become invincible if
      you ran, say, 100,000,000 training rounds per batch?     
@@ -68,14 +68,14 @@ but explain carefully when needed.
      (1 mark) # Experiment 3 - Run the evaluation on the 8x8 grid, cat-smartness=.9,
      # but using the random seed 4289 for the game.
 	
-     Mouse Winning Rate: 0.381190
+     Mouse Winning Rate: 0.398468
 
      (1 mark) # Experiment 4 - Run the evaluation on the 8x8 grid, cat-smartness=.9,
      # but using the random seed 31415 for the game.
 	
-     Mouse Winning Rate: 0.468819
+     Mouse Winning Rate: 0.529206
 
-     Average rate for Experiement 3 and Experiment 4: 0.4250045
+     Average rate for Experiement 3 and Experiment 4: 0.463837
 
      (1 mark) Compare with the rate obtained in experiment 2. What is happening here?
 
@@ -86,9 +86,9 @@ but explain carefully when needed.
      (1 mark) # Experiment 5 - Train your mouse on the 16x16 grid, using random seed
      # 1522, 1000000 trials, and 50 training rounds. Cat-smartness=.9
 
-     Initial mouse winning rate (first rate obtained when training starts): 0.029616
+     Initial mouse winning rate (first rate obtained when training starts): 0.028605
 
-     Mouse Winning Rate (from evaluation after training): 0.548921
+     Mouse Winning Rate (from evaluation after training): 0.473389
 
      (1 mark) Compare the final winning rate with that from Experiment 2, what can
      you say about the difference in winning rates?
@@ -98,9 +98,13 @@ but explain carefully when needed.
 6 .- (2 marks) Is standard Q-Learning a reasonable strategy for environments
      that change constantly? discuss based on the above
 
+Standard Q-Learning is not a reasonable strategy for environments that change constantly. We have seen above that we can achieve a very high evaluation score on the seed that we trained on, however for different seeds the success rate drops significantly. This makes sense, as standard Q-Learning learns the best policy for a given layout, which does not mean it is the best policy for different layouts.
+
 7 .- (2 marks) Explain your feature set for feature-based Q Learning, and
                explain why and how each feature is expected to contribute
 	       to helping your mouse win
+
+@Sam to-do
 
 8 .- Carry out the following experiments:
 
@@ -108,30 +112,34 @@ but explain carefully when needed.
      # the 16x16 grid, one cat, and one cheese, cat-smartness=.9,  
      # random seed = 1522, and use 1000000 trials and 50 rounds. 
 
-     Initial mouse winning rate (first rate obtained when training starts):
+     Initial mouse winning rate (first rate obtained when training starts): @Sam to-do
      
-     Mouse Winning Rate (from evaluation after training):
+     Mouse Winning Rate (from evaluation after training): @Sam to-do
 
      Compare this rate against the rate obtained in Experiment #5, what
      are your conclusions regarding the utility of feature-based
      Q-Learning?
 
+@Sam to-do
+
      (1 mark) # Experiment 7, using the saved weights from Experiment 6 (no
      # re-training) run the evaluation using random seed 4289, same
      # 1 cheese, 1 cat, and cat-smartness=.9, 16x16 grid
 
-     Mouse Winning Rate (from evaluation after training):
+     Mouse Winning Rate (from evaluation after training): @Sam to-do
 
      (1 mark) # Experiment 8, using the saved weights from Experiment 6 (no
      # re-training) run the evaluation using random seed 31415, same
      # 1 cheese, 1 cat, and cat-smartness=.9, 16x16 grid
 
-     Mouse Winning Rate (from evaluation after training):
+     Mouse Winning Rate (from evaluation after training): @Sam to-do
 
      (1 mark) Comparing the winning rates from Experiments #7 and #8 against
      those from Experiment #6, what can you conclude about feature-
      based Q-Learning in terms of its ability to deal with changes 
      to the environment?
+
+@Sam to-do
      
 9 .- Carry out the following experiments:
 
@@ -139,32 +147,37 @@ but explain carefully when needed.
      # the 16x16 grid, 2 cats, and 3 cheeses, cat-smartness=.9,  
      # random seed = 1522, and use 1000000 trials and 50 rounds. 
 
-     Initial mouse winning rate (first rate obtained when training starts):
+     Initial mouse winning rate (first rate obtained when training starts): @Sam to-do
      
-     Mouse Winning Rate (from evaluation after training):
+     Mouse Winning Rate (from evaluation after training): @Sam to-do
   
      (1 mark) # Experiment 9: Using the trained weights from Experiment 9, (no
      # re-training), run the evaluation on the 16x16 grid, 2 cats, 
      # 3 cheeses, cat-smartness=.9, and random seed 4289
      
-     Mouse Winning Rate (from evaluation after training):
+     Mouse Winning Rate (from evaluation after training): @Sam to-do
 
      (1 mark) # Experiment 9: Using the trained weights from Experiment 9, (no
      # re-training), run the evaluation on the 32x32 grid, 2 cats, 
      # 3 cheeses, cat-smartness=.9, and random seed 4289
      
-     Mouse Winning Rate (from evaluation after training):
+     Mouse Winning Rate (from evaluation after training): @Sam to-do
 
      (2 marks) Based on the last 3 experiments, what can you conclude regarding
      the usefulness and applicability of standard Q-Learning vs. 
      feature-based Q-learning?
+
+@Sam to-do
 
 10 . - (2 marks) We obviously can not train an expensive robot by trial and error,
       How would you implement feature-based Q-learning for a mobile bot so you
       can take advantage of reinforcement learning but not spend millions on
       broken robots that keep falling down the stairs?
       
-      
+We can design a simulation for the bot to learn weights for features, before testing in a safe environment. Of course, we can't guarantee that the simulator is 100% accurate tot he real world, so there may be some tweaks required before translating the mobile bot's learned weights for it's features to a real bot.
+
+The features specifically would have to encode the environment data, which it can process in multiple different ways. It can take in the texture of the terrain through it's cameras, use two cameras to identify depth of field of it's given path, etc. 
+@Sam to-check/improve
 _____________________________________________________
 
 Mark with an 'x' where appropriate. If something is only
