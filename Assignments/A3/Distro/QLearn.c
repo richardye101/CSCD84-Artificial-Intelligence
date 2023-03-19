@@ -191,13 +191,13 @@ double QLearn_reward(double gr[max_graph_size][4], int mouse_pos[1][2],
    * TO DO: Complete this function
    ***********************************************************************************************/
   if (is_pos_in_poss(mouse_pos[0], cats)) {
-    return -graph_size;
+    return -5.0;
   } else if (is_pos_in_poss(mouse_pos[0], cheeses)) {
-    return graph_size;
-  } else if (dead_end(gr, mouse_pos, size_X)) {
-    return -3;
+    return 5.0;
+  //} else if (dead_end(gr, mouse_pos, size_X)) {
+  //  return -3.0;
   } else {
-    return closest_dist(gr, mouse_pos, cheeses, size_X, graph_size); // <--- of course, you will change this as well!
+    return -closest_dist(gr, mouse_pos, cheeses, size_X, graph_size) + 0.5*closest_dist(gr, mouse_pos, cats, size_X, graph_size);
   }
 }
 
@@ -230,7 +230,8 @@ void feat_QLearn_update(double gr[max_graph_size][4], double weights[25],
   q_value = Qsa(weights, features);
 
   for (int i = 0; i < numFeatures; ++i) {
-    weights[i] += alpha * (reward + lambda * (maxU - q_value)) * features[i];
+    //printf("weight %d: %f, reward: %f, maxU: %f, q_val: %f\n", i, weights[i], reward, maxU, q_value);
+    weights[i] += alpha * (reward + lambda * maxU - q_value) * features[i];
   }
 }
 
@@ -292,20 +293,20 @@ void evaluateFeatures(double gr[max_graph_size][4], double features[25],
   /***********************************************************************************************
    * TO DO: Complete this function
    ***********************************************************************************************/
-  // Avg Cat Dist Feature
-  features[0] = avg_cat_feat(gr, mouse_pos, cats, size_X, graph_size);
+  // Closest Cheese Dist Feature
+  features[0] = closest_dist(gr, mouse_pos, cheeses, size_X, graph_size);
   // Closest Cat Dist Feature
   features[1] = closest_dist(gr, mouse_pos, cats, size_X, graph_size);
-  // Closest Cheese Dist Feature
-  features[2] = closest_dist(gr, mouse_pos, cheeses, size_X, graph_size);
+  // Avg Cat Dist Feature
+  features[2] = avg_cat_feat(gr, mouse_pos, cats, size_X, graph_size);
   // Is dead_end Feature
-  features[3] = dead_end(gr, mouse_pos, size_X) ? -1 : 0;
+  //features[3] = dead_end(gr, mouse_pos, size_X) ? -1 : 0;
 
   double best_angle = M_PI;
   for (int num_cheese = 0; cheeses[num_cheese][0] != -1; ++num_cheese) {
     best_angle = fmin(best_angle, angle(mouse_pos, cats, cheeses[num_cheese]));
   }
-  features[4] = best_angle / M_PI;
+  //features[4] = best_angle / M_PI;
 }
 
 double Qsa(double weights[25], double features[25]) {
@@ -349,16 +350,20 @@ void maxQsa(double gr[max_graph_size][4], double weights[25],
     set_next_pos(next_mouse_pos[0], mouse_pos[0], action);
     if (!is_pos_valid(next_mouse_pos[0], size_X, size_Y) ||
         !gr[pos_to_index(mouse_pos[0], size_X)][action]) {
+	    //printf("Cannot take action %d\n", action);
       continue;
     }
     evaluateFeatures(gr, features, next_mouse_pos, cats, cheeses, size_X,
                      graph_size);
     double q_value = Qsa(weights, features);
+      //printf("Checking action %d, q:%f, cur maxU:%f, maxA: %d\n", action, q_value, *maxU, *maxA);
     if (q_value > *maxU) {
+      //printf("action %d is max\n", action);
       *maxU = q_value;
       *maxA = action;
     }
   }
+  //printf("maxQ: %f, maxA: %d\n",* maxU, *maxA);
   assert(0 <= *maxA && *maxA < numActions);
 }
 

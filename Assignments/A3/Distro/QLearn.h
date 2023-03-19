@@ -33,9 +33,9 @@
 #define lambda .5 // Discount rate for future rewards
 #define max_graph_size 32 * 32
 
-#define numFeatures 5 // UPDATE THIS to be the number of features you have
+#define numFeatures 3 // UPDATE THIS to be the number of features you have
 #define numActions 4
-#define BIG_DBL 1000000.0
+#define BIG_DBL 1000000000000.0
 #define EPSILON 1e-9
 
 enum direction { UP = 0, RIGHT = 1, DOWN = 2, LEFT = 3 };
