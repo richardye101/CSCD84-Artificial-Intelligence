@@ -38,6 +38,19 @@
 #define BIG_DBL 1000000000000.0
 #define EPSILON 1e-9
 
+typedef struct DequeItem {
+  int x;
+  int y;
+  int distance;
+  struct DequeItem *prev, *next;
+} DequeItem;
+
+typedef struct Deque {
+  DequeItem *head;
+  DequeItem *tail;
+  int size;
+} Deque;
+
 enum direction { UP = 0, RIGHT = 1, DOWN = 2, LEFT = 3 };
 
 // Function prototypes for D84 - Unit 3 - Reinforcement Learning
@@ -83,12 +96,18 @@ int pos_to_index(int pos[2], int size_X);
 int is_pos_valid(int pos[2], int size_X, int size_Y);
 double avg_cat_feat(double gr[max_graph_size][4], int mouse_pos[1][2],
                     int cats[5][2], int size_X, int graph_size);
-double closest_dist(double gr[max_graph_size][4], int mouse_pos[1][2],
-                    int agents[5][2], int size_X, int graph_size);
+double get_scaled_closest_distance(double gr[max_graph_size][4],
+                                   int mouse_pos[1][2], int agents[5][2],
+                                   int size_X, int graph_size);
 bool dead_end(double gr[max_graph_size][4], int mouse_pos[1][2], int size_X);
 double angle(int mouse_pos[1][2], int cats[5][2], int cheese[2]);
 int get_random_legal_action(double gr[max_graph_size][4], int mouse_pos[1][2],
                             int size_X, int graph_size);
+DequeItem *DequeItem_new(int x, int y, int distance);
+Deque *Deque_new(void);
+void Deque_push_front(Deque *deque, int x, int y, int distance);
+DequeItem Deque_pop_back(Deque *deque);
+void Deque_dtor(Deque *deque);
 // END HELPER FUNCTION PROTOS
 
 // Set random seed:

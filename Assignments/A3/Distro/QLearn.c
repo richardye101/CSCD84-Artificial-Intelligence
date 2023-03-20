@@ -228,7 +228,6 @@ void feat_QLearn_update(double gr[max_graph_size][4], double weights[25],
   q_value = Qsa(weights, features);
 
   for (int i = 0; i < numFeatures; ++i) {
-    //printf("weight %d: %f, reward: %f, maxU: %f, q_val: %f\n", i, weights[i], reward, maxU, q_value);
     weights[i] += alpha * (reward + lambda * maxU - q_value) * features[i];
   }
 }
@@ -292,19 +291,17 @@ void evaluateFeatures(double gr[max_graph_size][4], double features[25],
    * TO DO: Complete this function
    ***********************************************************************************************/
   // Closest Cheese Dist Feature
-  features[0] = closest_dist(gr, mouse_pos, cheeses, size_X, graph_size);
+  features[0] = get_scaled_closest_distance(gr, mouse_pos, cheeses, size_X, graph_size);
   // Closest Cat Dist Feature
-  features[1] = closest_dist(gr, mouse_pos, cats, size_X, graph_size);
+  features[1] = get_scaled_closest_distance(gr, mouse_pos, cats, size_X, graph_size);
   // Avg Cat Dist Feature
   features[2] = avg_cat_feat(gr, mouse_pos, cats, size_X, graph_size);
   // Is dead_end Feature
-  //features[3] = dead_end(gr, mouse_pos, size_X) ? -1 : 0;
 
   double best_angle = M_PI;
   for (int num_cheese = 0; cheeses[num_cheese][0] != -1; ++num_cheese) {
     best_angle = fmin(best_angle, angle(mouse_pos, cats, cheeses[num_cheese]));
   }
-  //features[4] = best_angle / M_PI;
 }
 
 double Qsa(double weights[25], double features[25]) {
@@ -348,20 +345,16 @@ void maxQsa(double gr[max_graph_size][4], double weights[25],
     set_next_pos(next_mouse_pos[0], mouse_pos[0], action);
     if (!is_pos_valid(next_mouse_pos[0], size_X, size_Y) ||
         !gr[pos_to_index(mouse_pos[0], size_X)][action]) {
-	    //printf("Cannot take action %d\n", action);
       continue;
     }
     evaluateFeatures(gr, features, next_mouse_pos, cats, cheeses, size_X,
                      graph_size);
     double q_value = Qsa(weights, features);
-      //printf("Checking action %d, q:%f, cur maxU:%f, maxA: %d\n", action, q_value, *maxU, *maxA);
     if (q_value > *maxU) {
-      //printf("action %d is max\n", action);
       *maxU = q_value;
       *maxA = action;
     }
   }
-  //printf("maxQ: %f, maxA: %d\n",* maxU, *maxA);
   assert(0 <= *maxA && *maxA < numActions);
 }
 
@@ -453,23 +446,39 @@ double avg_cat_feat(double gr[max_graph_size][4], int mouse_pos[1][2],
 }
 
 /* Feature: Returns the distance to the closest agent in agents from the mouse
- between [-1, 1], Possible agents: Cat, Cheese*/
-double closest_dist(double gr[max_graph_size][4], int mouse_pos[1][2],
+ between [0, 1], Possible agents: Cat, Cheese*/
+double get_scaled_closest_distance(double gr[max_graph_size][4], int mouse_pos[1][2],
                     int agents[5][2], int size_X, int graph_size) {
-  // -1 is terrible, aka cats are right on top
-  // 1 is great, aka cats are across the map from the mouse
-  double max_dist =
-      sqrt(pow((double)(size_X), 2) + pow((double)(graph_size / size_X), 2));
-  double closest_dist = max_dist;
-
-  for (int num_agent = 0; agents[num_agent][0] != -1; ++num_agent) {
-    closest_dist =
-        fmin(closest_dist,
-             sqrt(pow((double)(mouse_pos[0][0] - agents[num_agent][0]), 2) +
-                  pow((double)(mouse_pos[0][1] - agents[num_agent][1]), 2)));
+  if (is_pos_in_poss(mouse_pos[0], agents)) {
+    return 0;
   }
-  closest_dist /= max_dist;
-  return (closest_dist - 0.5) * 2;
+  int size_Y = graph_size / size_X;
+  bool seen[graph_size];
+  memset(seen, false, sizeof(seen));
+  Deque* deque = Deque_new();
+  seen[pos_to_index(mouse_pos[0], size_X)] = true;
+  Deque_push_front(deque, mouse_pos[0][0], mouse_pos[0][1], 0);
+  while (deque->size > 0) {
+    DequeItem deque_item = Deque_pop_back(deque);
+    int pos[2] = {deque_item.x, deque_item.y};
+    for (int direction=0; direction <4; ++direction) {
+      int next_pos[2];
+      set_next_pos(next_pos, pos, direction);
+      if (!is_pos_valid(next_pos, size_X, size_Y) ||
+          seen[pos_to_index(next_pos, size_X)] ||
+          !gr[pos_to_index(pos, size_X)][direction]) {
+        continue;
+      }
+      if (is_pos_in_poss(next_pos, agents)) {
+        Deque_dtor(deque);
+        return (double)(deque_item.distance + 1) / (double)graph_size;
+      }
+      seen[pos_to_index(next_pos, size_X)] = true;
+      Deque_push_front(deque, next_pos[0], next_pos[1], deque_item.distance + 1);
+    }
+  }
+  Deque_dtor(deque);
+  return -1;
 }
 
 // Check if currenty at dead end
@@ -516,4 +525,61 @@ int get_random_legal_action(double gr[max_graph_size][4], int mouse_pos[1][2],
     ++num_legal_actions;
   }
   return legal_actions[(int)get_random_uniform(0, num_legal_actions - EPSILON)];
+}
+
+DequeItem *DequeItem_new(int x, int y, int distance) {
+  DequeItem *deque_item = (DequeItem*)malloc(sizeof(DequeItem));
+  assert(deque_item != NULL);
+  deque_item->x = x;
+  deque_item->y = y;
+  deque_item->distance = distance;
+  deque_item->prev = NULL;
+  deque_item->next = NULL;
+  return deque_item;
+}
+
+Deque *Deque_new(void) {
+  Deque *deque = (Deque *)malloc(sizeof(Deque));
+  assert(deque != NULL);
+  deque->head = NULL;
+  deque->tail = NULL;
+  deque->size = 0;
+  return deque;
+}
+
+void Deque_push_front(Deque *deque, int x, int y, int distance) {
+  assert(deque != NULL);
+  DequeItem *deque_item = DequeItem_new(x, y, distance);
+  deque_item->next = deque->head;
+  deque_item->prev = NULL;
+  if (deque->tail == NULL) {
+    deque->head = deque->tail = deque_item;
+  } else {
+    deque->head->prev = deque_item;
+    deque->head = deque_item;
+  }
+  ++deque->size;
+}
+
+DequeItem Deque_pop_back(Deque* deque) {
+  assert(deque != NULL);
+  assert(deque->size != 0);
+  DequeItem* deque_item = deque->tail;
+  if (deque->head == deque->tail) {
+    deque->head = deque->tail = NULL;
+  } else {
+    deque->tail = deque->tail->prev;
+  }
+  DequeItem res = *deque_item;
+  free(deque_item);
+  --deque->size;
+  return res;
+}
+
+void Deque_dtor(Deque *deque) {
+  assert(deque != NULL);
+  while (deque->size > 0) {
+    Deque_pop_back(deque);
+  }
+  free(deque);
 }
