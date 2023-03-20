@@ -35,7 +35,7 @@ but explain carefully when needed.
 1 .- (1 mark) Explain your reward function. What game elements
       are used, and why you think this is a good reward function
       for this problem.
-In the end, we used a simple reward function: Return -5 if eaten, Return 5 if ate cheese.
+In the end, we used a simple reward function: Return -5 if eaten, Return 5 if ate cheese. Return 0 otherwise.
 
 2 .- These are multiple experiments (once you are sure your 
      QLearning code is working!) 
