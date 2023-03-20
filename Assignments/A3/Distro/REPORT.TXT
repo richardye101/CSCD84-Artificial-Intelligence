@@ -36,6 +36,8 @@ but explain carefully when needed.
       are used, and why you think this is a good reward function
       for this problem.
 In the end, we used a simple reward function: Return -5 if eaten, Return 5 if ate cheese. Return 0 otherwise.
+We found that changing the 0-return value to anything else (that we were able to think of) reduced performance.
+This is a good reward function because it highlights exactly what the goal of this problem is, and what to avoid.
 
 2 .- These are multiple experiments (once you are sure your 
      QLearning code is working!) 
