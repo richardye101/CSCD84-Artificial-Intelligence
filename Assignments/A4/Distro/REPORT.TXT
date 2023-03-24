@@ -1,0 +1,126 @@
+CSC D84 - Artificial Intelligence
+
+Assignment 4 - Neural Networks for OCR
+
+________________________________________________
+
+Student Name 1 (last, first):
+
+
+Student Name 2 (last, first):
+
+Student number 1:
+
+Student number 2:
+
+UTORid 1:
+
+UTORid 2:
+
+READ THIS AND SIGN YOUR NAME AT THE END:
+
+ I certify that I have read the UTSC code on academic
+honesty and plaguarism. All work submitted as part
+of this assignment is my own.
+
+    Signed: _(student 1 name)__      _(student 2 name)_
+
+
+(-5 marks for failing to provide the identifying
+ information requested above)
+________________________________________________
+
+Answer the following questions. Be concise and clear
+but explain carefully when needed.
+
+1 .- (1 marks) Train a 1-layer network using the Logistic activation
+               function. 
+
+	       Copy/paste the reported classification rates for:
+	 	
+	       Training data (last training round):
+
+	       Testing data:
+
+2 .- (1 marks) Repeat the process using the hyperbolic tangent activation
+	       function.
+
+
+3 .- (1 marks) Which type of activation function yielded the best classification
+	       results? which one learned faster?
+
+4 .- (1 marks) Train a 2-layer network with hyperbolic-tangent activation, using
+	       150 hidden units. Report the classification rates on training and
+	       testing data just as for 1) and 2).	       
+	       
+5 .- (1 marks) Same as 4), except use 10 hidden units instead
+
+6 .- (1 marks) Same as 5), except use 3 hidden units instead
+
+7 .- (3 marks) Comment on the experiments in 4, 5, and 6, and give your conclusion
+	       regarding the effect of the number of hidden units on classification
+	       accuracy. 
+
+	       What is the network with 3 hidden telling you about this classification
+	       problem?
+
+8 .- (3 marks) Train the best performing network you can. Use any activation function
+	       you wish, and set the number of hidden units so as to achieve the best
+	       performance.
+
+	       Number of hidden units used:
+
+	       Classification rate on testing data:
+
+9 .- (3 marks) Describe how you would build a network to play the cat
+	        and mouse game (move the mouse to help it survive).
+
+		- Describe what the input is in terms of a vector of
+		  values
+		- Describe what the output layer looks like (how many
+		  neurons and what they encode)
+		- Describe the error function
+		- How many layers should you use?
+_____________________________________________________
+
+Mark with an 'x' where appropriate. If something is only
+working partially, briefly describe what works, what
+doesn't work, or what problems exist.
+	
+        	Complete/Working	Partial		Not done
+
+Logistic
+ activation
+ 
+Tanh
+ activation
+
+1L Feed-forward  
+
+1L Backprop
+
+1L Classify
+
+2L Feed-forward
+
+2L Backprop
+
+2L Classify
+_____________________________________________________
+
+Marking:
+
+(10) one-layer, logistic network trains and classifies
+
+(5)  one-layer, tanh network trains and classifies
+
+(15) two-layer, tanh network trains and classifies
+
+(5) two-layer, logistic network trains and classifies
+
+(5 marks) Can train 2-layer networks with either activation function
+	  and any number of hidden units
+
+(12 marks) Answers in this report
+
+Total for A4:       / out of 52
