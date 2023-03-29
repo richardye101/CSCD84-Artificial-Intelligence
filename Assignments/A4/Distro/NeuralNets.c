@@ -153,13 +153,13 @@ void backprop_1layer(double sample[INPUTS], double activations[OUTPUTS],
    *
    *  You have to:
    * 		* Determine the target value for each neuron
-   * 			- This depends on the type of sigmoid being used, you should think
-   * about this: What should the neuron's output be if the neuron corresponds to
-   * 			  the correct label, and what should the output be for every other
-   * neuron?
+   * 			- This depends on the type of sigmoid being used, you should
+   * think about this: What should the neuron's output be if the neuron
+   * corresponds to the correct label, and what should the output be for every
+   * other neuron?
    * 		* Compute an error value given the neuron's target
-   * 		* Compute the weight adjustment for each weight (the learning rate is
-   * in NeuralNets.h)
+   * 		* Compute the weight adjustment for each weight (the learning rate
+   * is in NeuralNets.h)
    */
 
   /***************************************************************************************************
@@ -319,13 +319,13 @@ void backprop_2layer(double sample[INPUTS], double h_activations[MAX_HIDDEN],
    *
    *  You have to:
    * 		* Determine the target value for each neuron
-   * 			- This depends on the type of sigmoid being used, you should think
-   * about this: What should the neuron's output be if the neuron corresponds to
-   * 			  the correct label, and what should the output be for every other
-   * neuron?
+   * 			- This depends on the type of sigmoid being used, you should
+   * think about this: What should the neuron's output be if the neuron
+   * corresponds to the correct label, and what should the output be for every
+   * other neuron?
    * 		* Compute an error value given the neuron's target
-   * 		* Compute the weight adjustment for each weight (the learning rate is
-   * in NeuralNets.h)
+   * 		* Compute the weight adjustment for each weight (the learning rate
+   * is in NeuralNets.h)
    */
 
   /***************************************************************************************************
