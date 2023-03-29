@@ -88,7 +88,7 @@ Where $a$ is the index of an input, $b$ is an index of a neuron connected to the
 
 We can therefore decompose it to: 
 $$
-\frac{ \partial A(I) }{ \underbrace{ \partial w_{ab} }_{ I_{a} } } \underbrace{ \frac{ \partial Output }{ \partial A(I) } }_{ \text{activation fnc deriv} } \frac{ \partial err }{ \partial Output } 
+\frac{ \partial A(I) }{ \underbrace{ \partial w_{ab} }_{ I_{a} } } \underbrace{ \frac{ \partial Output_{A} }{ \partial A(I) } }_{ \text{activation fnc deriv} } \frac{ \partial Err_{A} }{ \partial Output_{A} } 
 $$
 
 where
@@ -105,6 +105,7 @@ $$
 w_{ab} = w_{ab} + \alpha \frac{ \partial Err_{b} }{ \partial w_{ab} } 
 $$
 
+
 ### Stochastic Gradient Descent (SGD)
 To make weight updates more efficient, you can take a batch of inputs of size $k$, accumulate the squared error, and then does one big weight update for the $k$ weights.
 
@@ -113,3 +114,20 @@ To make weight updates more efficient, you can take a batch of inputs of size $k
 - **Saturation:** For example, with the logistic function, beyond 5 and -5 (or whatever limits) will simply give 0 gradient.
 	- Causes the learning to halt
 	- Dealt with by resetting the weights and trying again and working between the two limits
+	- Reset when the weights of the last few iterations show no changes
+
+## Multi-layer networks
+
+Fully connected multi-layer networks are only good for small problems, for larger problems it quickly becomes unwieldy and too complicated to learn.
+
+![[Obsidian-Attachments/5-Neural-Nets-4.png]]
+
+The inner layers of the network are meant to learn "features" of the data.
+
+The learning/updating of the weights are now also more complicated.
+
+$$
+\frac{\partial E r r_b}{\partial O_b}=\sum_{j \in \text { neurons connected to } B} w_{b j} \frac{\partial f(x)}{\partial A_j(I)} \cdot\left(T_j-O_j\right)
+$$
+
+If we find any weights that grow too fast, or don't change much at all, we can cut those weights out (exploding gradient problem).
