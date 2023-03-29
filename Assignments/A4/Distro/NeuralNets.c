@@ -339,5 +339,5 @@ void backprop_2layer(double sample[INPUTS], double h_activations[MAX_HIDDEN],
 double logistic(double input) {
   // This function returns the value of the logistic function evaluated on input
   // TO DO: Implement this function!
-  return 1.0 / (1.0 + exp(- SIGMOID_SCALE * input));
+  return 1.0 / (1.0 + exp(-SIGMOID_SCALE * input));
 }
