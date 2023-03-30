@@ -101,7 +101,7 @@ int classify_1layer(double sample[INPUTS], int label,
    *order to be able to complete this function.
    ***********************************************************************************************************/
   int pred = -1;
-  int max_output = -1;
+  int max_output = -BIG_DBL;
   for(int out = 0; out < OUTPUTS; out++){
     double sum = 0;
     for(int in = 0; in < INPUTS; in++){
@@ -113,6 +113,7 @@ int classify_1layer(double sample[INPUTS], int label,
       max_output = activation;
     }
   }
+  assert(pred >= 0);
   return (pred); // <---	This should return the class for this sample
 }
 

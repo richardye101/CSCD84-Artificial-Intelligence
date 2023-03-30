@@ -37,6 +37,8 @@
 // Scaling factor for sigmoid function input <--- MIND THIS!
 #define SIGMOID_SCALE .01
 
+#define BIG_DBL 100000000000.0
+
 // Function prototypes for D84 - Unit 4 - Neural Nets
 int train_1layer_net(double sample[INPUTS], int label,
                      double (*sigmoid)(double input),
