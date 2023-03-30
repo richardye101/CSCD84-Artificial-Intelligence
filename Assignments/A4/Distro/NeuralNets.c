@@ -100,8 +100,20 @@ int classify_1layer(double sample[INPUTS], int label,
    *          You will need to complete feedforward_1layer(), and logistic() in
    *order to be able to complete this function.
    ***********************************************************************************************************/
-
-  return (0); // <---	This should return the class for this sample
+  int pred = -1;
+  int max_output = -1;
+  for(int out = 0; out < OUTPUTS; out++){
+    double sum = 0;
+    for(int in = 0; in < INPUTS; in++){
+      sum += weights_io[in][out] * sample[in];
+    }
+    double activation = sigmoid(sum);
+    if(activation > max_output){
+      pred = out;
+      max_output = activation;
+    }
+  }
+  return (pred); // <---	This should return the class for this sample
 }
 
 void feedforward_1layer(double sample[785], double (*sigmoid)(double input),
@@ -168,6 +180,32 @@ void backprop_1layer(double sample[INPUTS], double activations[OUTPUTS],
    * sigmoid function you're using. Then use the procedure discussed in lecture
    * to compute weight updates.
    * ************************************************************************************************/
+  for (int i = 0; i < INPUTS; i++) {
+    double output = sigmoid(activations[i]);
+    double dAct_dw = sample[i];
+    double dOut_dAct;
+    double dErr_dOut;
+    // Partial derivative of the neuron's activation function
+    if (sigmoid == logistic) {
+      dOut_dAct = output * (1 - output); // logistic
+    } 
+    else if (sigmoid == tanh) {
+      dOut_dAct = 1 - pow(output, 2); // hyperbolic tangent
+    }
+    // update weights for all other outputs
+    for (int j = 0; j < OUTPUTS; j++) {
+      if (j == label) { 
+        // correct output should be 1 for correct label
+        dErr_dOut = 1 - output;
+      } 
+      else { 
+        // output should be 0 for incorrect label
+        dErr_dOut = 0 - output;
+      }
+      double update = dAct_dw * dOut_dAct * dErr_dOut;
+      weights_io[i][j] += ALPHA * update;
+    }
+  }
 }
 
 int train_2layer_net(double sample[INPUTS], int label,
