@@ -72,6 +72,7 @@ int classify_2layer(double sample[INPUTS], int label,
                     double weights_ho[MAX_HIDDEN][OUTPUTS]);
 double logistic(double input);
 // Note that hyperbolic tangent is already provided in math.h as tanh()!
+double sigmoid_prime(double output, double (*sigmoid)(double input));
 
 // If you need to add any function prototypes yourself, you can do so *below*
 // this line.
