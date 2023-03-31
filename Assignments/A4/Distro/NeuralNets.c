@@ -412,6 +412,5 @@ double sigmoid_prime(double output, double (*sigmoid)(double input)) {
   default:
     break;
   }
-  assert(result);
   return result;
 }
