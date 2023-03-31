@@ -402,13 +402,16 @@ double logistic(double input) {
 
 double sigmoid_prime(double output, double (*sigmoid)(double input)) {
   // Partial derivative of the neuron's activation function
+  double result;
   switch (sigmoid) {
   case logistic:
-    return (output * (1 - output)); // logistic
+    result = output * (1 - output); // logistic
     break;
   case tanh:
-    return (1 - pow(output, 2)); // hyperbolic tangent)
+    result = 1 - pow(output, 2); // hyperbolic tangent)
   default:
     break;
   }
+  assert(result);
+  return result;
 }
