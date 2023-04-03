@@ -66,7 +66,7 @@ int train_1layer_net(double sample[INPUTS], int label,
    *and logistic() in order to be able to complete this function.
    ***********************************************************************************************************/
   double activations[OUTPUTS];
-  feedforward_1layer(sample,sigmoid, weights_io, activations);
+  feedforward_1layer(sample, sigmoid, weights_io, activations);
   backprop_1layer(sample, activations, sigmoid, label, weights_io);
   return argmax(activations, OUTPUTS);
 }
@@ -173,16 +173,17 @@ void backprop_1layer(double sample[INPUTS], double activations[OUTPUTS],
    * sigmoid function you're using. Then use the procedure discussed in lecture
    * to compute weight updates.
    * ************************************************************************************************/
-  for (int j=0; i<OUTPUTS; ++j) {
+  for (int j = 0; i < OUTPUTS; ++j) {
     const double kOutput = activations[j];
-    const double kTargetOutput = (j == label)? 1.0 : 0.0;
+    const double kTargetOutput = (j == label) ? 1.0 : 0.0;
     const double kDErrorDActivation = kTargetOutput - kOutput;
     const double kDActivationDSum = activation_prime(kOutput, sigmoid);
-    for (int i=0; i<INPUTS; ++i) {
-        const double kInput = sample[i];
-        const double kDSumDWeight = kInput;
-        const double kDErrorDWeight = kDErrorDActivation * kDActivationDSum * kDSumDWeight;
-        weights_io[i][j] = ALPHA * kDErrorDWeight;
+    for (int i = 0; i < INPUTS; ++i) {
+      const double kInput = sample[i];
+      const double kDSumDWeight = kInput;
+      const double kDErrorDWeight =
+          kDErrorDActivation * kDActivationDSum * kDSumDWeight;
+      weights_io[i][j] = ALPHA * kDErrorDWeight;
     }
   }
 }
@@ -375,7 +376,7 @@ int argmax(double array[], int size) {
   assert(size > 0);
   int max_index = 0;
   double max_value = array[0];
-  for (int i=1; i<size; ++i) {
+  for (int i = 1; i < size; ++i) {
     if (array[i] > max_value) {
       max_value = array[i];
       max_index = i;
@@ -386,11 +387,11 @@ int argmax(double array[], int size) {
 
 double activation_prime(double output, double (*sigmoid)(double input)) {
   switch (sigmoid) {
-    case logistic:
-      return output * (1 - output);
-    default:
-      // TanH
-      return 1 - pow(output, 2);
+  case logistic:
+    return output * (1 - output);
+  default:
+    // TanH
+    return 1 - pow(output, 2);
   }
 }
 
@@ -403,8 +404,9 @@ void dot_product(double A[][], double x[], double b[], int rows, int cols) {
   }
 }
 
-void apply_activation_function(double array[], int size, double (*sigmoid)(double input)) {
-  for (int i=0; i<num_neurons; ++i) {
+void apply_activation_function(double array[], int size,
+                               double (*sigmoid)(double input)) {
+  for (int i = 0; i < num_neurons; ++i) {
     array[i] = sigmoid(array[i]);
   }
 }
