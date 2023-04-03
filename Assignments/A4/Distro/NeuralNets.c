@@ -135,13 +135,8 @@ void feedforward_1layer(double sample[785], double (*sigmoid)(double input),
    * TO DO: Complete this function. You will need to implement logistic() in
    *order for this to work with a logistic activation function.
    ******************************************************************************************************/
-  for (int j = 0; j < OUTPUTS; ++j) {
-    double sum = 0;
-    for (int i=0; i<INPUTS; ++i) {
-      sum += sample[i] * weights_io[i][j];
-    }
-    activations[j] = sigmoid(sum);
-  }
+  dot_product(weights_io, sample, activations, OUTPUTS, INPUTS);
+  apply_activation_function(activations, OUTPUTS, sigmoid);
 }
 
 void backprop_1layer(double sample[INPUTS], double activations[OUTPUTS],
