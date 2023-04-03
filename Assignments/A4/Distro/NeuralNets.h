@@ -73,4 +73,5 @@ double logistic(double input);
 
 // If you need to add any function prototypes yourself, you can do so *below*
 // this line.
+int argmax(double array[], int size);
 #endif

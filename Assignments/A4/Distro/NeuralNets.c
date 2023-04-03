@@ -65,8 +65,10 @@ int train_1layer_net(double sample[INPUTS], int label,
    *          You will need to complete feedforward_1layer(), backprop_1layer(),
    *and logistic() in order to be able to complete this function.
    ***********************************************************************************************************/
-
-  return (0); // <--- This should return the class for this sample
+  double activations[OUTPUTS];
+  feedforward_1layer(sample,sigmoid, weights_io, activations);
+  backprop_1layer(sample, activations, sigmoid, label, weights_io);
+  return argmax(activations, OUTPUTS);
 }
 
 int classify_1layer(double sample[INPUTS], int label,
@@ -115,7 +117,7 @@ void feedforward_1layer(double sample[785], double (*sigmoid)(double input),
    *  Inputs:
    *    sample -      The input sample (see above for a description)
    *    sigmoid -     The sigmoid function being used
-   *    weights_op -  Array of current network weights
+   *    weights_io -  Array of current network weights
    *    activations - Array where your function will store the resulting
    * activation for each output neuron
    *
@@ -132,6 +134,13 @@ void feedforward_1layer(double sample[785], double (*sigmoid)(double input),
    * TO DO: Complete this function. You will need to implement logistic() in
    *order for this to work with a logistic activation function.
    ******************************************************************************************************/
+  for (int j = 0; j < OUTPUTS; ++j) {
+    double sum = 0;
+    for (int i=0; i<INPUTS; ++i) {
+      sum += sample[i] * weights_io[i][j];
+    }
+    activations[j] = sigmoid(sum);
+  }
 }
 
 void backprop_1layer(double sample[INPUTS], double activations[OUTPUTS],
@@ -249,8 +258,11 @@ int classify_2layer(double sample[INPUTS], int label,
    *          You will need to complete feedforward_2layer(), and logistic() in
    *order to be able to complete this function.
    ***********************************************************************************************************/
-
-  return (0); // <--- Should return the class for this sample
+  double h_activations[MAX_HIDDEN];
+  double activations[OUTPUTS];
+  feedforward_2layer(sample, sigmoid, weights_ih, weights_ho, h_activations,
+                     activations, units);
+  return argmax(activations, OUTPUTS);
 }
 
 void feedforward_2layer(double sample[INPUTS], double (*sigmoid)(double input),
@@ -341,3 +353,17 @@ double logistic(double input) {
   // TO DO: Implement this function!
   return 1.0 / (1.0 + exp(-SIGMOID_SCALE * input));
 }
+
+int argmax(double array[], int size) {
+  assert(size > 0);
+  int max_index = 0;
+  double max_value = array[0];
+  for (int i=1; i<size; ++i) {
+    if (array[i] > max_value) {
+      max_value = array[i];
+      max_index = i;
+    }
+  }
+  return max_index;
+}
+
