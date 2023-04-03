@@ -100,8 +100,9 @@ int classify_1layer(double sample[INPUTS], int label,
    *          You will need to complete feedforward_1layer(), and logistic() in
    *order to be able to complete this function.
    ***********************************************************************************************************/
-
-  return (0); // <---	This should return the class for this sample
+  double activations[OUTPUTS];
+  feedforward_1layer(sample, sigmoid, weights_io, activations);
+  return argmax(activations, OUTPUTS);
 }
 
 void feedforward_1layer(double sample[785], double (*sigmoid)(double input),
@@ -153,13 +154,13 @@ void backprop_1layer(double sample[INPUTS], double activations[OUTPUTS],
    *
    *  You have to:
    * 		* Determine the target value for each neuron
-   * 			- This depends on the type of sigmoid being used, you should
-   * think about this: What should the neuron's output be if the neuron
+   * 			- This depends on the type of sigmoid being used, you
+   * should think about this: What should the neuron's output be if the neuron
    * corresponds to the correct label, and what should the output be for every
    * other neuron?
    * 		* Compute an error value given the neuron's target
-   * 		* Compute the weight adjustment for each weight (the learning rate
-   * is in NeuralNets.h)
+   * 		* Compute the weight adjustment for each weight (the learning
+   * rate is in NeuralNets.h)
    */
 
   /***************************************************************************************************
@@ -168,6 +169,18 @@ void backprop_1layer(double sample[INPUTS], double activations[OUTPUTS],
    * sigmoid function you're using. Then use the procedure discussed in lecture
    * to compute weight updates.
    * ************************************************************************************************/
+  for (int j=0; i<OUTPUTS; ++j) {
+    const double kOutput = activations[j];
+    const double kTargetOutput = (j == label)? 1.0 : 0.0;
+    const double kDErrorDActivation = target - kOutput;
+    const double kDActivationDSum = activation_prime(kOutput, sigmoid);
+    for (int i=0; i<INPUTS; ++i) {
+        const double kInput = sample[i];
+        const double kDSumDWeight = kInput;
+        const double kDErrorDWeight = kDErrorDActivation * kDActivationDSum * kDSumDWeight;
+        weights_io[i][j] = ALPHA * kDErrorDWeight;
+    }
+  }
 }
 
 int train_2layer_net(double sample[INPUTS], int label,
@@ -210,8 +223,13 @@ int train_2layer_net(double sample[INPUTS], int label,
    *          You will need to complete feedforward_2layer(), backprop_2layer(),
    *and logistic() in order to be able to complete this function.
    ***********************************************************************************************************/
-
-  return (0); // <--- Should return the class for this sample
+  double h_activations[MAX_HIDDEN];
+  double activations[OUTPUTS];
+  feedforward_2layer(sample, sigmoid, weights_ih, weights_ho, h_activations,
+                     activations, units);
+  backprop_2layer(sample, h_activations, activations, sigmoid, label,
+                  weights_ih, weights_ho, units);
+  return argmax(activations, OUTPUTS);
 }
 
 int classify_2layer(double sample[INPUTS], int label,
@@ -292,6 +310,10 @@ void feedforward_2layer(double sample[INPUTS], double (*sigmoid)(double input),
    *the output layer, the scaling factor has to be adjusted by the factor
    *                  SIGMOID_SCALE*(MAX_HIDDEN/units).
    **************************************************************************************************/
+  dot_product(weights_ih, sample, h_activations, INPUTS, units);
+  apply_activation_function(h_activations, units, sigmoid);
+  dot_product(weights_ho, h_activations, activations, units, OUTPUTS);
+  apply_activation_function(activations, OUTPUTS, sigmoid);
 }
 
 void backprop_2layer(double sample[INPUTS], double h_activations[MAX_HIDDEN],
@@ -319,13 +341,13 @@ void backprop_2layer(double sample[INPUTS], double h_activations[MAX_HIDDEN],
    *
    *  You have to:
    * 		* Determine the target value for each neuron
-   * 			- This depends on the type of sigmoid being used, you should
-   * think about this: What should the neuron's output be if the neuron
+   * 			- This depends on the type of sigmoid being used, you
+   * should think about this: What should the neuron's output be if the neuron
    * corresponds to the correct label, and what should the output be for every
    * other neuron?
    * 		* Compute an error value given the neuron's target
-   * 		* Compute the weight adjustment for each weight (the learning rate
-   * is in NeuralNets.h)
+   * 		* Compute the weight adjustment for each weight (the learning
+   * rate is in NeuralNets.h)
    */
 
   /***************************************************************************************************
@@ -341,4 +363,29 @@ double logistic(double input) {
   // TO DO: Implement this function!
   return (
       0); // <--- Should return the value of the logistic function on the input
+}
+
+double activation_prime(double output, double (*sigmoid)(double input)) {
+  switch (sigmoid) {
+    case logistic:
+      return output * (1 - output);
+    default:
+      // TanH
+      return 1 - pow(output, 2);
+  }
+}
+
+void dot_product(double A[][], double x[], double b[], int rows, int cols) {
+  for (int row = 0; row < rows; ++row) {
+    b[row] = 0;
+    for (int col = 0; col < cols; ++col) {
+      b[row] += A[col][row] * x[col];
+    }
+  }
+}
+
+void apply_activation_function(double array[], int size, double (*sigmoid)(double input)) {
+  for (int i=0; i<num_neurons; ++i) {
+    array[i] = sigmoid(array[i]);
+  }
 }
