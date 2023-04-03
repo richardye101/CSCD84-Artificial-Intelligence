@@ -176,7 +176,7 @@ void backprop_1layer(double sample[INPUTS], double activations[OUTPUTS],
   for (int j=0; i<OUTPUTS; ++j) {
     const double kOutput = activations[j];
     const double kTargetOutput = (j == label)? 1.0 : 0.0;
-    const double kDErrorDActivation = target - kOutput;
+    const double kDErrorDActivation = kTargetOutput - kOutput;
     const double kDActivationDSum = activation_prime(kOutput, sigmoid);
     for (int i=0; i<INPUTS; ++i) {
         const double kInput = sample[i];
