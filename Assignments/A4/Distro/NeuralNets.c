@@ -173,7 +173,7 @@ void backprop_1layer(double sample[INPUTS], double activations[OUTPUTS],
    * sigmoid function you're using. Then use the procedure discussed in lecture
    * to compute weight updates.
    * ************************************************************************************************/
-  for (int j = 0; i < OUTPUTS; ++j) {
+  for (int j = 0; j < OUTPUTS; ++j) {
     const double kOutput = activations[j];
     const double kTargetOutput = (j == label) ? 1.0 : 0.0;
     const double kDErrorDActivation = kTargetOutput - kOutput;
@@ -364,6 +364,32 @@ void backprop_2layer(double sample[INPUTS], double h_activations[MAX_HIDDEN],
    * sigmoid function you're using. Then use the procedure discussed in lecture
    * to compute weight updates.
    * ************************************************************************************************/
+  for (int j = 0; j < OUTPUTS; ++j) {
+    const double kOutput = activations[j];
+    const double kTargetOutput = (j == label) ? 1.0 : 0.0;
+    const double kDErrorDActivation = kTargetOutput - kOutput;
+    const double kDActivationDSum = activation_prime(kOutput, sigmoid);
+    for (int i = 0; i < units; ++i) {
+      const double kInput = h_activations[i];
+      const double kDSumDWeight = kInput;
+      const double kDErrorDWeight =
+          kDErrorDActivation * kDActivationDSum * kDSumDWeight;
+      weights_ho[i][j] = ALPHA * kDErrorDWeight;
+    }
+  }
+  for (int j = 0; j < units; ++j) {
+    const double kOutput = h_activations[j];
+    const double kTargetOutput = (j == label) ? 1.0 : 0.0;
+    const double kDErrorDActivation = kTargetOutput - kOutput;
+    const double kDActivationDSum = activation_prime(kOutput, sigmoid);
+    for (int i = 0; i < INPUTS; ++i) {
+      const double kInput = sample[i];
+      const double kDSumDWeight = kInput;
+      const double kDErrorDWeight =
+          kDErrorDActivation * kDActivationDSum * kDSumDWeight;
+      weights_ih[i][j] = ALPHA * kDErrorDWeight;
+    }
+  }
 }
 
 double logistic(double input) {
