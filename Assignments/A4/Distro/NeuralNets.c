@@ -100,21 +100,9 @@ int classify_1layer(double sample[INPUTS], int label,
    *          You will need to complete feedforward_1layer(), and logistic() in
    *order to be able to complete this function.
    ***********************************************************************************************************/
-  int pred = -1;
-  int max_output = -BIG_DBL;
-  for (int out = 0; out < OUTPUTS; out++) {
-    double sum = 0;
-    for (int in = 0; in < INPUTS; in++) {
-      sum += weights_io[in][out] * sample[in];
-    }
-    double activation = sigmoid(sum);
-    if (activation > max_output) {
-      pred = out;
-      max_output = activation;
-    }
-  }
-  assert(pred >= 0);
-  return (pred); // <---	This should return the class for this sample
+  double activations[OUTPUTS];
+  feedforward_1layer(sample, sigmoid, weights_io, activations);
+  return argmax(activations, OUTPUTS);
 }
 
 void feedforward_1layer(double sample[785], double (*sigmoid)(double input),
@@ -181,23 +169,16 @@ void backprop_1layer(double sample[INPUTS], double activations[OUTPUTS],
    * sigmoid function you're using. Then use the procedure discussed in lecture
    * to compute weight updates.
    * ************************************************************************************************/
-  for (int i = 0; i < INPUTS; i++) {
-    double output = sigmoid(activations[i]);
-    double dAct_dw = sample[i];
-    double dOut_dAct;
-    double dErr_dOut = sigmoid_prime(output, sigmoid);
-
-    // update weights between this input and all outputs
-    for (int j = 0; j < OUTPUTS; j++) {
-      if (j == label) {
-        // correct output should be 1 for correct label
-        dErr_dOut = 1 - output;
-      } else {
-        // output should be 0 for incorrect label
-        dErr_dOut = 0 - output;
-      }
-      double update = dAct_dw * dOut_dAct * dErr_dOut;
-      weights_io[i][j] += ALPHA * update;
+  for (int j=0; i<OUTPUTS; ++j) {
+    const double kOutput = activations[j];
+    const double kTargetOutput = (j == label)? 1.0 : 0.0;
+    const double kDErrorDActivation = target - kOutput;
+    const double kDActivationDSum = activation_prime(kOutput, sigmoid);
+    for (int i=0; i<INPUTS; ++i) {
+        const double kInput = sample[i];
+        const double kDSumDWeight = kInput;
+        const double kDErrorDWeight = kDErrorDActivation * kDActivationDSum * kDSumDWeight;
+        weights_io[i][j] = ALPHA * kDErrorDWeight;
     }
   }
 }
@@ -244,17 +225,11 @@ int train_2layer_net(double sample[INPUTS], int label,
    ***********************************************************************************************************/
   double h_activations[MAX_HIDDEN];
   double activations[OUTPUTS];
-  int label = 0;
   feedforward_2layer(sample, sigmoid, weights_ih, weights_ho, h_activations,
                      activations, units);
-  for (int o = 1; o < OUTPUTS; o++) {
-    if (activations[o] > activations[o - 1]) {
-      label = o;
-    }
-  }
   backprop_2layer(sample, h_activations, activations, sigmoid, label,
                   weights_ih, weights_ho, units);
-  return (label); // <--- Should return the class for this sample
+  return argmax(activations, OUTPUTS);
 }
 
 int classify_2layer(double sample[INPUTS], int label,
@@ -335,20 +310,10 @@ void feedforward_2layer(double sample[INPUTS], double (*sigmoid)(double input),
    *the output layer, the scaling factor has to be adjusted by the factor
    *                  SIGMOID_SCALE*(MAX_HIDDEN/units).
    **************************************************************************************************/
-  for (int h = 0; h < units; h++) {
-    double input = 0;
-    for (int i = 0; i < INPUTS; i++) {
-      input += sample[i] * weights_ih[i][h];
-    }
-    h_activations[h] = sigmoid(input * SIGMOID_SCALE);
-  }
-  for (int out = 0; out < units; out++) {
-    double input = 0;
-    for (int h = 0; h < units; h++) {
-      input += h_activations[h] * weights_ho[h][out];
-    }
-    activations[out] = sigmoid(input * SIGMOID_SCALE * (MAX_HIDDEN / units));
-  }
+  dot_product(weights_ih, sample, h_activations, INPUTS, units);
+  apply_activation_function(h_activations, units, sigmoid);
+  dot_product(weights_ho, h_activations, activations, units, OUTPUTS);
+  apply_activation_function(activations, OUTPUTS, sigmoid);
 }
 
 void backprop_2layer(double sample[INPUTS], double h_activations[MAX_HIDDEN],
@@ -400,17 +365,27 @@ double logistic(double input) {
       0); // <--- Should return the value of the logistic function on the input
 }
 
-double sigmoid_prime(double output, double (*sigmoid)(double input)) {
-  // Partial derivative of the neuron's activation function
-  double result;
+double activation_prime(double output, double (*sigmoid)(double input)) {
   switch (sigmoid) {
-  case logistic:
-    result = output * (1 - output); // logistic
-    break;
-  case tanh:
-    result = 1 - pow(output, 2); // hyperbolic tangent)
-  default:
-    break;
+    case logistic:
+      return output * (1 - output);
+    default:
+      // TanH
+      return 1 - pow(output, 2);
   }
-  return result;
+}
+
+void dot_product(double A[][], double x[], double b[], int rows, int cols) {
+  for (int row = 0; row < rows; ++row) {
+    b[row] = 0;
+    for (int col = 0; col < cols; ++col) {
+      b[row] += A[col][row] * x[col];
+    }
+  }
+}
+
+void apply_activation_function(double array[], int size, double (*sigmoid)(double input)) {
+  for (int i=0; i<num_neurons; ++i) {
+    array[i] = sigmoid(array[i]);
+  }
 }
