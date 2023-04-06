@@ -176,14 +176,14 @@ void backprop_1layer(double sample[INPUTS], double activations[OUTPUTS],
   for (int j = 0; j < OUTPUTS; ++j) {
     const double kOutput = activations[j];
     const double kTargetOutput = (j == label) ? 1.0 : 0.0;
-    const double kDErrorDActivation = kTargetOutput - kOutput;
-    const double kDActivationDSum = activation_prime(kOutput, sigmoid);
+    const double kDErrorDOutput = kTargetOutput - kOutput;
+    const double kDOutputDActivation = activation_prime(kOutput, sigmoid);
     for (int i = 0; i < INPUTS; ++i) {
       const double kInput = sample[i];
-      const double kDSumDWeight = kInput;
+      const double kDActivationDWeight = kInput;
       const double kDErrorDWeight =
-          kDErrorDActivation * kDActivationDSum * kDSumDWeight;
-      weights_io[i][j] = ALPHA * kDErrorDWeight;
+          kDErrorDOutput * kDOutputDActivation * kDActivationDWeight;
+      weights_io[i][j] += ALPHA * kDErrorDWeight;
     }
   }
 }
@@ -364,30 +364,35 @@ void backprop_2layer(double sample[INPUTS], double h_activations[MAX_HIDDEN],
    * sigmoid function you're using. Then use the procedure discussed in lecture
    * to compute weight updates.
    * ************************************************************************************************/
+  // Note the "activations" and "h_activations" should really be named
+  // "outputs" and "h_outputs" wheras all other variables in this function are
+  // named correctly.
+  double d_error_d_output_cache[units] = {0};
   for (int j = 0; j < OUTPUTS; ++j) {
     const double kOutput = activations[j];
     const double kTargetOutput = (j == label) ? 1.0 : 0.0;
-    const double kDErrorDActivation = kTargetOutput - kOutput;
-    const double kDActivationDSum = activation_prime(kOutput, sigmoid);
+    const double kDErrorDOutput = kTargetOutput - kOutput;
+    const double kDOutputDActivation = activation_prime(kOutput, sigmoid);
+    const double kDErrorDActivation = kDErrorDOutput * kDOutputDActivation;
     for (int i = 0; i < units; ++i) {
       const double kInput = h_activations[i];
-      const double kDSumDWeight = kInput;
+      const double kDActivationDWeight = kInput;
       const double kDErrorDWeight =
-          kDErrorDActivation * kDActivationDSum * kDSumDWeight;
-      weights_ho[i][j] = ALPHA * kDErrorDWeight;
+          kDErrorDOutput * kDOutputDActivation * kDActivationDWeight;
+      d_error_d_output_cache[i] += weights_ho[i][j] * kDErrorDActivation;
+      weights_ho[i][j] += ALPHA * kDErrorDWeight;
     }
   }
   for (int j = 0; j < units; ++j) {
     const double kOutput = h_activations[j];
-    const double kTargetOutput = (j == label) ? 1.0 : 0.0;
-    const double kDErrorDActivation = kTargetOutput - kOutput;
-    const double kDActivationDSum = activation_prime(kOutput, sigmoid);
+    const double kDErrorDOutput = d_error_d_output_cache[j];
+    const double kDOutputDActivation = activation_prime(kOutput, sigmoid);
     for (int i = 0; i < INPUTS; ++i) {
       const double kInput = sample[i];
-      const double kDSumDWeight = kInput;
+      const double kDActivationDWeight = kInput;
       const double kDErrorDWeight =
-          kDErrorDActivation * kDActivationDSum * kDSumDWeight;
-      weights_ih[i][j] = ALPHA * kDErrorDWeight;
+          kDErrorDOutput * kDOutputDActivation * kDActivationDWeight;
+      weights_ih[i][j] += ALPHA * kDErrorDWeight;
     }
   }
 }
