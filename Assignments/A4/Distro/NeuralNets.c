@@ -29,6 +29,8 @@
 
 #include "NeuralNets.h"
 
+#include <assert.h>
+
 int train_1layer_net(double sample[INPUTS], int label,
                      double (*sigmoid)(double input),
                      double weights_io[INPUTS][OUTPUTS]) {
@@ -135,7 +137,7 @@ void feedforward_1layer(double sample[785], double (*sigmoid)(double input),
    * TO DO: Complete this function. You will need to implement logistic() in
    *order for this to work with a logistic activation function.
    ******************************************************************************************************/
-  dot_product(weights_io, sample, activations, OUTPUTS, INPUTS);
+  dot_product(&weights_io[0][0], sample, activations, OUTPUTS, INPUTS);
   apply_activation_function(activations, OUTPUTS, sigmoid);
 }
 
@@ -318,9 +320,9 @@ void feedforward_2layer(double sample[INPUTS], double (*sigmoid)(double input),
    *the output layer, the scaling factor has to be adjusted by the factor
    *                  SIGMOID_SCALE*(MAX_HIDDEN/units).
    **************************************************************************************************/
-  dot_product(weights_ih, sample, h_activations, INPUTS, units);
+  dot_product(&weights_ih[0][0], sample, h_activations, INPUTS, units);
   apply_activation_function(h_activations, units, sigmoid);
-  dot_product(weights_ho, h_activations, activations, units, OUTPUTS);
+  dot_product(&weights_ho[0][0], h_activations, activations, units, OUTPUTS);
   apply_activation_function(activations, OUTPUTS, sigmoid);
 }
 
@@ -417,27 +419,26 @@ int argmax(double array[], int size) {
 }
 
 double activation_prime(double output, double (*sigmoid)(double input)) {
-  switch (sigmoid) {
-  case logistic:
+  assert(sigmoid != NULL);
+  if (sigmoid == &logistic) {
     return output * (1 - output);
-  default:
-    // TanH
+  } else {
     return 1 - pow(output, 2);
   }
 }
 
-void dot_product(double A[][], double x[], double b[], int rows, int cols) {
+void dot_product(double *A, double x[], double b[], int rows, int cols) {
   for (int row = 0; row < rows; ++row) {
     b[row] = 0;
     for (int col = 0; col < cols; ++col) {
-      b[row] += A[col][row] * x[col];
+      b[row] += A[col * rows + row] * x[col];
     }
   }
 }
 
 void apply_activation_function(double array[], int size,
                                double (*sigmoid)(double input)) {
-  for (int i = 0; i < num_neurons; ++i) {
+  for (int i = 0; i < size; ++i) {
     array[i] = sigmoid(array[i]);
   }
 }
