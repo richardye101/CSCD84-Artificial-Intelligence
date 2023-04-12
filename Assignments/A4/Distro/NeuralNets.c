@@ -138,7 +138,7 @@ void feedforward_1layer(double sample[785], double (*sigmoid)(double input),
    *order for this to work with a logistic activation function.
    ******************************************************************************************************/
   dot_product(&weights_io[0][0], sample, activations, OUTPUTS, INPUTS);
-  apply_activation_function(activations, OUTPUTS, sigmoid);
+  apply_activation_function(activations, OUTPUTS, sigmoid, SIGMOID_SCALE);
 }
 
 void backprop_1layer(double sample[INPUTS], double activations[OUTPUTS],
@@ -180,11 +180,11 @@ void backprop_1layer(double sample[INPUTS], double activations[OUTPUTS],
     const double kTargetOutput = (j == label) ? 1.0 : 0.0;
     const double kDErrorDOutput = kTargetOutput - kOutput;
     const double kDOutputDActivation = activation_prime(kOutput, sigmoid);
+    const double kDErrorDActivation = kDErrorDOutput * kDOutputDActivation;
     for (int i = 0; i < INPUTS; ++i) {
       const double kInput = sample[i];
       const double kDActivationDWeight = kInput;
-      const double kDErrorDWeight =
-          kDErrorDOutput * kDOutputDActivation * kDActivationDWeight;
+      const double kDErrorDWeight = kDErrorDActivation * kDActivationDWeight;
       weights_io[i][j] += ALPHA * kDErrorDWeight;
     }
   }
@@ -320,10 +320,11 @@ void feedforward_2layer(double sample[INPUTS], double (*sigmoid)(double input),
    *the output layer, the scaling factor has to be adjusted by the factor
    *                  SIGMOID_SCALE*(MAX_HIDDEN/units).
    **************************************************************************************************/
-  dot_product(&weights_ih[0][0], sample, h_activations, INPUTS, units);
-  apply_activation_function(h_activations, units, sigmoid);
-  dot_product(&weights_ho[0][0], h_activations, activations, units, OUTPUTS);
-  apply_activation_function(activations, OUTPUTS, sigmoid);
+  dot_product(&weights_ih[0][0], sample, h_activations, units, INPUTS);
+  apply_activation_function(h_activations, units, sigmoid, SIGMOID_SCALE);
+  dot_product(&weights_ho[0][0], h_activations, activations, OUTPUTS, units);
+  apply_activation_function(activations, OUTPUTS, sigmoid,
+                            SIGMOID_SCALE * (MAX_HIDDEN / units));
 }
 
 void backprop_2layer(double sample[INPUTS], double h_activations[MAX_HIDDEN],
@@ -379,8 +380,7 @@ void backprop_2layer(double sample[INPUTS], double h_activations[MAX_HIDDEN],
     for (int i = 0; i < units; ++i) {
       const double kInput = h_activations[i];
       const double kDActivationDWeight = kInput;
-      const double kDErrorDWeight =
-          kDErrorDOutput * kDOutputDActivation * kDActivationDWeight;
+      const double kDErrorDWeight = kDErrorDActivation * kDActivationDWeight;
       d_error_d_output_cache[i] += weights_ho[i][j] * kDErrorDActivation;
       weights_ho[i][j] += ALPHA * kDErrorDWeight;
     }
@@ -389,6 +389,7 @@ void backprop_2layer(double sample[INPUTS], double h_activations[MAX_HIDDEN],
     const double kOutput = h_activations[j];
     const double kDErrorDOutput = d_error_d_output_cache[j];
     const double kDOutputDActivation = activation_prime(kOutput, sigmoid);
+    const double kDErrorDActivation = kDErrorDOutput * kDOutputDActivation;
     for (int i = 0; i < INPUTS; ++i) {
       const double kInput = sample[i];
       const double kDActivationDWeight = kInput;
@@ -402,7 +403,7 @@ void backprop_2layer(double sample[INPUTS], double h_activations[MAX_HIDDEN],
 double logistic(double input) {
   // This function returns the value of the logistic function evaluated on input
   // TO DO: Implement this function!
-  return 1.0 / (1.0 + exp(-SIGMOID_SCALE * input));
+  return 1.0 / (1.0 + exp(-input));
 }
 
 int argmax(double array[], int size) {
@@ -437,8 +438,9 @@ void dot_product(double *A, double x[], double b[], int rows, int cols) {
 }
 
 void apply_activation_function(double array[], int size,
-                               double (*sigmoid)(double input)) {
+                               double (*sigmoid)(double input),
+                               double scaling_factor) {
   for (int i = 0; i < size; ++i) {
-    array[i] = sigmoid(array[i]);
+    array[i] = sigmoid(scaling_factor * array[i]);
   }
 }
