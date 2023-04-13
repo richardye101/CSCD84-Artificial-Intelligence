@@ -177,7 +177,7 @@ void backprop_1layer(double sample[INPUTS], double activations[OUTPUTS],
    * ************************************************************************************************/
   for (int j = 0; j < OUTPUTS; ++j) {
     const double kOutput = activations[j];
-    const double kTargetOutput = (j == label) ? 1.0 : 0.0;
+    const double kTargetOutput = target_output(j, label, sigmoid);
     const double kDErrorDOutput = kTargetOutput - kOutput;
     const double kDOutputDActivation = activation_prime(kOutput, sigmoid);
     const double kDErrorDActivation = kDErrorDOutput * kDOutputDActivation;
@@ -373,7 +373,7 @@ void backprop_2layer(double sample[INPUTS], double h_activations[MAX_HIDDEN],
   double d_error_d_output_cache[units] = {0};
   for (int j = 0; j < OUTPUTS; ++j) {
     const double kOutput = activations[j];
-    const double kTargetOutput = (j == label) ? 1.0 : 0.0;
+    const double kTargetOutput = target_output(j, label, sigmoid);
     const double kDErrorDOutput = kTargetOutput - kOutput;
     const double kDOutputDActivation = activation_prime(kOutput, sigmoid);
     const double kDErrorDActivation = kDErrorDOutput * kDOutputDActivation;
@@ -442,5 +442,14 @@ void apply_activation_function(double array[], int size,
                                double scaling_factor) {
   for (int i = 0; i < size; ++i) {
     array[i] = sigmoid(scaling_factor * array[i]);
+  }
+}
+
+double target_output(int i, int label, double (*sigmoid)(double input)) {
+  assert(sigmoid != NULL);
+  if (sigmoid == &logistic) {
+    return (i == label) ? 1.0 : 0.0;
+  } else {
+    return (i == label) ? 1.0 : -1.0;
   }
 }

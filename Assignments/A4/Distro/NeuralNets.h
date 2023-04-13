@@ -35,7 +35,7 @@
 // Network learning rate
 #define ALPHA .01
 // Scaling factor for sigmoid function input <--- MIND THIS!
-#define SIGMOID_SCALE .01
+#define SIGMOID_SCALE 0.5
 
 // Function prototypes for D84 - Unit 4 - Neural Nets
 int train_1layer_net(double sample[INPUTS], int label,
@@ -86,5 +86,7 @@ void apply_activation_function(double array[], int size,
 // If you need to add any function prototypes yourself, you can do so *below*
 // this line.
 int argmax(double array[], int size);
+
+double target_output(int i, int label, double (*sigmoid)(double input));
 
 #endif
