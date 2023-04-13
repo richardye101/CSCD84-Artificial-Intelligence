@@ -4,18 +4,17 @@ Assignment 4 - Neural Networks for OCR
 
 ________________________________________________
 
-Student Name 1 (last, first):
+Student Name 1 (last, first): Ye, Rong Feng (Richard)
 
+Student Name 2 (last, first): Prokopchuk, Samuel
 
-Student Name 2 (last, first):
+Student number 1: 1005035230
 
-Student number 1:
+Student number 2: 1006570943
 
-Student number 2:
+UTORid 1: yerong1
 
-UTORid 1:
-
-UTORid 2:
+UTORid 2: prokopc3
 
 READ THIS AND SIGN YOUR NAME AT THE END:
 
@@ -23,12 +22,12 @@ READ THIS AND SIGN YOUR NAME AT THE END:
 honesty and plaguarism. All work submitted as part
 of this assignment is my own.
 
-    Signed: _(student 1 name)__      _(student 2 name)_
+    Signed: _Rong Feng Ye__      _Samuel_Prokopchuk_
 
 
 (-5 marks for failing to provide the identifying
  information requested above)
-________________________________________________
+____________________
 
 Answer the following questions. Be concise and clear
 but explain carefully when needed.
@@ -36,26 +35,44 @@ but explain carefully when needed.
 1 .- (1 marks) Train a 1-layer network using the Logistic activation
                function. 
 
-	       Copy/paste the reported classification rates for:
-	 	
-	       Training data (last training round):
+           Copy/paste the reported classification rates for: 
 
-	       Testing data:
+           Training data (last training round): 0.880987
+
+           Testing data: 0.882895
 
 2 .- (1 marks) Repeat the process using the hyperbolic tangent activation
-	       function.
+           function.
 
+           Training data (last training round): 0.910566
+
+           Testing data: 0.912037
 
 3 .- (1 marks) Which type of activation function yielded the best classification
-	       results? which one learned faster?
+           results? which one learned faster?
+
+        The hyperbolic tangent activation yielded the best classification results.
+        Both learned very quickly at 250 epochs, although tank was slightly faster.
 
 4 .- (1 marks) Train a 2-layer network with hyperbolic-tangent activation, using
 	       150 hidden units. Report the classification rates on training and
-	       testing data just as for 1) and 2).	       
+	       testing data just as for 1) and 2).
+
+              Training data (last training round): 0.984998
+
+              Testing data: 0.973949
 	       
 5 .- (1 marks) Same as 4), except use 10 hidden units instead
 
+              Training data (last training round): 0.927256
+
+              Testing data: 0.928189
+	       
 6 .- (1 marks) Same as 5), except use 3 hidden units instead
+
+              Training data (last training round): 0.672221
+
+              Testing data: 0.685018
 
 7 .- (3 marks) Comment on the experiments in 4, 5, and 6, and give your conclusion
 	       regarding the effect of the number of hidden units on classification
@@ -64,13 +81,17 @@ but explain carefully when needed.
 	       What is the network with 3 hidden telling you about this classification
 	       problem?
 
+         The network performs better with 150 hidden units compared to 10.
+         However, the accuracy difference between 150 and 10 is much smaller than the difference between 10 and 3 hidden units.
+         This tells me that 3 features in the hidden layer is too little information to accurately label the input.
+
 8 .- (3 marks) Train the best performing network you can. Use any activation function
 	       you wish, and set the number of hidden units so as to achieve the best
 	       performance.
 
-	       Number of hidden units used:
+	       Number of hidden units used: 785
 
-	       Classification rate on testing data:
+	       Classification rate on testing data: 0.979284
 
 9 .- (3 marks) Describe how you would build a network to play the cat
 	        and mouse game (move the mouse to help it survive).
@@ -81,6 +102,26 @@ but explain carefully when needed.
 		  neurons and what they encode)
 		- Describe the error function
 		- How many layers should you use?
+
+We could use a neural network as the policy for RL-based cat and mouse game.
+In order to avoid having to enumerate the state-space, we could use the actor-critic RL method.
+
+The inputs to the network would consist of:
+ - The current mouse position (1 bit out of rows * cols),
+ - cat positions (rows * cols),
+ - cheese positions (cheeses * rows * cols),
+If this input is too large to practically train the network,
+then one could send an image of the maze with all entities to the network, which could be a CNN.
+
+The output layer would have 4 neurons where each would correspond to one of 4 possible actions (up left down right).
+
+The error function could be simple MSE, where the target action is the action that leads to the state with the highest predicted value.
+
+The network likely should use at least 2 layers, to gain some nuanced understanding of the game's dynamics.
+The answer to this question would ultimately arise via experimentation though.
+
+The actor (policy/neural network in question) and critic (another, simpler state-value NN) would learn in unision to find a good approach to the cat and mouse game.
+
 _____________________________________________________
 
 Mark with an 'x' where appropriate. If something is only
@@ -90,22 +131,22 @@ doesn't work, or what problems exist.
         	Complete/Working	Partial		Not done
 
 Logistic
- activation
+ activation       x
  
 Tanh
- activation
+ activation       x
 
-1L Feed-forward  
+1L Feed-forward   x
 
-1L Backprop
+1L Backprop       x
 
-1L Classify
+1L Classify       x
 
-2L Feed-forward
+2L Feed-forward   x
 
-2L Backprop
+2L Backprop       x
 
-2L Classify
+2L Classify       x
 _____________________________________________________
 
 Marking:
