@@ -35,7 +35,7 @@
 // Network learning rate
 #define ALPHA .01
 // Scaling factor for sigmoid function input <--- MIND THIS!
-#define SIGMOID_SCALE .01
+#define SIGMOID_SCALE 0.01
 
 // Function prototypes for D84 - Unit 4 - Neural Nets
 int train_1layer_net(double sample[INPUTS], int label,
@@ -71,6 +71,23 @@ int classify_2layer(double sample[INPUTS], int label,
 double logistic(double input);
 // Note that hyperbolic tangent is already provided in math.h as tanh()!
 
+// Partial derivative of the neuron's activation function
+double activation_prime(double output, double (*sigmoid)(double input));
+
+// Compute the dot product between matrix A and vector x.
+// Note that matrix A is column-major.
+void dot_product(double *A, double x[], double b[], int rows, int cols,
+                 int memory_cols);
+
+// Set each array element to the activation function applied to it.
+void apply_activation_function(double array[], int size,
+                               double (*sigmoid)(double input),
+                               double scaling_factor);
+
 // If you need to add any function prototypes yourself, you can do so *below*
 // this line.
+int argmax(double array[], int size);
+
+double target_output(int i, int label, double (*sigmoid)(double input));
+
 #endif
