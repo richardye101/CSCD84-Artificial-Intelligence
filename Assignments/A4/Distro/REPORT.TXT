@@ -4,18 +4,18 @@ Assignment 4 - Neural Networks for OCR
 
 ________________________________________________
 
-Student Name 1 (last, first):
+Student Name 1 (last, first): Ye, Rong Feng (Richard)
 
 
-Student Name 2 (last, first):
+Student Name 2 (last, first): Prokopchuk, Samuel
 
-Student number 1:
+Student number 1: 1005035230
 
-Student number 2:
+Student number 2: 1006570943
 
-UTORid 1:
+UTORid 1: yerong1
 
-UTORid 2:
+UTORid 2: prokopc3
 
 READ THIS AND SIGN YOUR NAME AT THE END:
 
@@ -23,7 +23,7 @@ READ THIS AND SIGN YOUR NAME AT THE END:
 honesty and plaguarism. All work submitted as part
 of this assignment is my own.
 
-    Signed: _(student 1 name)__      _(student 2 name)_
+    Signed: _Rong Feng Ye__      _Samuel Prokopchuk_
 
 
 (-5 marks for failing to provide the identifying
@@ -36,26 +36,43 @@ but explain carefully when needed.
 1 .- (1 marks) Train a 1-layer network using the Logistic activation
                function. 
 
-	       Copy/paste the reported classification rates for:
+	       Copy/paste the reported classification rates for: 
 	 	
-	       Training data (last training round):
+	       Training data (last training round): 0.904072
 
-	       Testing data:
+	       Testing data: 0.906214
 
 2 .- (1 marks) Repeat the process using the hyperbolic tangent activation
 	       function.
 
+	       Training data (last training round): 0.910969
+
+	       Testing data: 0.910721
 
 3 .- (1 marks) Which type of activation function yielded the best classification
 	       results? which one learned faster?
 
+		The hyperbolic tangent activation yielded the best classification results. Both learned very quickly at 50 epochs, although tank was slightly faster.
+		
 4 .- (1 marks) Train a 2-layer network with hyperbolic-tangent activation, using
 	       150 hidden units. Report the classification rates on training and
 	       testing data just as for 1) and 2).	       
 	       
+	       Training data (last training round): 
+
+	       Testing data: 
+
 5 .- (1 marks) Same as 4), except use 10 hidden units instead
 
+	       Training data (last training round): 
+
+	       Testing data: 
+
 6 .- (1 marks) Same as 5), except use 3 hidden units instead
+
+	       Training data (last training round): 
+
+	       Testing data: 
 
 7 .- (3 marks) Comment on the experiments in 4, 5, and 6, and give your conclusion
 	       regarding the effect of the number of hidden units on classification
@@ -63,6 +80,7 @@ but explain carefully when needed.
 
 	       What is the network with 3 hidden telling you about this classification
 	       problem?
+
 
 8 .- (3 marks) Train the best performing network you can. Use any activation function
 	       you wish, and set the number of hidden units so as to achieve the best
@@ -81,6 +99,8 @@ but explain carefully when needed.
 		  neurons and what they encode)
 		- Describe the error function
 		- How many layers should you use?
+
+The inputs to the network would consist of the current mouse position, the cat positions, some distance metric to each cat, 
 _____________________________________________________
 
 Mark with an 'x' where appropriate. If something is only
