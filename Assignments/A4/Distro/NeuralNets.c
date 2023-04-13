@@ -29,6 +29,8 @@
 
 #include "NeuralNets.h"
 
+#include <assert.h>
+
 int train_1layer_net(double sample[INPUTS], int label,
                      double (*sigmoid)(double input),
                      double weights_io[INPUTS][OUTPUTS]) {
@@ -65,8 +67,10 @@ int train_1layer_net(double sample[INPUTS], int label,
    *          You will need to complete feedforward_1layer(), backprop_1layer(),
    *and logistic() in order to be able to complete this function.
    ***********************************************************************************************************/
-
-  return (0); // <--- This should return the class for this sample
+  double activations[OUTPUTS];
+  feedforward_1layer(sample, sigmoid, weights_io, activations);
+  backprop_1layer(sample, activations, sigmoid, label, weights_io);
+  return argmax(activations, OUTPUTS);
 }
 
 int classify_1layer(double sample[INPUTS], int label,
@@ -116,7 +120,7 @@ void feedforward_1layer(double sample[785], double (*sigmoid)(double input),
    *  Inputs:
    *    sample -      The input sample (see above for a description)
    *    sigmoid -     The sigmoid function being used
-   *    weights_op -  Array of current network weights
+   *    weights_io -  Array of current network weights
    *    activations - Array where your function will store the resulting
    * activation for each output neuron
    *
@@ -133,6 +137,8 @@ void feedforward_1layer(double sample[785], double (*sigmoid)(double input),
    * TO DO: Complete this function. You will need to implement logistic() in
    *order for this to work with a logistic activation function.
    ******************************************************************************************************/
+  dot_product(&weights_io[0][0], sample, activations, OUTPUTS, INPUTS, OUTPUTS);
+  apply_activation_function(activations, OUTPUTS, sigmoid, SIGMOID_SCALE);
 }
 
 void backprop_1layer(double sample[INPUTS], double activations[OUTPUTS],
@@ -169,16 +175,17 @@ void backprop_1layer(double sample[INPUTS], double activations[OUTPUTS],
    * sigmoid function you're using. Then use the procedure discussed in lecture
    * to compute weight updates.
    * ************************************************************************************************/
-  for (int j=0; i<OUTPUTS; ++j) {
+  for (int j = 0; j < OUTPUTS; ++j) {
     const double kOutput = activations[j];
-    const double kTargetOutput = (j == label)? 1.0 : 0.0;
-    const double kDErrorDActivation = target - kOutput;
-    const double kDActivationDSum = activation_prime(kOutput, sigmoid);
-    for (int i=0; i<INPUTS; ++i) {
-        const double kInput = sample[i];
-        const double kDSumDWeight = kInput;
-        const double kDErrorDWeight = kDErrorDActivation * kDActivationDSum * kDSumDWeight;
-        weights_io[i][j] = ALPHA * kDErrorDWeight;
+    const double kTargetOutput = target_output(j, label, sigmoid);
+    const double kDErrorDOutput = kTargetOutput - kOutput;
+    const double kDOutputDActivation = activation_prime(kOutput, sigmoid);
+    const double kDErrorDActivation = kDErrorDOutput * kDOutputDActivation;
+    for (int i = 0; i < INPUTS; ++i) {
+      const double kInput = sample[i];
+      const double kDActivationDWeight = kInput;
+      const double kDErrorDWeight = kDErrorDActivation * kDActivationDWeight;
+      weights_io[i][j] += ALPHA * kDErrorDWeight;
     }
   }
 }
@@ -267,8 +274,11 @@ int classify_2layer(double sample[INPUTS], int label,
    *          You will need to complete feedforward_2layer(), and logistic() in
    *order to be able to complete this function.
    ***********************************************************************************************************/
-
-  return (0); // <--- Should return the class for this sample
+  double h_activations[MAX_HIDDEN];
+  double activations[OUTPUTS];
+  feedforward_2layer(sample, sigmoid, weights_ih, weights_ho, h_activations,
+                     activations, units);
+  return argmax(activations, OUTPUTS);
 }
 
 void feedforward_2layer(double sample[INPUTS], double (*sigmoid)(double input),
@@ -310,10 +320,13 @@ void feedforward_2layer(double sample[INPUTS], double (*sigmoid)(double input),
    *the output layer, the scaling factor has to be adjusted by the factor
    *                  SIGMOID_SCALE*(MAX_HIDDEN/units).
    **************************************************************************************************/
-  dot_product(weights_ih, sample, h_activations, INPUTS, units);
-  apply_activation_function(h_activations, units, sigmoid);
-  dot_product(weights_ho, h_activations, activations, units, OUTPUTS);
-  apply_activation_function(activations, OUTPUTS, sigmoid);
+  dot_product(&weights_ih[0][0], sample, h_activations, units, INPUTS,
+              MAX_HIDDEN);
+  apply_activation_function(h_activations, units, sigmoid, SIGMOID_SCALE);
+  dot_product(&weights_ho[0][0], h_activations, activations, OUTPUTS, units,
+              OUTPUTS);
+  apply_activation_function(activations, OUTPUTS, sigmoid,
+                            SIGMOID_SCALE * (MAX_HIDDEN / units));
 }
 
 void backprop_2layer(double sample[INPUTS], double h_activations[MAX_HIDDEN],
@@ -356,36 +369,90 @@ void backprop_2layer(double sample[INPUTS], double h_activations[MAX_HIDDEN],
    * sigmoid function you're using. Then use the procedure discussed in lecture
    * to compute weight updates.
    * ************************************************************************************************/
+  // Note the "activations" and "h_activations" should really be named
+  // "outputs" and "h_outputs" wheras all other variables in this function are
+  // named correctly.
+  double d_error_d_output_cache[units] = {0};
+  for (int j = 0; j < OUTPUTS; ++j) {
+    const double kOutput = activations[j];
+    const double kTargetOutput = target_output(j, label, sigmoid);
+    const double kDErrorDOutput = kTargetOutput - kOutput;
+    const double kDOutputDActivation = activation_prime(kOutput, sigmoid);
+    const double kDErrorDActivation = kDErrorDOutput * kDOutputDActivation;
+    for (int i = 0; i < units; ++i) {
+      const double kInput = h_activations[i];
+      const double kDActivationDWeight = kInput;
+      const double kDErrorDWeight = kDErrorDActivation * kDActivationDWeight;
+      d_error_d_output_cache[i] += weights_ho[i][j] * kDErrorDActivation;
+      weights_ho[i][j] += ALPHA * kDErrorDWeight;
+    }
+  }
+  for (int j = 0; j < units; ++j) {
+    const double kOutput = h_activations[j];
+    const double kDErrorDOutput = d_error_d_output_cache[j];
+    const double kDOutputDActivation = activation_prime(kOutput, sigmoid);
+    const double kDErrorDActivation = kDErrorDOutput * kDOutputDActivation;
+    for (int i = 0; i < INPUTS; ++i) {
+      const double kInput = sample[i];
+      const double kDActivationDWeight = kInput;
+      const double kDErrorDWeight =
+          kDErrorDOutput * kDOutputDActivation * kDActivationDWeight;
+      weights_ih[i][j] += ALPHA * kDErrorDWeight;
+    }
+  }
 }
 
 double logistic(double input) {
   // This function returns the value of the logistic function evaluated on input
   // TO DO: Implement this function!
-  return (
-      0); // <--- Should return the value of the logistic function on the input
+  return 1.0 / (1.0 + exp(-input));
+}
+
+int argmax(double array[], int size) {
+  assert(size > 0);
+  int max_index = 0;
+  double max_value = array[0];
+  for (int i = 1; i < size; ++i) {
+    if (array[i] > max_value) {
+      max_value = array[i];
+      max_index = i;
+    }
+  }
+  return max_index;
 }
 
 double activation_prime(double output, double (*sigmoid)(double input)) {
-  switch (sigmoid) {
-    case logistic:
-      return output * (1 - output);
-    default:
-      // TanH
-      return 1 - pow(output, 2);
+  assert(sigmoid != NULL);
+  if (sigmoid == &logistic) {
+    return output * (1 - output);
+  } else {
+    return 1 - pow(output, 2);
   }
 }
 
-void dot_product(double A[][], double x[], double b[], int rows, int cols) {
+void dot_product(double *A, double x[], double b[], int rows, int cols,
+                 int memory_cols) {
   for (int row = 0; row < rows; ++row) {
     b[row] = 0;
     for (int col = 0; col < cols; ++col) {
-      b[row] += A[col][row] * x[col];
+      b[row] += A[col * memory_cols + row] * x[col];
     }
   }
 }
 
-void apply_activation_function(double array[], int size, double (*sigmoid)(double input)) {
-  for (int i=0; i<num_neurons; ++i) {
-    array[i] = sigmoid(array[i]);
+void apply_activation_function(double array[], int size,
+                               double (*sigmoid)(double input),
+                               double scaling_factor) {
+  for (int i = 0; i < size; ++i) {
+    array[i] = sigmoid(scaling_factor * array[i]);
+  }
+}
+
+double target_output(int i, int label, double (*sigmoid)(double input)) {
+  assert(sigmoid != NULL);
+  if (sigmoid == &logistic) {
+    return (i == label) ? 1.0 : 0.0;
+  } else {
+    return (i == label) ? 1.0 : -1.0;
   }
 }
