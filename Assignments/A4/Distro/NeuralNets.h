@@ -35,7 +35,7 @@
 // Network learning rate
 #define ALPHA .01
 // Scaling factor for sigmoid function input <--- MIND THIS!
-#define SIGMOID_SCALE 0.5
+#define SIGMOID_SCALE 0.01
 
 // Function prototypes for D84 - Unit 4 - Neural Nets
 int train_1layer_net(double sample[INPUTS], int label,
@@ -76,7 +76,8 @@ double activation_prime(double output, double (*sigmoid)(double input));
 
 // Compute the dot product between matrix A and vector x.
 // Note that matrix A is column-major.
-void dot_product(double *A, double x[], double b[], int rows, int cols);
+void dot_product(double *A, double x[], double b[], int rows, int cols,
+                 int memory_cols);
 
 // Set each array element to the activation function applied to it.
 void apply_activation_function(double array[], int size,

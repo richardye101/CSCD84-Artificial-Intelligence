@@ -137,7 +137,7 @@ void feedforward_1layer(double sample[785], double (*sigmoid)(double input),
    * TO DO: Complete this function. You will need to implement logistic() in
    *order for this to work with a logistic activation function.
    ******************************************************************************************************/
-  dot_product(&weights_io[0][0], sample, activations, OUTPUTS, INPUTS);
+  dot_product(&weights_io[0][0], sample, activations, OUTPUTS, INPUTS, OUTPUTS);
   apply_activation_function(activations, OUTPUTS, sigmoid, SIGMOID_SCALE);
 }
 
@@ -320,9 +320,11 @@ void feedforward_2layer(double sample[INPUTS], double (*sigmoid)(double input),
    *the output layer, the scaling factor has to be adjusted by the factor
    *                  SIGMOID_SCALE*(MAX_HIDDEN/units).
    **************************************************************************************************/
-  dot_product(&weights_ih[0][0], sample, h_activations, units, INPUTS);
+  dot_product(&weights_ih[0][0], sample, h_activations, units, INPUTS,
+              MAX_HIDDEN);
   apply_activation_function(h_activations, units, sigmoid, SIGMOID_SCALE);
-  dot_product(&weights_ho[0][0], h_activations, activations, OUTPUTS, units);
+  dot_product(&weights_ho[0][0], h_activations, activations, OUTPUTS, units,
+              OUTPUTS);
   apply_activation_function(activations, OUTPUTS, sigmoid,
                             SIGMOID_SCALE * (MAX_HIDDEN / units));
 }
@@ -428,11 +430,12 @@ double activation_prime(double output, double (*sigmoid)(double input)) {
   }
 }
 
-void dot_product(double *A, double x[], double b[], int rows, int cols) {
+void dot_product(double *A, double x[], double b[], int rows, int cols,
+                 int memory_cols) {
   for (int row = 0; row < rows; ++row) {
     b[row] = 0;
     for (int col = 0; col < cols; ++col) {
-      b[row] += A[col * rows + row] * x[col];
+      b[row] += A[col * memory_cols + row] * x[col];
     }
   }
 }
