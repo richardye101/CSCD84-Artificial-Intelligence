@@ -1,0 +1,735 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<link href="../1-UCS-and-Heuristic-Search/" rel="prev"/>
+<link href="../3-Game-Playing/" rel="next"/>
+<link href="../assets/images/favicon.png" rel="icon"/>
+<meta content="mkdocs-1.4.2, mkdocs-material-9.1.6" name="generator"/>
+<title>2 Constraint Satisfaction Problems - Artificial Intelligence Notes</title>
+<link href="../assets/stylesheets/main.ded33207.min.css" rel="stylesheet"/>
+<link href="../assets/stylesheets/palette.a0c5b2b5.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="indigo" data-md-color-primary="blue" data-md-color-scheme="default" dir="ltr">
+<script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#defining-the-problem">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header md-header--shadow" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="Artificial Intelligence Notes" class="md-header__button md-logo" data-md-component="logo" href=".." title="Artificial Intelligence Notes">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            Artificial Intelligence Notes
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              2 Constraint Satisfaction Problems
+            
+          </span>
+</div>
+</div>
+</div>
+<form class="md-header__option" data-md-component="palette">
+<input aria-label="Switch to dark mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="(prefers-color-scheme: light)" data-md-color-primary="blue" data-md-color-scheme="default" id="__palette_1" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_2" hidden="" title="Switch to dark mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6zm0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4zM7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"></path></svg>
+</label>
+<input aria-label="Switch to light mode" class="md-option" data-md-color-accent="cyan" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-primary="blue" data-md-color-scheme="slate" id="__palette_2" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_1" hidden="" title="Switch to light mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3Z"></path></svg>
+</label>
+</form>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"></path></svg>
+</button>
+</nav>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="Artificial Intelligence Notes" class="md-nav__button md-logo" data-md-component="logo" href=".." title="Artificial Intelligence Notes">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"></path></svg>
+</a>
+    Artificial Intelligence Notes
+  </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="..">
+        CSCD84
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../1-UCS-and-Heuristic-Search/">
+        1 UCS and Heuristic Search
+      </a>
+</li>
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+          2 Constraint Satisfaction Problems
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+        2 Constraint Satisfaction Problems
+      </a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#defining-the-problem">
+    Defining the problem
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scheduling-courses-example">
+    Scheduling courses example
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#backtracking-search">
+    Backtracking Search
+  </a>
+<nav aria-label="Backtracking Search" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#algorithm">
+    Algorithm
+  </a>
+<nav aria-label="Algorithm" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#worst-case">
+    Worst case
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#improving-backtracking-search">
+    Improving Backtracking search
+  </a>
+<nav aria-label="Improving Backtracking search" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-use-least-remaining-variables-lrv-rule">
+    1. Use Least Remaining Variables (LRV) rule
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-use-the-largest-number-of-active-constraints">
+    2. Use the largest number of active constraints
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-choose-the-least-constraining-value-for-the-variable">
+    3. Choose the least constraining value for the variable
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#example">
+    Example:
+  </a>
+<nav aria-label="Example:" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#need-to-formulate-a-connected-graph">
+    Need to formulate a connected graph
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#einsteins-puzzle">
+    Einstein's Puzzle
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#how-to-solve-a-tree-structured-csp-ts-csp">
+    How to solve a tree structured CSP (TS CSP)
+  </a>
+<nav aria-label="How to solve a tree structured CSP (TS CSP)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#example-of-topological-sort">
+    Example of topological sort
+  </a>
+<nav aria-label="Example of topological sort" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#backward-pass">
+    Backward pass
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#near-ts-csp">
+    Near TS CSP
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#if-all-else-fails-perform-local-search">
+    If all else fails, perform Local Search
+  </a>
+<nav aria-label="If all else fails, perform Local Search" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#basicsimple-method">
+    Basic/Simple Method
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#improvement-beam-search">
+    Improvement: Beam Search
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#n-queens-problem">
+    N Queens problem
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#can-local-search-work-on-sudoku">
+    Can local search work on sudoku?
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#deterministic-annealing">
+    Deterministic annealing
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#local-search-for-k-medians">
+    Local search for K-medians
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../3-Game-Playing/">
+        3 Game Playing
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../4-Reinforcement-Learning/">
+        4 Reinforcement Learning
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../5-Neural-Nets/">
+        5 Neural Nets
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../6-Bayes-Nets/">
+        6 Bayes Nets
+      </a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#defining-the-problem">
+    Defining the problem
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scheduling-courses-example">
+    Scheduling courses example
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#backtracking-search">
+    Backtracking Search
+  </a>
+<nav aria-label="Backtracking Search" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#algorithm">
+    Algorithm
+  </a>
+<nav aria-label="Algorithm" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#worst-case">
+    Worst case
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#improving-backtracking-search">
+    Improving Backtracking search
+  </a>
+<nav aria-label="Improving Backtracking search" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-use-least-remaining-variables-lrv-rule">
+    1. Use Least Remaining Variables (LRV) rule
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-use-the-largest-number-of-active-constraints">
+    2. Use the largest number of active constraints
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-choose-the-least-constraining-value-for-the-variable">
+    3. Choose the least constraining value for the variable
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#example">
+    Example:
+  </a>
+<nav aria-label="Example:" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#need-to-formulate-a-connected-graph">
+    Need to formulate a connected graph
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#einsteins-puzzle">
+    Einstein's Puzzle
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#how-to-solve-a-tree-structured-csp-ts-csp">
+    How to solve a tree structured CSP (TS CSP)
+  </a>
+<nav aria-label="How to solve a tree structured CSP (TS CSP)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#example-of-topological-sort">
+    Example of topological sort
+  </a>
+<nav aria-label="Example of topological sort" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#backward-pass">
+    Backward pass
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#near-ts-csp">
+    Near TS CSP
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#if-all-else-fails-perform-local-search">
+    If all else fails, perform Local Search
+  </a>
+<nav aria-label="If all else fails, perform Local Search" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#basicsimple-method">
+    Basic/Simple Method
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#improvement-beam-search">
+    Improvement: Beam Search
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#n-queens-problem">
+    N Queens problem
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#can-local-search-work-on-sudoku">
+    Can local search work on sudoku?
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#deterministic-annealing">
+    Deterministic annealing
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#local-search-for-k-medians">
+    Local search for K-medians
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1>2 Constraint Satisfaction Problems</h1>
+<ul>
+<li><a href="#defining-the-problem">Defining the problem</a></li>
+<li><a href="#scheduling-courses-example">Scheduling courses example</a></li>
+<li><a href="#backtracking-search">Backtracking Search</a><ul>
+<li><a href="#backtracking-searchalgorithm">Algorithm</a>
+        - <a href="#worst-case">Worst case</a></li>
+<li><a href="#backtracking-searchimproving-backtracking-search">Improving Backtracking search</a><ul>
+<li><a href="#improving-backtracking-search1-use-least-remaining-variables-lrv-rule1-use-least-remaining-variables-lrv-rule">#Improving Backtracking search#1. Use Least Remaining Variables (LRV) rule|1. Use Least Remaining Variables (LRV) rule</a></li>
+<li><a href="#improving-backtracking-search2-use-the-largest-number-of-active-constraints2-use-the-largest-number-of-active-constraints">#Improving Backtracking search#2. Use the largest number of active constraints|2. Use the largest number of active constraints</a></li>
+<li><a href="#improving-backtracking-search3-choose-the-least-constraining-value-for-the-variable3-choose-the-least-constraining-value-for-the-variable">#Improving Backtracking search#3. Choose the least constraining value for the variable|3. Choose the least constraining value for the variable</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#example">Example:</a><ul>
+<li><a href="#exampleneed-to-formulate-a-connected-graph">Need to formulate a connected graph</a></li>
+</ul>
+</li>
+<li>
+<p>[<a href="https://web.stanford.edu/~laurik/fsmbook/examples/Einstein%27sPuzzle.html">Einstein's Puzzle</a>]]</p>
+</li>
+<li>
+<p>Need to listen to <em>I can't get no satisfcation</em>...
+Constraint satisfaction deals with scheduling, such as timetable problems, operations, etc.
+Represented as a graph, where edges represent contraints. There is a domain for variables as well.</p>
+</li>
+</ul>
+<h2 id="defining-the-problem">Defining the problem<a class="headerlink" href="#defining-the-problem" title="Permanent link">¶</a></h2>
+<p>You have variables which could be discrete or categorical (makes up the domain, which should be finite)
+Can use linear programming for random variable CSP
+Edges represent nodes that have constraints</p>
+<ul>
+<li>Unary: (self edge) is weird?</li>
+<li>Binary: paris of variables</li>
+<li>Can have ternary and more</li>
+</ul>
+<h2 id="scheduling-courses-example">Scheduling courses example<a class="headerlink" href="#scheduling-courses-example" title="Permanent link">¶</a></h2>
+<p>Constraints:</p>
+<ul>
+<li>Professor schedules</li>
+<li>Courses on the same level</li>
+<li>Courses which students are likely to take in the same term</li>
+<li>Lecture hall availability</li>
+</ul>
+<p>Sudoku is a Constraint Satisfaction problem</p>
+<h2 id="backtracking-search">Backtracking Search<a class="headerlink" href="#backtracking-search" title="Permanent link">¶</a></h2>
+<p>A form of DFS </p>
+<p>Will use a country example.
+Domain: <code>{r,g,b,y}</code></p>
+<h3 id="algorithm">Algorithm<a class="headerlink" href="#algorithm" title="Permanent link">¶</a></h3>
+<ul>
+<li>Start with empty assignment of all variables (countries), or initial config</li>
+<li>Choose a random variable (country) and assign a value from the domain that doesn't break constraints<ul>
+<li>Ex. Assign the colour blue to Portugal</li>
+</ul>
+</li>
+<li>Repeat with different variable<ul>
+<li>Ex. Assign the colour red to Spain</li>
+</ul>
+</li>
+<li>If a variable is reached where there is no solution, then you must <strong>backtrack</strong>.<ul>
+<li>Go back to the previous variable, and reassign a new value from domain and try again</li>
+</ul>
+</li>
+</ul>
+<h5 id="worst-case">Worst case<a class="headerlink" href="#worst-case" title="Permanent link">¶</a></h5>
+<p>Will try every possible combination and it could take very long
+Can be <span class="arithmatex">\(O(d^n)\)</span> time complexity, with <span class="arithmatex">\(n\)</span> variables, and a domain of size <span class="arithmatex">\(d\)</span>.</p>
+<h3 id="improving-backtracking-search">Improving Backtracking search<a class="headerlink" href="#improving-backtracking-search" title="Permanent link">¶</a></h3>
+<h4 id="1-use-least-remaining-variables-lrv-rule">1. Use Least Remaining Variables (LRV) rule<a class="headerlink" href="#1-use-least-remaining-variables-lrv-rule" title="Permanent link">¶</a></h4>
+<p>Choose the next variable with the fewest possible values left
+- This ensures that we fulfill as many variables as possible
+    - If we don't, then our tree could be very wide and that would result in a very high number of nodes</p>
+<h4 id="2-use-the-largest-number-of-active-constraints">2. Use the largest number of active constraints<a class="headerlink" href="#2-use-the-largest-number-of-active-constraints" title="Permanent link">¶</a></h4>
+<p>Only use this rule if <strong>LRV</strong> doesn't reduce the search time, or all the variables have the same number of constraints? (#2 is a tie-breaker rule)</p>
+<p>Choose the variable participating in the largest number of active constraints. This is equivalent to the node with the most connections to other nodes (what variable it chooses affects the greatest number of other variables). This reduces the domain for all the nodes connected to the given node.</p>
+<p>An active constraint is between variables that have yet to be assigned.</p>
+<h4 id="3-choose-the-least-constraining-value-for-the-variable">3. Choose the least constraining value for the variable<a class="headerlink" href="#3-choose-the-least-constraining-value-for-the-variable" title="Permanent link">¶</a></h4>
+<p>How to choose a value for the variable we've chosen to process:</p>
+<ul>
+<li>If we have two nodes/variables which both share an edge:<ul>
+<li>S can be assigned <span class="arithmatex">\({R,G,B}\)</span> and F can be assigned <span class="arithmatex">\({R,G}\)</span></li>
+<li>We choose <span class="arithmatex">\(B\)</span>  for S because its the value that is the least likely to constrain F's domain.</li>
+</ul>
+</li>
+</ul>
+<h2 id="example">Example:<a class="headerlink" href="#example" title="Permanent link">¶</a></h2>
+<ul>
+<li>5 houses <strong>in a row</strong> are a street<ul>
+<li>In each house lives a person with the following domains:</li>
+</ul>
+</li>
+<li>Nationalities: <span class="arithmatex">\({China, British, Thai, Canadian, Indian}\)</span></li>
+<li>Each person has a different favorite drink: <span class="arithmatex">\({Tea, Coffee, Monster, Tequila, Beer}\)</span></li>
+<li>Each person has a different pet: <span class="arithmatex">\({Snake, Tarantula, Capybara, Cat, Fish}\)</span></li>
+<li>Each person watches a different show: <span class="arithmatex">\({Wednesday, The\ Last\ of\ Us, Blue\ Lock, Jack\ Ryan, Arcane}\)</span></li>
+<li>Each house has a different colour: <span class="arithmatex">\({R, G, B, W, Y}\)</span></li>
+<li>The ORDER of the houses matter (they must be in a row): <span class="arithmatex">\({1,2,3,4,5}\)</span></li>
+</ul>
+<p>Cannot use rule 1, as each user has the same amount of variables to choose from
+Cannot use rule 2, as everybody constrains everybody at the start
+Cannot use rule 3, as each person has the same domains</p>
+<h3 id="need-to-formulate-a-connected-graph">Need to formulate a connected graph<a class="headerlink" href="#need-to-formulate-a-connected-graph" title="Permanent link">¶</a></h3>
+<ul>
+<li>We can draw a fully connected graph of the 5 houses</li>
+</ul>
+<h2 id="einsteins-puzzle"><a href="https://web.stanford.edu/~laurik/fsmbook/examples/Einstein%27sPuzzle.html">Einstein's Puzzle</a><a class="headerlink" href="#einsteins-puzzle" title="Permanent link">¶</a></h2>
+<p>Let us assume that there are five houses of different colors next to each other on the same road. In each house lives a man of a different nationality. Every man has his favorite drink, his favorite brand of cigarettes, and keeps pets of a particular kind.</p>
+<ol>
+<li>The Englishman lives in the red house.</li>
+<li>The Swede keeps dogs.</li>
+<li>The Dane drinks tea.</li>
+<li>The green house is just to the left of the white one.</li>
+<li>The owner of the green house drinks coffee.</li>
+<li>The Pall Mall smoker keeps birds.</li>
+<li>The owner of the yellow house smokes Dunhills.</li>
+<li>The man in the center house drinks milk.</li>
+<li>The Norwegian lives in the first house.</li>
+<li>The Blend smoker has a neighbor who keeps cats.</li>
+<li>The man who smokes Blue Masters drinks bier.</li>
+<li>The man who keeps horses lives next to the Dunhill smoker.</li>
+<li>The German smokes Prince.</li>
+<li>The Norwegian lives next to the blue house.</li>
+<li>The Blend smoker has a neighbor who drinks water.</li>
+</ol>
+<p>The question to be answered is: <strong>Who keeps fish?</strong></p>
+<h2 id="how-to-solve-a-tree-structured-csp-ts-csp">How to solve a tree structured CSP (TS CSP)<a class="headerlink" href="#how-to-solve-a-tree-structured-csp-ts-csp" title="Permanent link">¶</a></h2>
+<p>Using topological sort in <span class="arithmatex">\(O(Nd^{2})\)</span></p>
+<ul>
+<li>Pick a root (normally the one with the most edges)</li>
+<li>List all nodes with an edge to the root<ul>
+<li>where each node is connected to 1 parent and same # of children</li>
+</ul>
+</li>
+<li>List domains for variables</li>
+<li>Backward pass (right to left or children to parent) <em>example below</em><ul>
+<li>For each node, remove from parent any inconsistent assignment</li>
+</ul>
+</li>
+<li>Backtracking search (but will not backtrack because it will always have a valid assignment)</li>
+</ul>
+<h3 id="example-of-topological-sort">Example of topological sort<a class="headerlink" href="#example-of-topological-sort" title="Permanent link">¶</a></h3>
+<p>![[Obsidian-Attachments/Pasted image 20230130092114.png]]
+![[Obsidian-Attachments/Pasted image 20230130092200.png]]</p>
+<h4 id="backward-pass">Backward pass<a class="headerlink" href="#backward-pass" title="Permanent link">¶</a></h4>
+<ul>
+<li>At H, remove <span class="arithmatex">\(r\)</span> from G</li>
+<li>At G, has <span class="arithmatex">\(g,b\)</span> so because if D chooses one of them, G can still choose the other. Therefore nothing needs to be removed from D</li>
+<li>At F, remove <span class="arithmatex">\(b\)</span> from D</li>
+<li>At E, nothing is removed from D as in G</li>
+<li>At B, nothing is removed from A</li>
+<li>At A, nothing is removed from C</li>
+<li>At C, remove <span class="arithmatex">\(y\)</span> from D</li>
+</ul>
+<h3 id="near-ts-csp">Near TS CSP<a class="headerlink" href="#near-ts-csp" title="Permanent link">¶</a></h3>
+<p>![<a href="#einsteins-puzzlehttpswebstanfordedulaurikfsmbookexampleseinstein27spuzzlehtml">Obsidian-Attachments/IMG_8638 copy.png</a></p>
+<ul>
+<li>Need to convert it into a tree structured CSP<ul>
+<li>Can do this by removing cycles, starting with the nodes that belong to the most cycles</li>
+</ul>
+</li>
+<li>Pick K variables to instantiate (the number of nodes that need to be removed to eliminate all cycles)<ul>
+<li>Results in (n-k) variables in TS CSP</li>
+</ul>
+</li>
+<li><span class="arithmatex">\(O(d^{k}(n-k)d^{2})\)</span><ul>
+<li>where <span class="arithmatex">\(d^{k}\)</span> is how long it takes to satisfy the domains of <span class="arithmatex">\(k\)</span> variables</li>
+</ul>
+</li>
+</ul>
+<h2 id="if-all-else-fails-perform-local-search">If all else fails, perform Local Search<a class="headerlink" href="#if-all-else-fails-perform-local-search" title="Permanent link">¶</a></h2>
+<p>An iterative method that is <em>okay</em>, not optimal (sometimes not even close) but it is the best we can do.</p>
+<ul>
+<li>Can solve scheduling with it</li>
+</ul>
+<h4 id="basicsimple-method">Basic/Simple Method<a class="headerlink" href="#basicsimple-method" title="Permanent link">¶</a></h4>
+<ul>
+<li>Set up problem as a set of variables to be assigned</li>
+<li>Pick an initial assignment at random for all the variables<ul>
+<li>Will have a lot of broken constraints</li>
+<li>Could be improved a lot</li>
+</ul>
+</li>
+<li>Do the following again and again until (<span class="arithmatex">\(k\)</span> iterations with no improvement)<ul>
+<li>Pick a variable at random (could be improved)</li>
+<li>Change it's value at random</li>
+<li>Check number of broken constraints (could also create a cost fnc, where cost is higher for solving tougher constraints such as with smaller domains)<ul>
+<li>Keep if smaller</li>
+<li>Reject otherwise</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="improvement-beam-search">Improvement: Beam Search<a class="headerlink" href="#improvement-beam-search" title="Permanent link">¶</a></h4>
+<p>If we have a schedule for a previous version of the constraint tree, we only have to optimize for the changes to it for the new version </p>
+<p>There are local minima everywhere
+    Keep multiple guesses and optimize
+    Choose the best at the end</p>
+<p>Or run K times and pick the best configuration</p>
+<h4 id="n-queens-problem">N Queens problem<a class="headerlink" href="#n-queens-problem" title="Permanent link">¶</a></h4>
+<ul>
+<li>Can be done with backtracking search, but this is not optimal</li>
+</ul>
+<p>Can be set up smartly as follows:</p>
+<ul>
+<li>Ensure no two queens are on the same row or column</li>
+<li>Keep track of how many conflicts each queen has<ul>
+<li>Choose the one with the most conflicts and reassign that one first</li>
+<li>Can move that queen to the row with the fewest conflicts</li>
+</ul>
+</li>
+<li><em>This supposedly converges very quickly</em></li>
+</ul>
+<h4 id="can-local-search-work-on-sudoku">Can local search work on sudoku?<a class="headerlink" href="#can-local-search-work-on-sudoku" title="Permanent link">¶</a></h4>
+<p>Probably not, local search will not produce an optimal solution
+Sudoku has many optimal solutions (he said?)</p>
+<h3 id="deterministic-annealing">Deterministic annealing<a class="headerlink" href="#deterministic-annealing" title="Permanent link">¶</a></h3>
+<p>Keep track of a temperature <span class="arithmatex">\(T\)</span> which is initially large</p>
+<p>Run local search</p>
+<ul>
+<li>Initialize at random</li>
+<li>Loop<ul>
+<li>If soln is better, then keep</li>
+<li>Else, keep with probability proportional to temperature</li>
+<li>Decrease temperature</li>
+</ul>
+</li>
+</ul>
+<p>Way worse than a normal local search problem, i dont really understand this problem though</p>
+<h3 id="local-search-for-k-medians">Local search for K-medians<a class="headerlink" href="#local-search-for-k-medians" title="Permanent link">¶</a></h3>
+<ol>
+<li>Pick k random points to be the centroid</li>
+<li>Explore the neighbourhood by moving those centroids<ol>
+<li>Don't need to be too clever, </li>
+</ol>
+</li>
+</ol>
+</article>
+</div>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+<script src="../assets/javascripts/bundle.51198bba.min.js"></script>
+<script src="../javascripts/mathjax.js"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,426 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<link href="../3-Game-Playing/" rel="prev"/>
+<link href="../5-Neural-Nets/" rel="next"/>
+<link href="../assets/images/favicon.png" rel="icon"/>
+<meta content="mkdocs-1.4.2, mkdocs-material-9.1.6" name="generator"/>
+<title>4 Reinforcement Learning - Artificial Intelligence Notes</title>
+<link href="../assets/stylesheets/main.ded33207.min.css" rel="stylesheet"/>
+<link href="../assets/stylesheets/palette.a0c5b2b5.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="indigo" data-md-color-primary="blue" data-md-color-scheme="default" dir="ltr">
+<script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#the-setup">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header md-header--shadow" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="Artificial Intelligence Notes" class="md-header__button md-logo" data-md-component="logo" href=".." title="Artificial Intelligence Notes">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            Artificial Intelligence Notes
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              4 Reinforcement Learning
+            
+          </span>
+</div>
+</div>
+</div>
+<form class="md-header__option" data-md-component="palette">
+<input aria-label="Switch to dark mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="(prefers-color-scheme: light)" data-md-color-primary="blue" data-md-color-scheme="default" id="__palette_1" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_2" hidden="" title="Switch to dark mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6zm0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4zM7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"></path></svg>
+</label>
+<input aria-label="Switch to light mode" class="md-option" data-md-color-accent="cyan" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-primary="blue" data-md-color-scheme="slate" id="__palette_2" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_1" hidden="" title="Switch to light mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3Z"></path></svg>
+</label>
+</form>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"></path></svg>
+</button>
+</nav>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="Artificial Intelligence Notes" class="md-nav__button md-logo" data-md-component="logo" href=".." title="Artificial Intelligence Notes">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"></path></svg>
+</a>
+    Artificial Intelligence Notes
+  </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="..">
+        CSCD84
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../1-UCS-and-Heuristic-Search/">
+        1 UCS and Heuristic Search
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../2-Constraint-Satisfaction-Problems/">
+        2 Constraint Satisfaction Problems
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../3-Game-Playing/">
+        3 Game Playing
+      </a>
+</li>
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+          4 Reinforcement Learning
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+        4 Reinforcement Learning
+      </a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#the-setup">
+    The setup
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#markov-decision-process-mdp">
+    Markov Decision Process (MDP)
+  </a>
+<nav aria-label="Markov Decision Process (MDP)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#the-learning-policy">
+    The Learning Policy
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#value-iteration">
+    Value Iteration
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#estimating-the-transition-function">
+    Estimating the Transition function
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#q-learning">
+    Q-learning
+  </a>
+<nav aria-label="Q-learning" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#improvement-to-q-learning">
+    Improvement to Q-learning
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#feature-based-q-learning">
+    Feature-based Q-Learning
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../5-Neural-Nets/">
+        5 Neural Nets
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../6-Bayes-Nets/">
+        6 Bayes Nets
+      </a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#the-setup">
+    The setup
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#markov-decision-process-mdp">
+    Markov Decision Process (MDP)
+  </a>
+<nav aria-label="Markov Decision Process (MDP)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#the-learning-policy">
+    The Learning Policy
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#value-iteration">
+    Value Iteration
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#estimating-the-transition-function">
+    Estimating the Transition function
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#q-learning">
+    Q-learning
+  </a>
+<nav aria-label="Q-learning" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#improvement-to-q-learning">
+    Improvement to Q-learning
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#feature-based-q-learning">
+    Feature-based Q-Learning
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<p>We want to get around having a complicated utility function. To do this, we can <em>train</em> our agent to learn a utility function. Afterward, we can then get the agent to <em>play</em> the game/task they were trained to do.</p>
+<h2 id="the-setup">The setup<a class="headerlink" href="#the-setup" title="Permanent link">¶</a></h2>
+<p>A problem characterized by a set of state variables, which constitute configurations <span class="arithmatex">\(s\)</span> contained in the entire state space <span class="arithmatex">\(S\)</span>. <em>This state space contains end states, where the agent has solved the problem and states where the agent failed.</em></p>
+<p>We also need a set of all actions <span class="arithmatex">\(A\)</span> that agents can take.</p>
+<p>Finally, we need a reward function/reinforcement signal that maps states <span class="arithmatex">\(s\)</span> to a reward/punishment. (The goal is to no have to engineer this reward function)</p>
+<p>This assumes discrete time steps in this problem.</p>
+<h1 id="markov-decision-process-mdp">Markov Decision Process (MDP)<a class="headerlink" href="#markov-decision-process-mdp" title="Permanent link">¶</a></h1>
+<p>We care about the immediate past and only that. We don't care about the longterm past.</p>
+<p><strong>Setup:</strong> The agent will learn a policy <span class="arithmatex">\(\Pi\)</span> that maps states <span class="arithmatex">\(s\)</span> to an optimal action <span class="arithmatex">\(a\)</span>. We also assume the environment is stationary. </p>
+<p><strong>Why do we need to assume the environment is stationary?</strong>
+That is, the environment does not change. We need this because otherwise there will be a very very large state space that the agent will have to learn over, becoming infeasible.</p>
+<blockquote>
+<p>Thats not to say that we cannot have an environment that is non-stationary, it just means that it will be more difficult for the agent to learn.</p>
+</blockquote>
+<h2 id="the-learning-policy">The Learning Policy<a class="headerlink" href="#the-learning-policy" title="Permanent link">¶</a></h2>
+<p>Goal: Maximize the expected sum
+$$
+\mathbb{E}\left[ \sum<sup>{\infty}_{t=0}\gamma</sup>{t}r_{t} \right] \quad \gamma \in [0,1)
+$$</p>
+<p>Where <span class="arithmatex">\(r_{t}\)</span> is the reward at a given time step, and <span class="arithmatex">\(\gamma_{t}\)</span> is a discount factor.</p>
+<p>We don't like that infinite sum, so we can rewrite it.</p>
+<p>Define a quantity <span class="arithmatex">\(V^{*}(s) =\)</span> value of state s <span class="arithmatex">\(= \max_{\Pi}\mathbb{E}\left[ \sum^{\infty}_{t=0}\gamma^{t}r_{t} \right]\)</span></p>
+<blockquote>
+<p>This is the max expected value of a given state <span class="arithmatex">\(s\)</span>, indicating whether the state is good or not informing the quality.</p>
+</blockquote>
+<p>It can be computed under the process:</p>
+<ul>
+<li>Given a state <span class="arithmatex">\(s\)</span> the agent will take an action <span class="arithmatex">\(a\)</span>, receive a reward <span class="arithmatex">\(r\)</span>, and end up at some state <span class="arithmatex">\(s'\)</span> . This can be used to compute <span class="arithmatex">\(V^{*}(s)\)</span><ul>
+<li><span class="arithmatex">\(&lt;s,a,r,s'&gt;\)</span></li>
+</ul>
+</li>
+</ul>
+<p>Rewrite </p>
+<div class="arithmatex">\[
+\begin{aligned}
+V^{*}(s) &amp;= max_{a}\left( R(s,a) +\\
+\gamma \sum_{s'\in S \text{ reachable from }s}T(s,a,s')V^{*}(s')\right)\\
+\text{Where }&amp; R(s,a) \text{ is the Reward from taking action a from state s}\\
+&amp;T(s,a,s') \text{is the Transition fnc: prob of ending up at s' from s under action }a\\
+&amp;V^{*}(s') \text{ is the value at the neighbour of } s
+\end{aligned}
+\]</div>
+<p>Which gets rid of the infinite sum.</p>
+<h2 id="value-iteration">Value Iteration<a class="headerlink" href="#value-iteration" title="Permanent link">¶</a></h2>
+<p>Initialize <span class="arithmatex">\(V^{*}(s) = 0\)</span>, and a table <span class="arithmatex">\(Q(s,a)=\emptyset\)</span> </p>
+<p>Repeat until <span class="arithmatex">\(\Pi\)</span> is <em>good enough</em>.</p>
+<pre><code>for all s in S
+    for all a in A
+        Q(s,a) = R(s,a) + gamma \sum_{s' \in S} T(s,a,s')V*(s')
+
+    update V*(s) = max_a Q(s,a)
+    update Pi(s) = argmax_a Q(s,a)
+</code></pre>
+<p>At 1st iteration, <span class="arithmatex">\(V(s) \ne \emptyset\)</span> for configs where we get some immediate <span class="arithmatex">\(R(s,a)\)</span>.</p>
+<p>How to stop:
+We need to check for convergence of <span class="arithmatex">\(V^{*}(s)\)</span>, but it could still have very small changes at every iteration. Instead, we can check for when the <em>policy</em> <span class="arithmatex">\(\Pi\)</span> has stopped changing.</p>
+<p>This training can run offline (not during game time) so there are no time constraints.</p>
+<p>After training, we get a look up table for actions to take, so given a state <span class="arithmatex">\(s\)</span> we select a few <span class="arithmatex">\(a\)</span> from <span class="arithmatex">\(\Pi(s)\)</span>.</p>
+<h2 id="estimating-the-transition-function">Estimating the Transition function<a class="headerlink" href="#estimating-the-transition-function" title="Permanent link">¶</a></h2>
+<p>If we want the real transition function:</p>
+<ul>
+<li>We could to run the real thing, but thats time consuming, slow, and could be affected by the environment.</li>
+<li>We could run a simulation, but that could probably not generalize well.</li>
+</ul>
+<p>We can actually just tweak the learning process (value iteration), to get it.</p>
+<h2 id="q-learning">Q-learning<a class="headerlink" href="#q-learning" title="Permanent link">¶</a></h2>
+<p><strong>Goal: Try to ignore the transition function</strong>
+<em>We still have to design the reward function ourselves</em></p>
+<p>Initially, set:</p>
+<ul>
+<li><span class="arithmatex">\(Q(s,a)=0\)</span></li>
+<li><span class="arithmatex">\(\Pi(s) =\)</span> random action</li>
+<li>Determine initial state <span class="arithmatex">\(s\)</span></li>
+<li>Set <span class="arithmatex">\(\gamma\)</span> to whatever, and new param <span class="arithmatex">\(\alpha\)</span> which represents a <strong>gradient</strong> to smth that should be small</li>
+</ul>
+<pre><code>N = a lot of training rounds
+for (i in 1...N):
+    from current state, get random action
+    simulate agent doing the action, and sees what happens
+        - find out the reward r(s,a)
+        - find out next state s', which becomes cur state
+            - if end game, choose a random state s as cur state
+
+    # preform gradient descent (the second and third terms)
+    Q(s,a) += alpha * [r(s,a) + 
+                       gamma * max_{a'} Q(s',a') - 
+                       Q(s,a)]
+update policy Pi(s) for all s
+</code></pre>
+<p>All of this requires a lot of careful sampling (not sampling same nodes, not getting stuck in a strongly connected subset of the graph)</p>
+<h3 id="improvement-to-q-learning">Improvement to Q-learning<a class="headerlink" href="#improvement-to-q-learning" title="Permanent link">¶</a></h3>
+<p>We have <span class="arithmatex">\(K\)</span> rounds of training:</p>
+<pre><code>for (j in 0...K):
+    do prev code
+
+    in round j of K:
+        choose randomly action a with P(a) = 1-j/K
+    else:
+        choose action in Pi(s)
+</code></pre>
+<p>This basically chooses a random action a less and less of the time as the number of rounds goes on, as this implies that as we continue the learning, the policy should be relied on more as it should contain the best action.</p>
+<p>This whole q-learning thing can be hard because:</p>
+<ul>
+<li>the state space can be huge.</li>
+<li>We need to build an actual simulator</li>
+<li>the agent will be trained on a specific state space/environment, but given a new one it may not do well (not generalized)</li>
+</ul>
+<h2 id="feature-based-q-learning">Feature-based Q-Learning<a class="headerlink" href="#feature-based-q-learning" title="Permanent link">¶</a></h2>
+<p>We can generalize using feature based Q-learning</p>
+<p>We create a set of abstracted features that can be used to estimate the reward from a certain state <span class="arithmatex">\(Q(s)\)</span>. This is different form before as its not a table, it is:</p>
+<div class="arithmatex">\[
+Q(s) = \sum_{i}w_{i}f_{i}(s)
+\]</div>
+<blockquote>
+<p>A weighted sum of the features we can evaluate for a given state. These features will work on any maze, and aren't tied to any specific seed. The weights will need updating.</p>
+</blockquote>
+<p>Instead of updating <span class="arithmatex">\(Q(s,a)\)</span> in the Q-learning loop, we have</p>
+<pre><code>w_t += alpha * f_t (s) * [r + gamma Q(s') - Q(s)]
+</code></pre>
+<p>Which just updates the weights, but doesn't actually update the policy. yet.</p>
+</article>
+</div>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+<script src="../assets/javascripts/bundle.51198bba.min.js"></script>
+<script src="../javascripts/mathjax.js"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</body>
+</html>
